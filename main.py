@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import backtrader as bt
 import yfinance as yf
 import pandas as pd
@@ -32,17 +34,6 @@ if __name__ == '__main__':
     config_path = "/Users/tjgus/Desktop/project/krtrade/testDataDirectory/config/config.json"
     DB.init_connection_pool(config_path)
 
-    db = DB()
-    candle_infos = db.get_candle_info('BYBIT', 'LINKUSDT', '30m')
-    df = pd.DataFrame([vars(info) for info in candle_infos])
-
-    df['datetime'] = pd.to_datetime(df['date'])
-    df['open'] = pd.to_numeric(df['open'])
-    df['high'] = pd.to_numeric(df['high'])
-    df['low'] = pd.to_numeric(df['low'])
-    df['close'] = pd.to_numeric(df['close'])
-    df['volume'] = pd.to_numeric(df['volume'])
-
     # cerebro 인스턴스 초기화
     cerebro = bt.Cerebro()
 
@@ -51,7 +42,21 @@ if __name__ == '__main__':
 
     # 백테스팅할 데이터 설정
     # data = bt.feeds.PandasData(dataname=yf.download('036570.KS', '2018-01-01', '2021-12-01'))
-    data = bt.feeds.PandasData(dataname=df, datetime='datetime')
+    data = bt.feeds.GenericCSVData(
+        dataname='linkusdt_30m.csv',
+        fromdate=datetime(2020, 1, 1),
+        todate=datetime(2021, 1, 1),
+        nullvalue=0.0,
+        dtformat=('%Y-%m-%d %H:%M:%S'),
+        datetime=3,
+        open=4,
+        high=5,
+        low=6,
+        close=7,
+        volume=8,
+        openinterest=-1
+    )
+
     cerebro.adddata(data)
 
     cerebro.broker.setcash(100000.0)
