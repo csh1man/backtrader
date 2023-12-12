@@ -7,5 +7,3 @@ class DBConfig:
         self.database = database
         self.ip = ip
         self.port = port
-
-

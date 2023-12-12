@@ -1,0 +1,16 @@
+{
+  "TurtleATR": {
+    "atrLength" : 2,
+    "atrAvgLength" : 4,
+    "bodyLengthConstant" : 7,
+    "basicAtrConstant" : [1.5,2,4,5,6],
+    "bearishAtrConstant" : [10,12,14,15,16],
+    "riskPerTrade" : [13,15,20,22,25],
+    "maLengths" : [11, 13],
+    "higherBandLength" : 7,
+    "rsiLength" : 2,
+    "rsiLow" : 4,
+    "rsiHigh": 96,
+    "dividers": [1,1,4]
+  }
+}
