@@ -2,7 +2,6 @@ from datetime import datetime
 
 import backtrader as bt
 import pandas as pd
-import quantstats as qs
 from util.FileUtil import FileUtil
 from config.StrategyConfiguration import TurtleATR
 from indicator.Indicators import Indicator
@@ -167,20 +166,6 @@ if __name__ == '__main__':
     returns, positions, transactions, gross_lev = pyfoliozer.get_pf_items()
     returns.index = returns.index.tz_convert(None)
 
-    # 간단한 결과 출력
-    print(f'\n')
-    print("Result:")
-    cagr = qs.stats.cagr(returns)
-    mdd = qs.stats.max_drawdown(returns)
-    sharpe = qs.stats.sharpe(returns)
-    print(f"SHARPE: {sharpe:.2f}")
-    print(f"CAGR: {cagr * 100:.2f} %")
-    print(f"MDD : {mdd * 100:.2f} %")
-
-    benchmark_data = pd.Series(data=cerebro.datas[0].close.array, index=returns.index)
-    benchmark_data = benchmark_data[benchmark_data.index.isin(returns.index)]
-
-    qs.reports.html(returns, benchmark=benchmark_data, output=f'sample/터틀그리드.html', title='result')
     # cerebro.broker.setcash(100000.0)
     #
     # print('Starting Portfolio Value : %.2f' % cerebro.broker.getvalue())
