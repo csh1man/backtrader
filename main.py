@@ -145,7 +145,7 @@ if __name__ == '__main__':
 
     # cerebro 인스턴스 초기화
     cerebro = bt.Cerebro()
-    cerebro.broker.setcommission(commission=0.02)
+    cerebro.broker.setcommission(commission=0.02, leverage=5)
     cerebro.addanalyzer(bt.analyzers.DrawDown, _name='dd')
 
     # cerebro에 전략 셋팅

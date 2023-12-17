@@ -4,11 +4,17 @@ from dbutils.pooled_db import PooledDB
 from util.FileUtil import FileUtil
 from repository.entity import CandleInfo
 
+
 class DB:
     connection_pool = None
 
     @classmethod
     def init_connection_pool(cls, file_path):
+        """
+        디비의 커넥션 풀 인스턴스를 초기화한다.
+        :param file_path: config file path
+        :return: null
+        """
         db_config = FileUtil.load_db_config(file_path)
         cls.connection_pool = PooledDB(
             creator=pymysql,
@@ -21,9 +27,18 @@ class DB:
         )
 
     def get_db_connect(self):
+        """
+        Connection Pool에서 Connection instance 하나를 반환한다.
+        :return: Connection Pool instance
+        """
         return self.connection_pool.connection()
 
     def get_symbol_list(self):
+        """
+        현재 캔들 정보가 들어있는 디비 테이블에서 어떤 종목들이 들어가있는지에 대한 종목 리스트를 반환한다.
+        
+        :return: string array list
+        """
         sql = "select distinct currency from candle_info"
         conn = self.get_db_connect()
         curs = conn.cursor()
@@ -36,6 +51,14 @@ class DB:
         return symbols
 
     def get_candle_info(self, company, currency, tick_kind, start_time=None, end_time=None):
+        """
+        :param company:
+        :param currency:
+        :param tick_kind:
+        :param start_time:
+        :param end_time:
+        :return:
+        """
         sql = "select * from candle_info where company = %s and currency = %s and tick_kind = %s"
         params = [company, currency, tick_kind]
 
