@@ -1,3 +1,5 @@
+import math
+
 class Indicator:
     @staticmethod
     def get_body_length(open_price, close_price):
@@ -16,6 +18,7 @@ class Indicator:
         """
         현재 가격을 최댓값이라 가정하고 현재 가격 이후 중 가장 작은 가격과 차이를 계산하여 리스트화한다.
         그러고 리스트화한 결과 목록 중 가장 큰 값이 mdd가된다.
+
         :param df:
             index : date
             value : asset
@@ -33,3 +36,25 @@ class Indicator:
             max_draw_downs.append(draw_down)
 
         return max(max_draw_downs) * -1
+
+    @staticmethod
+    def adjust_price(price, tick_size):
+        """
+        특정 종목의 최소 가격 변동 단위에 맞게 계산된 가격을 반환
+
+        :param price: 계산한 price
+        :param tick_size: 종목의 최소 가격 변동 단위
+        :return: tick_size에 맞게 소수점 조정된 가격
+        """
+        return math.round(price / tick_size) * tick_size
+
+    @staticmethod
+    def adjust_quantity(quantity, step_size):
+        """
+        특정 종목의 최소 수량 변동 단위에 맞게 계산된 수량을 반환
+
+        :param quantity: 계산한 수량
+        :param step_size: 종목의 최소 수량 변동 단위
+        :return: step_size에 맞게 소수점 조정된 가격
+        """
+        return math.floor(quantity / step_size) * step_size

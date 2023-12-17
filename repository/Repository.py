@@ -36,7 +36,7 @@ class DB:
     def get_symbol_list(self):
         """
         현재 캔들 정보가 들어있는 디비 테이블에서 어떤 종목들이 들어가있는지에 대한 종목 리스트를 반환한다.
-        
+
         :return: string array list
         """
         sql = "select distinct currency from candle_info"
@@ -52,12 +52,14 @@ class DB:
 
     def get_candle_info(self, company, currency, tick_kind, start_time=None, end_time=None):
         """
-        :param company:
-        :param currency:
-        :param tick_kind:
-        :param start_time:
-        :param end_time:
-        :return:
+        candle정보 목록을 가져온다.(olhcv)
+
+        :param company: 거래소명
+        :param currency: 종목명
+        :param tick_kind: 시간 종류
+        :param start_time: 시작 시간
+        :param end_time: 종료 시간
+        :return: CandleInfo list
         """
         sql = "select * from candle_info where company = %s and currency = %s and tick_kind = %s"
         params = [company, currency, tick_kind]
