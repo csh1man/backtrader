@@ -6,7 +6,7 @@ import backtrader.indicators as btind
 import pandas as pd
 import quantstats as qs
 import pyfolio as pf
-
+from util.Util import DataUtil
 
 class TestStrategy(bt.Strategy):
     params = dict(
@@ -88,15 +88,19 @@ class TestStrategy(bt.Strategy):
 
         self.log("total trading count %.2f" % self.total_trading_count)
         self.log("winning percent : [%.2f]" % self.winning_rate)
-        self.log("수익률 : [%.2f]" % self.return_rate)
+        self.log(f"수익률 : {self.return_rate}%")
+        # self.log("수익률 : [%.2f]" % self.return_rate)
 
 
 if __name__ == '__main__':
     start_date = '2022-12-30 00:00:00'
     end_date = '2023-12-01 08:00:00'
 
-    df = pd.read_csv('sample/linkusdt_30m.csv')
-    df['datetime'] = pd.to_datetime(df['datetime'])
+    df = DataUtil.load_candle_data_as_df(DataUtil.CANDLE_DATA_DIR_PATH,
+                                         DataUtil.COMPANY_BYBIT,
+                                         "LINKUSDT",
+                                         DataUtil.CANDLE_TICK_30M)
+
     filtered_df = df[(df['datetime'] >= start_date) & (df['datetime'] <= end_date)]
     data = bt.feeds.PandasData(dataname=filtered_df, datetime='datetime')
 

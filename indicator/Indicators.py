@@ -58,3 +58,24 @@ class Indicator:
         :return: step_size에 맞게 소수점 조정된 가격
         """
         return math.floor(quantity / step_size) * step_size
+
+    @staticmethod
+    def get_percentage(price1, price2):
+        """
+        price1 대비 price2 차이 퍼센트 획득
+        :param price1: 기준 가격
+        :param price2: 비교 가격
+        :return: 가격간 차이
+        """
+        return round((price1-price2) * 100 / price1)
+
+    @staticmethod
+    def get_leverage(risk_per_trade, diff_percent):
+        """
+        진입하고자하는 레버리지 값을 획득한다.
+
+        :param risk_per_trade: 리스크 사이즈
+        :param diff_percent: 진입가격과 손절가격 간 퍼센트 차이
+        :return: 진입할 레버리지
+        """
+        return round(100 / (risk_per_trade * diff_percent))
