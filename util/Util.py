@@ -96,3 +96,13 @@ class DataUtil:
         :return: 날짜 범위만큼 추출된 DataFrame
         """
         return df[(df['datetime'] >= start_date) & (df['datetime'] <= end_date)]
+
+
+class JsonUtil:
+    @staticmethod
+    def get_candle_date_list(candle_data, tick_kind, is_ascend):
+        tick_data = candle_data[tick_kind]
+        if is_ascend:
+            return sorted(tick_data.keys())
+        else:
+            return sorted(tick_data.keys(), reverse=True)

@@ -1,5 +1,6 @@
 import math
 
+
 class Indicator:
     @staticmethod
     def get_body_length(open_price, close_price):
@@ -36,6 +37,19 @@ class Indicator:
             max_draw_downs.append(draw_down)
 
         return max(max_draw_downs) * -1
+
+    @staticmethod
+    def get_mdd_dates(date_list, asset_list):
+        """
+        MDD에 해당하는 최댓값 날짜와 최솟값 날짜를 획득한다.
+
+        :param date_list: asset_list가 저장된 날짜 목록
+        :param asset_list: 자산 목록 (순수자산 + low * position_size)
+        :return: MDD에 해당 하는 시작날짜, 끝날짜
+        """
+        print("TEST")
+
+
 
     @staticmethod
     def adjust_price(price, tick_size):

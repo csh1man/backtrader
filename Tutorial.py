@@ -100,6 +100,12 @@ class TutorialStrategy(bt.Strategy):
         self.log(f"승률 : {self.winning_rate :.2f}%")
         self.log(f"수익률 : {self.return_rate:.2f}%")
 
+        min_value = 10000000000
+        for i in range(290, len(self.my_assets)):
+            if min_value > self.my_assets[i]:
+                min_value = self.my_assets[i]
+                self.log(f"i is {i} and asset : {self.my_assets[i]} and date : {self.date_value[i]}")
+
 
 if __name__ == '__main__':
     config_path = "/Users/tjgus/Desktop/project/krtrade/testDataDirectory/config/config.json"
@@ -133,5 +139,5 @@ if __name__ == '__main__':
     print(f"my function MDD : {mdd * 100:.2f} %")
     mdd = qs.stats.max_drawdown(returns)
     print(f"quanstats's returns MDD : {mdd * 100:.2f} %")
-    # qs.reports.html(returns, output=f'SMA_MSFT.html', title='result')
+
 

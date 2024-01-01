@@ -139,6 +139,5 @@ if __name__ == '__main__':
     # print(f"수익률 : {return_rate:.2f} %")
 
     # 자세한 결과 html 파일로 저장
-    # qs.reports.html(returns, output=f'SMA_MSFT.html', title='result')
 
 
