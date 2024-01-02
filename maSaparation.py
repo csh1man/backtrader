@@ -2,7 +2,8 @@ import math
 
 import backtrader as bt
 from util.Util import DataUtil
-from repository.Repository import DB
+import pandas as pd
+import quantstats as qs
 from indicator.Indicators import Indicator
 
 
@@ -102,21 +103,21 @@ class MASeparationStrategy(bt.Strategy):
         self.order = None
 
     def next(self):
-        if self.separation[-1] < self.p.sep_limit < self.separation[0]:
-            self.log(f"{self.date.datetime(0)} => 이전 캔들 : {self.separation[-1]} / 현재 캔들 : {self.separation[0]}")
-        # self.date_value.append(self.date.datetime(0))
-        # self.my_assets.append(self.broker.getvalue() + self.getposition(self.datas[0]).size * self.low[0])
-        #
-        # if not self.position:
-        #     if self.entry_condition():
-        #         self.stop_price = self.close[0] - self.atr[0] * self.p.atr_constant
-        #         leverage = Indicator.get_leverage(self.p.risk_per_trade, Indicator.get_percent(self.close, self.stop_price))
-        #         position_size = leverage * self.broker.getvalue() * self.p.risk_per_trade / 100 / self.close[0]
-        #         position_size = math.floor(position_size / self.p.step_size) * self.p.step_size
-        #         self.buy(size=position_size)
-        # else:
-        #     if self.exit_condition() or self.cut_condition():
-        #         self.sell(size=self.getposition(self.datas[0]).size)
+        self.date_value.append(self.date.datetime(0))
+        self.my_assets.append(self.broker.getvalue() + self.getposition(self.datas[0]).size * self.low[0])
+
+        if not self.position:
+            if self.separation[-1] < self.p.sep_limit < self.separation[0] :
+                self.stop_price = self.close[0] - self.atr[0] * self.p.atr_constant
+                diff_percent = Indicator.get_diff_percent(self.close, self.stop_price)
+                if diff_percent != 0:
+                    leverage = Indicator.get_leverage(self.p.risk_per_trade, diff_percent)
+                    position_size = leverage * self.broker.getvalue() * self.p.risk_per_trade / 100 / self.close[0]
+                    position_size = math.floor(position_size / self.p.step_size) * self.p.step_size
+                    self.buy(size=position_size, price=self.close[0])
+        else:
+            if self.exit_condition() or self.cut_condition():
+                self.sell(size=self.getposition(self.datas[0]).size, price=self.close[0])
 
     def stop(self):
         self.winning_rate = self.winning_trading_count * 100 / self.total_trading_count
@@ -129,17 +130,39 @@ class MASeparationStrategy(bt.Strategy):
 
 if __name__ == '__main__':
     # backtesting 할 데이터 추출
-    df = DataUtil.load_candle_data_as_df(DataUtil.CANDLE_DATA_DIR_PATH_V2, DataUtil.COMPANY_BYBIT,
+    df = DataUtil.load_candle_data_as_df(DataUtil.CANDLE_DATA_DIR_PATH, DataUtil.COMPANY_BYBIT,
                                          "BTCUSDT", DataUtil.CANDLE_TICK_2HOUR)
 
     data = bt.feeds.PandasData(dataname=df, datetime='datetime')
-
+    print(type(data))
     cerebro = bt.Cerebro()
 
     cerebro.broker.setcash(1000)
-    cerebro.broker.setcommission(commission=0.0002)
+    cerebro.broker.setcommission(commission=0.0002, leverage=20)
 
     cerebro.adddata(data)
     cerebro.addstrategy(MASeparationStrategy)
 
-    cerebro.run()
+    cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')  # 결과 분석기 추가
+    results = cerebro.run()
+
+    strat = results[0]
+    pyfoliozer = strat.analyzers.getbyname('pyfolio')
+    returns, positions, transactions, gross_lev = pyfoliozer.get_pf_items()
+    returns.index = returns.index.tz_convert(None)
+
+    print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
+
+    asset_list = pd.DataFrame({'asset':strat.my_assets}, index=pd.to_datetime(strat.date_value))
+    mdd = Indicator.calculate_max_draw_down(asset_list)
+    print(f"quanstats's my function MDD : {mdd * 100:.2f} %")
+    mdd = qs.stats.max_drawdown(returns)
+    print(f"quanstats's  returns MDD : {mdd * 100:.2f} %")
+
+    cagr = qs.stats.cagr(returns)
+    print(f"CACR : {cagr * 100 :.2f}%")
+
+    sharpe = qs.stats.sharpe(returns)
+    print(f"SHARPE :{sharpe:.2f}%")
+
+    qs.reports.html(returns, output=f'result/maSeparation_btcusdt.html', title='result')

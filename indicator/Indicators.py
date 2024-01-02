@@ -12,7 +12,14 @@ class Indicator:
         """
         price1 대비 price2가 몇퍼센트 차이 나는 지 계산.
         """
-        return (price1 - price2) * 100 / price1
+        return (price2 - price1) * 100 / price1
+
+    @staticmethod
+    def get_diff_percent(close, stop_price):
+        """
+        종가 대비 손절가격이 몇퍼센트 차이나는지 계산
+        """
+        return round((close - stop_price) * 100 / close)
 
     @staticmethod
     def get_ma_separation(close, ma):
