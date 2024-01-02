@@ -57,6 +57,7 @@ class DataUtil:
     캔들 데이터가 저장된 디렉토리 경로 저장
     """
     CANDLE_DATA_DIR_PATH = "/Users/tjgus/Desktop/project/krtrade/candle_data"
+    CANDLE_DATA_DIR_PATH_V2 = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/backtrader/backtrader/sample"
 
     @staticmethod
     def load_candle_data_as_df(dir_path, company, currency, tick_kind):

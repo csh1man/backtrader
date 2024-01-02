@@ -12,7 +12,18 @@ class Indicator:
         """
         price1 대비 price2가 몇퍼센트 차이 나는 지 계산.
         """
-        return (price2 - price1) * 100 / price1
+        return (price1 - price2) * 100 / price1
+
+    @staticmethod
+    def get_ma_separation(close, ma):
+        """
+        이동평균선 대비 종가가 어느 정도의 위치에 있는 지 이격도를 계산하는 함수
+
+        :param close: 캔들의 종가
+        :param ma: 이동평균선
+        :return: 이격도
+        """
+        return close * 100 / ma
 
     @staticmethod
     def calculate_max_draw_down(df):
