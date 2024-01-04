@@ -2,6 +2,7 @@ import math
 
 import backtrader as bt
 from util.Util import DataUtil
+from decimal import Decimal
 import pandas as pd
 import quantstats as qs
 from indicator.Indicators import Indicator
@@ -10,10 +11,10 @@ from indicator.Indicators import Indicator
 class MASeparationStrategy(bt.Strategy):
     params = dict(
         risk_per_trade=10,
-        ma_length=120,
-        sep_limit=103,
-        atr_length=3,
-        atr_constant=1.5,
+        ma_length=110,
+        sep_limit=102,
+        atr_length=6,
+        atr_constant=1,
         tick_size=0.01,
         step_size=0.01
     )
@@ -106,14 +107,14 @@ class MASeparationStrategy(bt.Strategy):
         self.my_assets.append(self.broker.getvalue() + self.getposition(self.datas[0]).size * self.low[0])
 
         if not self.position:
-            if self.separation[-1] < self.p.sep_limit < self.separation[0] :
+            if self.entry_condition():
                 self.stop_price = self.close[0] - self.atr[0] * self.p.atr_constant
                 diff_percent = Indicator.get_diff_percent(self.close, self.stop_price)
                 if diff_percent != 0:
                     leverage = Indicator.get_leverage(self.p.risk_per_trade, diff_percent)
                     position_size = leverage * self.broker.getvalue() * self.p.risk_per_trade / 100 / self.close[0]
                     position_size = math.floor(position_size / self.p.step_size) * self.p.step_size
-                    self.buy(size=position_size, price=self.close[0])
+                    self.buy(size=float(position_size), price=self.close[0])
         else:
             if self.exit_condition() or self.cut_condition():
                 self.sell(size=self.getposition(self.datas[0]).size, price=self.close[0])
@@ -129,15 +130,13 @@ class MASeparationStrategy(bt.Strategy):
 
 if __name__ == '__main__':
     # backtesting 할 데이터 추출
-    df = DataUtil.load_candle_data_as_df(DataUtil.CANDLE_DATA_DIR_PATH_V2, DataUtil.COMPANY_BYBIT,
-                                         "ETHUSDT", DataUtil.CANDLE_TICK_2HOUR)
-
+    df = DataUtil.load_candle_data_as_df(DataUtil.CANDLE_DATA_DIR_PATH, DataUtil.COMPANY_BYBIT,
+                                         "TRBUSDT", DataUtil.CANDLE_TICK_2HOUR)
     data = bt.feeds.PandasData(dataname=df, datetime='datetime')
-    
     # cerebro 트레이딩 기본 셋팅
     cerebro = bt.Cerebro()
     cerebro.broker.setcash(1000)
-    cerebro.broker.setcommission(commission=0.0002, leverage=20)
+    cerebro.broker.setcommission(commission=0.0002, leverage=40)
 
     # 백테스팅할 데이터 및 전략 셋팅
     cerebro.adddata(data)
@@ -165,4 +164,4 @@ if __name__ == '__main__':
     sharpe = qs.stats.sharpe(returns)
     print(f"SHARPE :{sharpe:.2f}%")
 
-    # qs.reports.html(returns, output=f'result/maSeparation_btcusdt.html', title='result')
+    qs.reports.html(returns, output=f'result/maSeparation_trbusdt.html', title='result')

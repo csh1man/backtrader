@@ -12,6 +12,7 @@ class Indicator:
         """
         price1 대비 price2가 몇퍼센트 차이 나는 지 계산.
         """
+        # return price2  * 100 / price1
         return (price2 - price1) * 100 / price1
 
     @staticmethod
