@@ -1,27 +1,42 @@
 import math
-
+from decimal import Decimal
 
 class Indicator:
     @staticmethod
     def get_body_length(open_price, close_price):
         """캔들에 대한 몸통 길이 획득"""
-        return abs(close_price - open_price)
+        return abs(Decimal(str(close_price)) - Decimal(str(open_price)))
 
     @staticmethod
     def get_percent(price1, price2):
         """
         price1 대비 price2가 몇퍼센트 차이 나는 지 계산.
         """
-        # return price2  * 100 / price1
-        return (price2 - price1) * 100 / price1
+        return (Decimal(str(price2)) - Decimal(str(price1))) * Decimal("100") / Decimal(str(price1))
 
     @staticmethod
     def get_diff_percent(close, stop_price):
         """
         종가 대비 손절가격이 몇퍼센트 차이나는지 계산
         """
-        return round((close - stop_price) * 100 / close)
+        return round((Decimal(str(close)) - Decimal(str(stop_price))) * Decimal(str(100)) / Decimal(str(close)))
 
+    @staticmethod
+    def get_cut_price(close, atr, params):
+        """
+        손절가격을 Decimal로 계산하여 반환
+        :param close: 종가
+        :param atr: atr 값
+        :param params: atr_constant가 들어있는 파라미터 dict
+        :return: 손절가격
+        """
+        return Decimal(str(close)) - Decimal(str(atr)) * Decimal(str(params.atr_constant))
+
+    @staticmethod
+    def get_position_size(leverage, equity, close, params):
+        position_size = Decimal(str(leverage)) * Decimal(str(equity)) * Decimal(str(params.risk_per_trade)) / Decimal("100") / Decimal(str(close))
+        # position_size = leverage * Decimal(str(self.broker.getvalue())) * Decimal(
+        #     str(self.p.risk_per_trade)) / Decimal("100") / Decimal(str(self.close[0]))
     @staticmethod
     def get_ma_separation(close, ma):
         """
@@ -111,4 +126,4 @@ class Indicator:
         :param diff_percent: 진입가격과 손절가격 간 퍼센트 차이
         :return: 진입할 레버리지
         """
-        return round(100 / (risk_per_trade * diff_percent))
+        return round(Decimal("100") / (Decimal(str(risk_per_trade)) * Decimal(diff_percent)))

@@ -11,12 +11,12 @@ from indicator.Indicators import Indicator
 class MASeparationStrategy(bt.Strategy):
     params = dict(
         risk_per_trade=10,
-        ma_length=110,
+        ma_length=111,
         sep_limit=102,
-        atr_length=6,
+        atr_length=4,
         atr_constant=1,
         tick_size=0.01,
-        step_size=0.01
+        step_size=0.1
     )
 
     def log(self, txt):
@@ -108,16 +108,22 @@ class MASeparationStrategy(bt.Strategy):
 
         if not self.position:
             if self.entry_condition():
-                self.stop_price = self.close[0] - self.atr[0] * self.p.atr_constant
-                diff_percent = Indicator.get_diff_percent(self.close, self.stop_price)
-                if diff_percent != 0:
+                self.stop_price = Indicator.get_cut_price(self.close[0], self.atr[0], self.p)
+                diff_percent = Indicator.get_diff_percent(self.close[0], self.stop_price)
+                if diff_percent != Decimal("0"):
                     leverage = Indicator.get_leverage(self.p.risk_per_trade, diff_percent)
-                    position_size = leverage * self.broker.getvalue() * self.p.risk_per_trade / 100 / self.close[0]
-                    position_size = math.floor(position_size / self.p.step_size) * self.p.step_size
-                    self.buy(size=float(position_size), price=self.close[0])
+                    position_size = leverage * Decimal(str(self.broker.getvalue())) * Decimal(
+                        str(self.p.risk_per_trade)) / Decimal("100") / Decimal(str(self.close[0]))
+
+                    decimal_position_size = math.floor(position_size / Decimal(str(self.p.step_size))) * Decimal(
+                        str(self.p.step_size))
+                    self.log(f"{self.date.datetime(0)} => leverage : {leverage}, position_size :{decimal_position_size}, equity :{self.broker.getvalue()}")
+                    # position_size = leverage * self.broker.getvalue() * self.p.risk_per_trade / 100 / self.close[0]
+                    # position_size = math.floor(position_size / self.p.step_size) * self.p.step_size
+                    self.buy(size=float(decimal_position_size))
         else:
             if self.exit_condition() or self.cut_condition():
-                self.sell(size=self.getposition(self.datas[0]).size, price=self.close[0])
+                self.sell(size=self.getposition(self.datas[0]).size)
 
     def stop(self):
         self.winning_rate = self.winning_trading_count * 100 / self.total_trading_count
@@ -130,8 +136,8 @@ class MASeparationStrategy(bt.Strategy):
 
 if __name__ == '__main__':
     # backtesting 할 데이터 추출
-    df = DataUtil.load_candle_data_as_df(DataUtil.CANDLE_DATA_DIR_PATH, DataUtil.COMPANY_BYBIT,
-                                         "TRBUSDT", DataUtil.CANDLE_TICK_2HOUR)
+    df = DataUtil.load_candle_data_as_df(DataUtil.CANDLE_DATA_DIR_PATH_V2, DataUtil.COMPANY_BYBIT,
+                                         "OPUSDT", DataUtil.CANDLE_TICK_2HOUR)
     data = bt.feeds.PandasData(dataname=df, datetime='datetime')
     # cerebro 트레이딩 기본 셋팅
     cerebro = bt.Cerebro()
@@ -164,4 +170,4 @@ if __name__ == '__main__':
     sharpe = qs.stats.sharpe(returns)
     print(f"SHARPE :{sharpe:.2f}%")
 
-    qs.reports.html(returns, output=f'result/maSeparation_trbusdt.html', title='result')
+    # qs.reports.html(returns, output=f'result/maSeparation_trbusdt.html', title='result')
