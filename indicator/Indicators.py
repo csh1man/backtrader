@@ -1,7 +1,22 @@
 import math
 from decimal import Decimal
 
+
 class Indicator:
+    @staticmethod
+    def customized_round(number):
+        """
+        파이썬의 경우, 다른 언어와 달리 2.5와 같이 정확하게 .5로 끝나는 소숫점을 반올림이 아닌 버림을 하여 결과를 리턴한다.
+        따라서 자바 및 파인스크립트와 동일한 결과를 리턴해주는 함수 구현 (자바, 파인스크립트의 경우 .5는 버림이 아님 올림을 한다.)
+
+        :param number: 반올림할 타겟 숫자
+        :return: 반올림 결과
+        """
+        if isinstance(number, Decimal):
+            return math.floor(number + Decimal("0.5"))
+        else:
+            return math.floor(number + 0.5)
+
     @staticmethod
     def get_body_length(open_price, close_price):
         """캔들에 대한 몸통 길이 획득"""
@@ -126,4 +141,4 @@ class Indicator:
         :param diff_percent: 진입가격과 손절가격 간 퍼센트 차이
         :return: 진입할 레버리지
         """
-        return round(Decimal("100") / (Decimal(str(risk_per_trade)) * Decimal(diff_percent)))
+        return Indicator.customized_round(Decimal("100") / (Decimal(str(risk_per_trade)) * Decimal(diff_percent)))

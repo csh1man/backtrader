@@ -11,12 +11,12 @@ from indicator.Indicators import Indicator
 class MASeparationStrategy(bt.Strategy):
     params = dict(
         risk_per_trade=10,
-        ma_length=111,
+        ma_length=120,
         sep_limit=102,
-        atr_length=4,
-        atr_constant=1,
-        tick_size=0.01,
-        step_size=0.1
+        atr_length=3,
+        atr_constant=1.5,
+        tick_size=0.1,
+        step_size=0.001
     )
 
     def log(self, txt):
@@ -117,7 +117,8 @@ class MASeparationStrategy(bt.Strategy):
 
                     decimal_position_size = math.floor(position_size / Decimal(str(self.p.step_size))) * Decimal(
                         str(self.p.step_size))
-                    self.log(f"{self.date.datetime(0)} => leverage : {leverage}, position_size :{decimal_position_size}, equity :{self.broker.getvalue()}")
+                    self.log(f"{self.date.datetime(0)} => diff_percent : {diff_percent}, leverage : {leverage},"
+                             f" position_size :{decimal_position_size}, equity :{self.broker.getvalue()}")
                     # position_size = leverage * self.broker.getvalue() * self.p.risk_per_trade / 100 / self.close[0]
                     # position_size = math.floor(position_size / self.p.step_size) * self.p.step_size
                     self.buy(size=float(decimal_position_size))
@@ -136,8 +137,8 @@ class MASeparationStrategy(bt.Strategy):
 
 if __name__ == '__main__':
     # backtesting 할 데이터 추출
-    df = DataUtil.load_candle_data_as_df(DataUtil.CANDLE_DATA_DIR_PATH_V2, DataUtil.COMPANY_BYBIT,
-                                         "OPUSDT", DataUtil.CANDLE_TICK_2HOUR)
+    df = DataUtil.load_candle_data_as_df(DataUtil.CANDLE_DATA_DIR_PATH, DataUtil.COMPANY_BYBIT,
+                                         "BTCUSDT", DataUtil.CANDLE_TICK_2HOUR)
     data = bt.feeds.PandasData(dataname=df, datetime='datetime')
     # cerebro 트레이딩 기본 셋팅
     cerebro = bt.Cerebro()
@@ -170,4 +171,4 @@ if __name__ == '__main__':
     sharpe = qs.stats.sharpe(returns)
     print(f"SHARPE :{sharpe:.2f}%")
 
-    # qs.reports.html(returns, output=f'result/maSeparation_trbusdt.html', title='result')
+    qs.reports.html(returns, output=f'result/maSeparation_btcusdt.html', title='result')
