@@ -18,7 +18,7 @@ TRBUSDT 0.001
 class MaSeparationStrategyV2(bt.Strategy):
     params = dict(
         risk_per_trade=10,  # 초기 진입 시드 비율
-        add_risk_per_trade=10,  # 추가 진입 시드 비율
+        add_risk_per_trade=5,  # 추가 진입 시드 비율
         ma_length=120,  # 이동평균선 주기
         sep_limit=102,  # 이격도 기준
         atr_length=3,  # atr 주기
