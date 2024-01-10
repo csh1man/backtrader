@@ -52,6 +52,7 @@ class Indicator:
         position_size = Decimal(str(leverage)) * Decimal(str(equity)) * Decimal(str(params.risk_per_trade)) / Decimal("100") / Decimal(str(close))
         # position_size = leverage * Decimal(str(self.broker.getvalue())) * Decimal(
         #     str(self.p.risk_per_trade)) / Decimal("100") / Decimal(str(self.close[0]))
+
     @staticmethod
     def get_ma_separation(close, ma):
         """
