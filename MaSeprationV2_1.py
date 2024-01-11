@@ -50,7 +50,7 @@ class MaSeparationStrategyV2(bt.Strategy):
 
         # 거래 정보에 대한 추적을 위한 변수 초기화
         self.pyramiding_count = 0
-        self.order = None
+        self.active_orders = []
         self.stop_price = None
         self.leverage = None
 
@@ -106,22 +106,19 @@ class MaSeparationStrategyV2(bt.Strategy):
                 self.log(
                     f"[{self.date.datetime(0)}] 진입 완료. 진입 가격 : {order.executed.price} / 진입 수량 : {order.executed.size}, 레버리지 : {self.leverage}")
                 self.pyramiding_count += 1
-                # 전체 거래 횟수 증가
                 self.total_trading_count += 1
             elif order.issell():
                 self.log(
                     f"[{self.date.datetime(0)}] 종료 완료. 종료 가격 : {order.executed.price} / 종료 수량 : {order.executed.size}")
-                # 피라미딩 카운드를 초기화.
-                # 승률 계산을 위해 이익이 0보다 크면 승리한 거래로 설정
-                if order.executed.pnl > 0:
-                    self.winning_trading_count += self.pyramiding_count
+                for buy_order in self.active_orders:
+                    if order.executed.price > buy_order.executed.price:
+                        self.winning_trading_count += 1
+                self.active_orders.clear()
                 self.pyramiding_count = 0
             self.log(f"피라미딩 카운트 : {self.pyramiding_count}")
             self.log("")
-        self.order = None
 
     def next(self):
-
         if self.date.datetime(0) > datetime.datetime(2024, 1, 6, 0, 0, 0):
             return
         # 자산 추적을 위해 현재 포토폴리오 가치 저장
@@ -146,14 +143,19 @@ class MaSeparationStrategyV2(bt.Strategy):
                                                Decimal(str(self.step_size))) * \
                                                Decimal(str(self.step_size))
                     # 롱 진입
-                    self.buy(size=float(position_size))
+                    order = self.buy(size=float(position_size))
+                    self.active_orders.append(order)
+
         else:
             # 손절 조건이 만족하는 지 확인
             if self.cut_condition():
                 self.sell(size=self.getposition(self.datas[0]).size)
+
             # 종료 조건이 만족하는 지 확인
             elif self.exit_condition():
+                self.log(f"종료 사이즈 : [{self.getposition(self.datas[0]).size}]")
                 self.sell(size=self.getposition(self.datas[0]).size)
+
             # 아직 피라미딩 제한 만큼 진입하지 않았다면
             elif self.pyramiding_count < self.p.pyramiding_limit:
                 # 평단가와 종가간의 퍼센트 획득
@@ -169,7 +171,8 @@ class MaSeparationStrategyV2(bt.Strategy):
                     position_size = math.floor(position_size /
                                                Decimal(str(self.step_size))) * \
                                     Decimal(str(self.step_size))
-                    self.buy(size=float(position_size))
+                    order = self.buy(size=float(position_size))
+                    self.active_orders.append(order)
 
     def stop(self):
         self.winning_rate = self.winning_trading_count * 100 / self.total_trading_count
@@ -217,3 +220,5 @@ if __name__ == '__main__':
 
     sharpe = qs.stats.sharpe(returns)
     print(f"SHARPE :{sharpe:.2f}%")
+
+    qs.reports.html(returns, output=f'result/maSeparation_v2_btcusdt.html', title='result')
