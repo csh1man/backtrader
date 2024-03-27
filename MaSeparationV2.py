@@ -19,10 +19,10 @@ class MaSeparationStrategyV2(bt.Strategy):
     params = dict(
         risk_per_trade=10,  # 초기 진입 시드 비율
         add_risk_per_trade=5,  # 추가 진입 시드 비율
-        ma_length=120,  # 이동평균선 주기
+        ma_length=110,  # 이동평균선 주기
         sep_limit=102,  # 이격도 기준
-        atr_length=3,  # atr 주기
-        atr_constant=1.5,  # atr 상수
+        atr_length=6,  # atr 주기
+        atr_constant=1,  # atr 상수
         pyramiding_limit=3,  # 피라미딩 제한 횟수
         percent_limit=5  # 현재 종가가 평단가보다 percent_limit% 보다 높은 지 확인
     )
@@ -184,8 +184,8 @@ if __name__ == '__main__':
     # config_path = "/Users/tjgus/Desktop/project/krtrade/testDataDirectory/config/config.json"
     # DB.init_connection_pool(config_path)
 
-    df = DataUtil.load_candle_data_as_df(DataUtil.CANDLE_DATA_DIR_PATH_V2, DataUtil.COMPANY_BYBIT,
-                                         "BTCUSDT", DataUtil.CANDLE_TICK_2HOUR)
+    df = DataUtil.load_candle_data_as_df(DataUtil.CANDLE_DATA_DIR_PATH, DataUtil.COMPANY_BYBIT,
+                                         "TRBUSDT", DataUtil.CANDLE_TICK_2HOUR)
     data = bt.feeds.PandasData(dataname=df, datetime='datetime')
 
     cerebro = bt.Cerebro()
@@ -217,3 +217,5 @@ if __name__ == '__main__':
 
     sharpe = qs.stats.sharpe(returns)
     print(f"SHARPE :{sharpe:.2f}%")
+
+    qs.reports.html(returns, output=f'result/maSeparation_V2_btcusdt.html', title='result')
