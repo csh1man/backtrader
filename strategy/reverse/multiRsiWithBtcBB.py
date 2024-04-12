@@ -21,8 +21,8 @@ class MultiRsiWithBtcBB(bt.Strategy):
         bull_percents=[Decimal('1.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0'), Decimal('9.0')],
         bear_percents=[Decimal('1.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0'), Decimal('9.0')],
         default_percents=[Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('10.0')],
-        tick_size=[Decimal('0.10'), Decimal('0.00001'), Decimal('0.0001')],
-        step_size=[Decimal('0.01'), Decimal('1'), Decimal('1')]
+        tick_size=[Decimal('0.10'), Decimal('0.01'), Decimal('0.00001'), Decimal('0.0001')],
+        step_size=[Decimal('0.01'), Decimal('0.1'), Decimal('1'), Decimal('1')]
     )
 
     def log(self, txt):
@@ -172,6 +172,7 @@ if __name__ == '__main__':
 
     pairs = {
         'BTCUSDT': DataUtil.CANDLE_TICK_1HOUR,
+        'SOLUSDT': DataUtil.CANDLE_TICK_30M,
         'DOGEUSDT': DataUtil.CANDLE_TICK_30M,
         'XRPUSDT': DataUtil.CANDLE_TICK_30M,
     }
