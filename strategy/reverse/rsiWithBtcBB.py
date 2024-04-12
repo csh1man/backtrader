@@ -21,9 +21,9 @@ class RsiWithBtcBB(bt.Strategy):
         # default_percents=[0.5, 0.5, 0.5, 0.5, 0.5],
         bull_percents=[Decimal('1.0'), Decimal('2.0'), Decimal('3.0'), Decimal('4.0'), Decimal('5.0')],
         bear_percents=[Decimal('1.0'), Decimal('2.0'), Decimal('3.0'), Decimal('4.0'), Decimal('5.0')],
-        default_percents=[Decimal('1.0'), Decimal('2.0'), Decimal('3.0'), Decimal('4.0'), Decimal('5.0')],
-        tick_size=Decimal('0.0001'),
-        step_size=Decimal('1'),
+        default_percents=[Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('10.0')],
+        xrp_tick_size=Decimal('0.0001'),
+        xrp_step_size=Decimal('1'),
     )
 
     def log(self, txt):
@@ -97,28 +97,28 @@ class RsiWithBtcBB(bt.Strategy):
             if self.btc_close[0] > self.bb_top[0]:
                 for i in range(0, 5):
                     price = Decimal(self.pair_close[0]) * (Decimal('1') - self.p.bull_percents[i] / Decimal('100'))
-                    price = int(price / self.p.tick_size) * self.p.tick_size
-                    price = price.quantize(self.p.tick_size, rounding=ROUND_HALF_UP)
+                    price = int(price / self.p.xrp_tick_size) * self.p.xrp_tick_size
+                    price = price.quantize(self.p.xrp_tick_size, rounding=ROUND_HALF_UP)
                     prices.append(float(price))
 
             elif self.bb_bot[0] < self.btc_close[0] < self.bb_top[0]:
                 for i in range(0, 5):
                     price = Decimal(self.pair_close[0]) * (Decimal('1') - self.p.default_percents[i] / Decimal('100'))
-                    price = int(price / self.p.tick_size) * self.p.tick_size
-                    price = price.quantize(self.p.tick_size, rounding=ROUND_HALF_UP)
+                    price = int(price / self.p.xrp_tick_size) * self.p.xrp_tick_size
+                    price = price.quantize(self.p.xrp_tick_size, rounding=ROUND_HALF_UP)
                     prices.append(float(price))
 
             elif self.btc_close[0] < self.bb_bot[0]:
                 for i in range(0, 5):
                     price = Decimal(self.pair_close[0]) * (Decimal('1') - self.p.bear_percents[i] / Decimal('100'))
-                    price = int(price / self.p.tick_size) * self.p.tick_size
-                    price = price.quantize(self.p.tick_size, rounding=ROUND_HALF_UP)
+                    price = int(price / self.p.xrp_tick_size) * self.p.xrp_tick_size
+                    price = price.quantize(self.p.xrp_tick_size, rounding=ROUND_HALF_UP)
                     prices.append(float(price))
 
             current_equity = Decimal(str(self.broker.getvalue()))
             for i in range(0, 5):
                 qty = self.p.leverage * current_equity * self.p.risks[i] / 100 / Decimal(prices[i])
-                qty = int(Decimal(qty) / self.p.step_size) * self.p.step_size
+                qty = int(Decimal(qty) / self.p.xrp_step_size) * self.p.xrp_step_size
                 if qty > 0:
                     self.order = self.buy(exectype=bt.Order.Limit, data=self.pair, price=prices[i], size=float(qty))
         except:
@@ -127,7 +127,6 @@ class RsiWithBtcBB(bt.Strategy):
     def cancel_all(self):
         for order in self.broker.get_orders_open():
             self.broker.cancel(order)
-            # self.log(f'{self.pair_date.datetime(0)} => canceled')
 
 
 
@@ -139,7 +138,7 @@ if __name__ == '__main__':
 
     pairs = {
         'BTCUSDT': DataUtil.CANDLE_TICK_1HOUR,
-        'XRPUSDT': DataUtil.CANDLE_TICK_30M
+        'SOLUSDT': DataUtil.CANDLE_TICK_30M,
     }
 
     cerebro = bt.Cerebro()
@@ -150,7 +149,7 @@ if __name__ == '__main__':
 
     for pair, tick_kind in pairs.items():
         df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BYBIT, pair, tick_kind)
-        df = df[(df['datetime'] >= start_date) & (df['datetime'] <= end_date)]
+        # df = df[(df['datetime'] >= start_date) & (df['datetime'] <= end_date)]
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
 
         cerebro.adddata(data, name=pair)
