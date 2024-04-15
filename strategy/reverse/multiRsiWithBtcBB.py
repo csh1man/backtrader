@@ -112,7 +112,11 @@ class MultiRsiWithBtcBB(bt.Strategy):
     def next(self):
         try:
             self.date_value.append(self.pair_date[1].datetime(0))
-            self.my_assets.append(self.broker.getvalue() + self.getposition(self.datas[1]).size * self.pair_low[1][0] + self.getposition(self.datas[2]).size * self.pair_low[2][0])
+            position_value = self.broker.getvalue()
+            for i in range(1, len(self.datas)):
+                position_value += self.getposition(self.datas[i]).size * self.pair_low[i][0]
+            self.my_assets.append(position_value)
+            # self.my_assets.append(self.broker.getvalue() + self.getposition(self.datas[1]).size * self.pair_low[1][0] + self.getposition(self.datas[2]).size * self.pair_low[2][0])
             self.cancel_all()
             for i in range(1, len(self.pairs)):
                 current_position_size = self.getposition(self.pairs[i]).size
@@ -173,8 +177,8 @@ if __name__ == '__main__':
     pairs = {
         'BTCUSDT': DataUtil.CANDLE_TICK_1HOUR,
         'SOLUSDT': DataUtil.CANDLE_TICK_30M,
-        'DOGEUSDT': DataUtil.CANDLE_TICK_30M,
-        'XRPUSDT': DataUtil.CANDLE_TICK_30M,
+        # 'DOGEUSDT': DataUtil.CANDLE_TICK_30M,
+        # 'XRPUSDT': DataUtil.CANDLE_TICK_30M,
     }
 
     cerebro = bt.Cerebro()
