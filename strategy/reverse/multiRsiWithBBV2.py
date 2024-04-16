@@ -8,6 +8,13 @@ import matplotlib.pyplot as plt
 import pyfolio as pf
 from indicator.Indicators import Indicator
 
+pairs = {
+    'BTCUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    '1000BONKUSDT': DataUtil.CANDLE_TICK_30M,
+    '1000PEPEUSDT': DataUtil.CANDLE_TICK_30M,
+    'SEIUSDT': DataUtil.CANDLE_TICK_30M,
+    'TIAUSDT': DataUtil.CANDLE_TICK_30M,
+}
 
 class MultiRsiWithBtcBB(bt.Strategy):
     # 환경설정 파라미터값 선언
@@ -24,36 +31,40 @@ class MultiRsiWithBtcBB(bt.Strategy):
         bb_mult=1,
         rsi_length=2,
         rsi_high=90,
-        bull_percents=[
-            [Decimal('1.0'), Decimal('2.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0')],  # 1000BONKUSDT
-            [Decimal('1.0'), Decimal('2.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0')],  # 1000PEPEUSDT
-            [Decimal('1.0'), Decimal('2.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0')],  # SEIUSDT
-            [Decimal('1.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0'), Decimal('9.0')]  # TIAUSDT
-        ],
-        bear_percents=[
-            [Decimal('1.0'), Decimal('2.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0')],  # 1000BONKUSDT
-            [Decimal('1.0'), Decimal('2.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0')],  # 1000PEPEUSDT
-            [Decimal('1.0'), Decimal('2.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0')],  # SEIUSDT
-            [Decimal('1.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0'), Decimal('9.0')] ,  # TIAUSDT
-        ],
-        default_percents=[
-            [Decimal('2.0'), Decimal('4.0'), Decimal('5.0'), Decimal('9.0'), Decimal('11.0')],  # 1000BONKUSDT
-            [Decimal('2.0'), Decimal('4.0'), Decimal('5.0'), Decimal('9.0'), Decimal('11.0')],  # 1000PEPEUSDT
-            [Decimal('2.0'), Decimal('4.0'), Decimal('5.0'), Decimal('9.0'), Decimal('11.0')],  # SEIUSDT
-            [Decimal('2.0'), Decimal('4.0'), Decimal('5.0'), Decimal('7.0'), Decimal('9.0')],  # TIAUSDT
-        ],
-        tick_size=[
-            Decimal('0.0000010'), # 1000BONKUSDT
-            Decimal('0.0000001'), # 1000PEPEUSDT
-            Decimal('0.00010'), # SEIUSDT
-            Decimal('0.001') # TIAUSDT
-        ],
-        step_size=[
-            Decimal('100'), # 1000BONKUSDT
-            Decimal('100'), # 1000PEPEUSDT
-            Decimal('1'), # SEIUSDT
-            Decimal('0.1') # TIAUSDT
-        ]
+
+        bull_percents = {
+            '1000BONKUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0')],
+            '1000PEPEUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0')],
+            'SEIUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0')],
+            'TIAUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0')],
+        },
+
+        bear_percents = {
+            '1000BONKUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0')],
+            '1000PEPEUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0')],
+            'SEIUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0')],
+            'TIAUSDT': [Decimal('1.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0'), Decimal('9.0')]
+        },
+
+        default_percents = {
+            '1000BONKUSDT': [Decimal('2.0'), Decimal('4.0'), Decimal('5.0'), Decimal('9.0'), Decimal('11.0')],
+            '1000PEPEUSDT': [Decimal('2.0'), Decimal('4.0'), Decimal('5.0'), Decimal('9.0'), Decimal('11.0')],
+            'SEIUSDT': [Decimal('2.0'), Decimal('4.0'), Decimal('5.0'), Decimal('9.0'), Decimal('11.0')],
+            'TIAUSDT': [Decimal('2.0'), Decimal('4.0'), Decimal('5.0'), Decimal('7.0'), Decimal('9.0')]
+        },
+
+        tick_size = {
+            '1000BONKUSDT': Decimal('0.0000010'),
+            '1000PEPEUSDT': Decimal('0.0000001'),
+            'SEIUSDT': Decimal('0.00010'),
+            'TIAUSDT': Decimal('0.001')
+        },
+        step_size={
+            '1000BONKUSDT': Decimal('100'),
+            '1000PEPEUSDT': Decimal('100'),
+            'SEIUSDT': Decimal('1'),
+            'TIAUSDT': Decimal('0.1')
+        },
     )
 
     def log(self, txt):
@@ -153,6 +164,7 @@ class MultiRsiWithBtcBB(bt.Strategy):
             # self.my_assets.append(self.broker.getvalue() + self.getposition(self.datas[1]).size * self.pair_low[1][0] + self.getposition(self.datas[2]).size * self.pair_low[2][0])
             self.cancel_all()
             for i in range(1, len(self.pairs)):
+                currency_name = self.pairs[i]._name
                 current_position_size = self.getposition(self.pairs[i]).size
                 if current_position_size > 0:
                     if self.pair_rsi[i][0] > self.p.rsi_length:
@@ -162,37 +174,37 @@ class MultiRsiWithBtcBB(bt.Strategy):
                 btc_index = 0
                 if pair_minutes == 30:
                     btc_index = -1
-                self.log(f'btc time : {self.btc_date.datetime(btc_index)} <=> {self.pairs[i]._name} time : {self.pair_date[i].datetime(0)}')
+                self.log(f'btc time : {self.btc_date.datetime(btc_index)} <=> {currency_name} time : {self.pair_date[i].datetime(0)}')
                 prices = []
                 if self.btc_close[btc_index] > self.bb_top[btc_index]:
                     self.log(f'상승장')
                     for j in range(0, 5):
                         price = Decimal(self.pair_close[i][0]) * (
-                                    Decimal('1') - self.p.bull_percents[i-1][j] / Decimal('100'))
-                        price = int(price / self.p.tick_size[i-1]) * self.p.tick_size[i-1]
-                        price = price.quantize(self.p.tick_size[i-1], rounding=ROUND_HALF_UP)
+                                    Decimal('1') - self.p.bull_percents[currency_name][j] / Decimal('100'))
+                        price = int(price / self.p.tick_size[currency_name]) * self.p.tick_size[currency_name]
+                        price = price.quantize(self.p.tick_size[currency_name], rounding=ROUND_HALF_UP)
                         prices.append(float(price))
                 elif self.bb_bot[btc_index] < self.btc_close[btc_index] < self.bb_top[btc_index]:
                     self.log(f'횡보장')
                     for j in range(0, 5):
                         price = Decimal(self.pair_close[i][0]) * (
-                                Decimal('1') - self.p.default_percents[i-1][j] / Decimal('100'))
-                        price = int(price / self.p.tick_size[i-1]) * self.p.tick_size[i-1]
-                        price = price.quantize(self.p.tick_size[i-1], rounding=ROUND_HALF_UP)
+                                Decimal('1') - self.p.default_percents[currency_name][j] / Decimal('100'))
+                        price = int(price / self.p.tick_size[currency_name]) * self.p.tick_size[currency_name]
+                        price = price.quantize(self.p.tick_size[currency_name], rounding=ROUND_HALF_UP)
                         prices.append(float(price))
                 elif self.btc_close[btc_index] < self.bb_bot[btc_index]:
                     self.log(f'하락장')
                     for j in range(0, 5):
                         price = Decimal(self.pair_close[i][0]) * (
-                                    Decimal('1') - self.p.bear_percents[i-1][j] / Decimal('100'))
-                        price = int(price / self.p.tick_size[i-1]) * self.p.tick_size[i-1]
-                        price = price.quantize(self.p.tick_size[i-1], rounding=ROUND_HALF_UP)
+                                    Decimal('1') - self.p.bear_percents[currency_name][j] / Decimal('100'))
+                        price = int(price / self.p.tick_size[currency_name]) * self.p.tick_size[currency_name]
+                        price = price.quantize(self.p.tick_size[currency_name], rounding=ROUND_HALF_UP)
                         prices.append(float(price))
 
                 current_equity = Decimal(str(self.broker.getvalue()))
                 for j in range(0, 5):
                     qty = self.p.leverage * current_equity * self.p.risks[j] / Decimal('100') / Decimal(prices[j])
-                    qty = int(qty / self.p.step_size[i-1]) * self.p.step_size[i-1]
+                    qty = int(qty / self.p.step_size[currency_name]) * self.p.step_size[currency_name]
                     if qty > 0:
                         self.order = self.buy(exectype=bt.Order.Limit, data=self.pairs[i], price=prices[j],
                                               size=float(qty))
@@ -218,14 +230,6 @@ if __name__ == '__main__':
     data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
     start_date = '2020-04-01 00:00:00'
     end_date = '2024-04-11 00:00:00'
-
-    pairs = {
-        'BTCUSDT': DataUtil.CANDLE_TICK_1HOUR,
-        '1000BONKUSDT': DataUtil.CANDLE_TICK_30M,
-        '1000PEPEUSDT': DataUtil.CANDLE_TICK_30M,
-        'SEIUSDT': DataUtil.CANDLE_TICK_30M,
-        'TIAUSDT': DataUtil.CANDLE_TICK_30M,
-    }
 
     cerebro = bt.Cerebro()
     cerebro.broker.setcash(10000000)
