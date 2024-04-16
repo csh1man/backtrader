@@ -12,8 +12,8 @@ pairs = {
     'BTCUSDT': DataUtil.CANDLE_TICK_1HOUR,
     '1000BONKUSDT': DataUtil.CANDLE_TICK_30M,
     '1000PEPEUSDT': DataUtil.CANDLE_TICK_30M,
-    'SEIUSDT': DataUtil.CANDLE_TICK_30M,
     'TIAUSDT': DataUtil.CANDLE_TICK_30M,
+    'SEIUSDT': DataUtil.CANDLE_TICK_30M,
 }
 
 class MultiRsiWithBtcBB(bt.Strategy):
@@ -43,27 +43,27 @@ class MultiRsiWithBtcBB(bt.Strategy):
             '1000BONKUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0')],
             '1000PEPEUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0')],
             'SEIUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0')],
-            'TIAUSDT': [Decimal('1.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0'), Decimal('9.0')]
+            'TIAUSDT': [Decimal('1.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0'), Decimal('9.0')],
         },
 
         default_percents = {
             '1000BONKUSDT': [Decimal('2.0'), Decimal('4.0'), Decimal('5.0'), Decimal('9.0'), Decimal('11.0')],
             '1000PEPEUSDT': [Decimal('2.0'), Decimal('4.0'), Decimal('5.0'), Decimal('9.0'), Decimal('11.0')],
             'SEIUSDT': [Decimal('2.0'), Decimal('4.0'), Decimal('5.0'), Decimal('9.0'), Decimal('11.0')],
-            'TIAUSDT': [Decimal('2.0'), Decimal('4.0'), Decimal('5.0'), Decimal('7.0'), Decimal('9.0')]
+            'TIAUSDT': [Decimal('2.0'), Decimal('4.0'), Decimal('5.0'), Decimal('7.0'), Decimal('9.0')],
         },
 
         tick_size = {
             '1000BONKUSDT': Decimal('0.0000010'),
             '1000PEPEUSDT': Decimal('0.0000001'),
             'SEIUSDT': Decimal('0.00010'),
-            'TIAUSDT': Decimal('0.001')
+            'TIAUSDT': Decimal('0.001'),
         },
         step_size={
             '1000BONKUSDT': Decimal('100'),
             '1000PEPEUSDT': Decimal('100'),
             'SEIUSDT': Decimal('1'),
-            'TIAUSDT': Decimal('0.1')
+            'TIAUSDT': Decimal('0.1'),
         },
     )
 
@@ -153,8 +153,19 @@ class MultiRsiWithBtcBB(bt.Strategy):
 
     def next(self):
         try:
-            order_balance = self.broker.get_cash()
-            self.order_balance_list.append([self.pair_date[0].datetime(0), order_balance])
+            account_value = self.broker.get_cash() # 현재 현금(보유 포지션 제외) 자산의 가격을 획득
+            broker_leverage = self.broker.comminfo[None].p.leverage # cerebro에 설정한 레버리지 값 -> setcommission
+            position_value = 0.0
+            bought_value = 0.0
+            for pair in self.pairs:
+                position_value += self.getposition(pair).size * pair.low[0]
+                bought_value += self.getposition(pair).size * self.getposition(pair).price # 진입한 수량 x 평단가 즉, 현재 포지션 전체 가치를 의미(현금 제외)
+
+            account_value += position_value - bought_value * (broker_leverage-1) / broker_leverage
+            self.order_balance_list.append([self.pair_date[1].datetime(0), account_value])
+
+            # order_balance = self.broker.get_cash()
+            # self.order_balance_list.append([self.pair_date[0].datetime(0), order_balance])
             self.date_value.append(self.pair_date[1].datetime(0))
             position_value = self.broker.getvalue()
             for i in range(1, len(self.datas)):
@@ -171,9 +182,9 @@ class MultiRsiWithBtcBB(bt.Strategy):
                         self.order = self.sell(data=self.pairs[i], size=current_position_size)
 
                 pair_minutes = self.pair_date[i].datetime(0).minute
-                btc_index = 0
+                btc_index = -1
                 if pair_minutes == 30:
-                    btc_index = -1
+                    btc_index = 0
                 self.log(f'btc time : {self.btc_date.datetime(btc_index)} <=> {currency_name} time : {self.pair_date[i].datetime(0)}')
                 prices = []
                 if self.btc_close[btc_index] > self.bb_top[btc_index]:
@@ -226,10 +237,10 @@ class MultiRsiWithBtcBB(bt.Strategy):
 
 
 if __name__ == '__main__':
-    # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
-    data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
-    start_date = '2020-04-01 00:00:00'
-    end_date = '2024-04-11 00:00:00'
+    data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+    # data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+    start_date = '2023-04-01 00:00:00'
+    end_date = '2024-04-17 00:00:00'
 
     cerebro = bt.Cerebro()
     cerebro.broker.setcash(10000000)
