@@ -7,25 +7,28 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import pyfolio as pf
 from indicator.Indicators import Indicator
-
 pairs = {
     'BTCUSDT': DataUtil.CANDLE_TICK_1HOUR,
     '1000BONKUSDT': DataUtil.CANDLE_TICK_30M,
     '1000PEPEUSDT': DataUtil.CANDLE_TICK_30M,
-    'TIAUSDT': DataUtil.CANDLE_TICK_30M,
-    'SEIUSDT': DataUtil.CANDLE_TICK_30M,
+    'SOLUSDT' : DataUtil.CANDLE_TICK_30M,
+    'DOGEUSDT' : DataUtil.CANDLE_TICK_30M,
+    # 'XRPUSDT': DataUtil.CANDLE_TICK_30M,
+    # 'SEIUSDT': DataUtil.CANDLE_TICK_30M,
+    # 'TIAUSDT': DataUtil.CANDLE_TICK_30M,
 }
+
 
 class MultiRsiWithBtcBB(bt.Strategy):
     # 환경설정 파라미터값 선언
     params = dict(
-        leverage=Decimal('5'),
+        leverage=Decimal('4'),
         risks=[
             Decimal('1'),  # 1차 진입%
             Decimal('1'),  # 2차 진입%
             Decimal('2'),  # 3차 진입%
             Decimal('4'),  # 4차 진입%
-            Decimal('4')  # 5차 진입%
+            Decimal('8')  # 5차 진입%
         ],
         bb_span=80,
         bb_mult=1,
@@ -33,24 +36,33 @@ class MultiRsiWithBtcBB(bt.Strategy):
         rsi_high=90,
 
         bull_percents = {
-            '1000BONKUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0')],
-            '1000PEPEUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0')],
-            'SEIUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0')],
-            'TIAUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0')],
+            '1000BONKUSDT': [Decimal('1.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0'), Decimal('9.0')],
+            '1000PEPEUSDT': [Decimal('1.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0'), Decimal('9.0')],
+            'SEIUSDT': [Decimal('1.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0'), Decimal('9.0')],
+            'TIAUSDT': [Decimal('1.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0'), Decimal('9.0')],
+            'SOLUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('9.0')],
+            'DOGEUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('9.0')],
+            'XRPUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('9.0')],
         },
 
         bear_percents = {
-            '1000BONKUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0')],
-            '1000PEPEUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0')],
-            'SEIUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0')],
-            'TIAUSDT': [Decimal('1.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0'), Decimal('9.0')],
+            '1000BONKUSDT': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('9.0'), Decimal('11.0')],
+            '1000PEPEUSDT': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('9.0'), Decimal('11.0')],
+            'SEIUSDT': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('9.0'), Decimal('11.0')],
+            'TIAUSDT': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('9.0'), Decimal('11.0')],
+            'SOLUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('9.0')],
+            'DOGEUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('9.0')],
+            'XRPUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('9.0')],
         },
 
         default_percents = {
-            '1000BONKUSDT': [Decimal('2.0'), Decimal('4.0'), Decimal('5.0'), Decimal('9.0'), Decimal('11.0')],
-            '1000PEPEUSDT': [Decimal('2.0'), Decimal('4.0'), Decimal('5.0'), Decimal('9.0'), Decimal('11.0')],
-            'SEIUSDT': [Decimal('2.0'), Decimal('4.0'), Decimal('5.0'), Decimal('9.0'), Decimal('11.0')],
-            'TIAUSDT': [Decimal('2.0'), Decimal('4.0'), Decimal('5.0'), Decimal('7.0'), Decimal('9.0')],
+            '1000BONKUSDT': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('11.0'), Decimal('13.0')],
+            '1000PEPEUSDT': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('11.0'), Decimal('13.0')],
+            'SEIUSDT': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('11.0'), Decimal('13.0')],
+            'TIAUSDT': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('11.0'), Decimal('13.0')],
+            'SOLUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('9.0')],
+            'DOGEUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('9.0')],
+            'XRPUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('9.0')],
         },
 
         tick_size = {
@@ -58,12 +70,18 @@ class MultiRsiWithBtcBB(bt.Strategy):
             '1000PEPEUSDT': Decimal('0.0000001'),
             'SEIUSDT': Decimal('0.00010'),
             'TIAUSDT': Decimal('0.001'),
+            'XRPUSDT': Decimal('0.0001'),
+            'SOLUSDT': Decimal('0.010'),
+            'DOGEUSDT': Decimal('0.00001')
         },
         step_size={
             '1000BONKUSDT': Decimal('100'),
             '1000PEPEUSDT': Decimal('100'),
             'SEIUSDT': Decimal('1'),
             'TIAUSDT': Decimal('0.1'),
+            'XRPUSDT': Decimal('1'),
+            'SOLUSDT': Decimal('0.1'),
+            'DOGEUSDT': Decimal('1')
         },
     )
 
@@ -188,7 +206,7 @@ class MultiRsiWithBtcBB(bt.Strategy):
                 self.log(f'btc time : {self.btc_date.datetime(btc_index)} <=> {currency_name} time : {self.pair_date[i].datetime(0)}')
                 prices = []
                 if self.btc_close[btc_index] > self.bb_top[btc_index]:
-                    self.log(f'상승장')
+                    self.log(f'상승장 {self.pair_date[i].datetime(0)}')
                     for j in range(0, 5):
                         price = Decimal(self.pair_close[i][0]) * (
                                     Decimal('1') - self.p.bull_percents[currency_name][j] / Decimal('100'))
@@ -196,7 +214,7 @@ class MultiRsiWithBtcBB(bt.Strategy):
                         price = price.quantize(self.p.tick_size[currency_name], rounding=ROUND_HALF_UP)
                         prices.append(float(price))
                 elif self.bb_bot[btc_index] < self.btc_close[btc_index] < self.bb_top[btc_index]:
-                    self.log(f'횡보장')
+                    self.log(f'횡보장 {self.pair_date[i].datetime(0)}')
                     for j in range(0, 5):
                         price = Decimal(self.pair_close[i][0]) * (
                                 Decimal('1') - self.p.default_percents[currency_name][j] / Decimal('100'))
@@ -204,7 +222,7 @@ class MultiRsiWithBtcBB(bt.Strategy):
                         price = price.quantize(self.p.tick_size[currency_name], rounding=ROUND_HALF_UP)
                         prices.append(float(price))
                 elif self.btc_close[btc_index] < self.bb_bot[btc_index]:
-                    self.log(f'하락장')
+                    self.log(f'하락장 {self.pair_date[i].datetime(0)}')
                     for j in range(0, 5):
                         price = Decimal(self.pair_close[i][0]) * (
                                     Decimal('1') - self.p.bear_percents[currency_name][j] / Decimal('100'))
@@ -212,6 +230,8 @@ class MultiRsiWithBtcBB(bt.Strategy):
                         price = price.quantize(self.p.tick_size[currency_name], rounding=ROUND_HALF_UP)
                         prices.append(float(price))
 
+                for price in prices:
+                    self.log(price)
                 current_equity = Decimal(str(self.broker.getvalue()))
                 for j in range(0, 5):
                     qty = self.p.leverage * current_equity * self.p.risks[j] / Decimal('100') / Decimal(prices[j])
@@ -237,20 +257,20 @@ class MultiRsiWithBtcBB(bt.Strategy):
 
 
 if __name__ == '__main__':
-    data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
-    # data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
-    start_date = '2023-04-01 00:00:00'
+    # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+    data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+    start_date = '2020-04-01 00:00:00'
     end_date = '2024-04-17 00:00:00'
 
     cerebro = bt.Cerebro()
     cerebro.broker.setcash(10000000)
-    cerebro.broker.setcommission(0.0002, leverage=5)
+    cerebro.broker.setcommission(0.0002, leverage=4)
     cerebro.addstrategy(MultiRsiWithBtcBB)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')  # 결과 분석기 추가
 
     for pair, tick_kind in pairs.items():
         df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BYBIT, pair, tick_kind)
-        df = DataUtil.get_candle_data_in_scape(df, start_date, end_date)
+        # df = DataUtil.get_candle_data_in_scape(df, start_date, end_date)
         # df = df[(df['datetime'] >= start_date) & (df['datetime'] <= end_date)]
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
 
