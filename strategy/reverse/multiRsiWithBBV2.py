@@ -33,11 +33,11 @@ class MultiRsiWithBtcBB(bt.Strategy):
         bb_span=80,
         bb_mult=1,
         rsi_length=2,
-        rsi_high=90,
+        rsi_high=50,
 
         bull_percents = {
-            '1000BONKUSDT': [Decimal('1.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0'), Decimal('9.0')],
-            '1000PEPEUSDT': [Decimal('1.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0'), Decimal('9.0')],
+            '1000BONKUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('4.0'), Decimal('5.0'), Decimal('7.0')],
+            '1000PEPEUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('4.0'), Decimal('5.0'), Decimal('7.0')],
             'SEIUSDT': [Decimal('1.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0'), Decimal('9.0')],
             'TIAUSDT': [Decimal('1.0'), Decimal('3.0'), Decimal('5.0'), Decimal('7.0'), Decimal('9.0')],
             'SOLUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('9.0')],
@@ -46,18 +46,18 @@ class MultiRsiWithBtcBB(bt.Strategy):
         },
 
         bear_percents = {
-            '1000BONKUSDT': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('9.0'), Decimal('11.0')],
-            '1000PEPEUSDT': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('9.0'), Decimal('11.0')],
+            '1000BONKUSDT': [Decimal('10.0'), Decimal('12.0'), Decimal('14.0'), Decimal('16.0'), Decimal('18.0')],
+            '1000PEPEUSDT': [Decimal('10.0'), Decimal('12.0'), Decimal('14.0'), Decimal('16.0'), Decimal('18.0')],
             'SEIUSDT': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('9.0'), Decimal('11.0')],
             'TIAUSDT': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('9.0'), Decimal('11.0')],
-            'SOLUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('9.0')],
-            'DOGEUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('9.0')],
-            'XRPUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('9.0')],
+            'SOLUSDT': [Decimal('5.0'), Decimal('7.0'), Decimal('9.0'), Decimal('11.0'), Decimal('13.0')],
+            'DOGEUSDT': [Decimal('5.0'), Decimal('7.0'), Decimal('9.0'), Decimal('11.0'), Decimal('13.0')],
+            'XRPUSDT': [Decimal('5.0'), Decimal('7.0'), Decimal('9.0'), Decimal('11.0'), Decimal('13.0')],
         },
 
         default_percents = {
-            '1000BONKUSDT': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('11.0'), Decimal('13.0')],
-            '1000PEPEUSDT': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('11.0'), Decimal('13.0')],
+            '1000BONKUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('9.0')],
+            '1000PEPEUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('9.0')],
             'SEIUSDT': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('11.0'), Decimal('13.0')],
             'TIAUSDT': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('11.0'), Decimal('13.0')],
             'SOLUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('9.0')],
@@ -196,7 +196,7 @@ class MultiRsiWithBtcBB(bt.Strategy):
                 currency_name = self.pairs[i]._name
                 current_position_size = self.getposition(self.pairs[i]).size
                 if current_position_size > 0:
-                    if self.pair_rsi[i][0] > self.p.rsi_length:
+                    if self.pair_rsi[i][0] > self.p.rsi_high:
                         self.order = self.sell(data=self.pairs[i], size=current_position_size)
 
                 pair_minutes = self.pair_date[i].datetime(0).minute
@@ -259,7 +259,7 @@ class MultiRsiWithBtcBB(bt.Strategy):
 if __name__ == '__main__':
     # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
     data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
-    start_date = '2020-04-01 00:00:00'
+    start_date = '2022-04-01 00:00:00'
     end_date = '2024-04-17 00:00:00'
 
     cerebro = bt.Cerebro()
