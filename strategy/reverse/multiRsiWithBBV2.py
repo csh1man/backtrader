@@ -257,8 +257,8 @@ class MultiRsiWithBtcBB(bt.Strategy):
 
 
 if __name__ == '__main__':
-    # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
-    data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+    data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+    # data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
     start_date = '2022-04-01 00:00:00'
     end_date = '2024-04-17 00:00:00'
 
@@ -295,7 +295,8 @@ if __name__ == '__main__':
     mdd = qs.stats.max_drawdown(returns)
     print(f" quanstats's my returns MDD : {mdd * 100:.2f} %")
 
-    file_name = ""
+    file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+
     for pair, tick_kind in pairs.items():
         file_name += pair +"-"
     file_name += "multiRsiWithBTC"
@@ -311,4 +312,4 @@ if __name__ == '__main__':
     df = df.dropna()
     df = df.set_index('date')
     df.index.name = 'date'
-    qs.reports.html(df['value'], output="result.html", download_filename="result.html", title="Result")
+    qs.reports.html(df['value'], output=f"{file_name}.html", download_filename=f"{file_name}.html", title=file_name)
