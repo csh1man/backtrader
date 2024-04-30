@@ -34,7 +34,10 @@ class Indicator:
         """
         종가 대비 손절가격이 몇퍼센트 차이나는지 계산
         """
-        return round((Decimal(str(close)) - Decimal(str(stop_price))) * Decimal(str(100)) / Decimal(str(close)))
+        diff = (Decimal(str(close)) - Decimal(str(stop_price))) * Decimal(str(100)) / Decimal(str(close))
+        if diff < Decimal('0.5'):
+            return Decimal('0.5')
+        return round(diff)
 
     @staticmethod
     def get_cut_price(close, atr, params):
