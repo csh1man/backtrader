@@ -1,45 +1,46 @@
 import backtrader as bt
 from util.Util import DataUtil
 from decimal import Decimal
+from indicator.Indicators import Indicator
 
 pairs = {
     "KRW-BTC": DataUtil.CANDLE_TICK_4HOUR,
-    "KRW-ETH": DataUtil.CANDLE_TICK_4HOUR,
-    "KRW-BCH": DataUtil.CANDLE_TICK_4HOUR,
-    "KRW-SOL": DataUtil.CANDLE_TICK_4HOUR
+    # "KRW-ETH": DataUtil.CANDLE_TICK_4HOUR,
+    # "KRW-BCH": DataUtil.CANDLE_TICK_4HOUR,
+    # "KRW-SOL": DataUtil.CANDLE_TICK_4HOUR
 }
 
 
 def get_tick_size(price):
     if price >= 2000000:
-        return 1000
+        return Decimal('1000')
     elif price >= 1000000:
-        return 500
+        return Decimal('500')
     elif price >= 500000:
-        return 100
+        return Decimal('100')
     elif price >= 100000:
-        return 50
+        return Decimal('50')
     elif price >= 1000:
-        return 5
+        return Decimal('5')
     elif price >= 100:
-        return 1
+        return Decimal('1')
     elif price >= 10:
-        return 0.1
+        return Decimal('0.1')
     else:
-        return 0.01
+        return Decimal('0.01')
 
 
 class UpbitBBV2(bt.Strategy):
     params = dict(
-        riskPerTrade=2,
+        riskPerTrade=Decimal('2'),
         bb_span={
-            'KRW-BTC': 50,
+            'KRW-BTC': 80,
             'KRW-ETH': 50,
             'KRW-BCH': 50,
             'KRW-SOL': 50
         },
         bb_mult={
-            'KRW-BTC': 1.5,
+            'KRW-BTC': 1,
             'KRW-ETH': 1.5,
             'KRW-BCH': 1.5,
             'KRW-SOL': 1.5
@@ -51,7 +52,7 @@ class UpbitBBV2(bt.Strategy):
             'KRW-SOL': 10
         },
         atr_constant={
-            'KRW-BTC': Decimal('1.5'),
+            'KRW-BTC': Decimal('2.0'),
             'KRW-ETH': Decimal('1.5'),
             'KRW-BCH': Decimal('1.5'),
             'KRW-SOL': Decimal('1.5')
@@ -134,12 +135,34 @@ class UpbitBBV2(bt.Strategy):
         for order in self.broker.get_orders_open():
             self.broker.cancel(order)
 
+    def next(self):
+        for i in range(0, len(self.pairs)):
+            name = self.names[i]
+            entry_position_size = self.getposition(self.pairs[i]).size
+            if entry_position_size > 0:
+                if self.pairs_close[i][-1] > self.pairs_bb_mid[i][-1] and self.pairs_close[i][0] < self.pairs_bb_mid[i][0]:
+                    self.order = self.sell(data=self.pairs[i], size=entry_position_size)
+                else:
+                    self.order = self.sell(exectype=bt.Order.Limit, data=self.pairs[i], price=float(self.pairs_stop_price[i]), size=entry_position_size)
+            else:
+                if self.pairs_close[i][-1] < self.pairs_bb_top[i][-1] and self.pairs_close[i][0] > self.pairs_bb_top[i][0]:
+                    self.pairs_stop_price[i] = Decimal(str(self.pairs_close[i][0])) - Decimal(str(self.pairs_atr[i][0])) * self.p.atr_constant[name]
+                    self.pairs_stop_price[i] = int(self.pairs_stop_price[i] / get_tick_size(self.pairs_close[i][0])) * get_tick_size(self.pairs_close[i][0])
+                    qty = (self.p.riskPerTrade / Decimal('100')) / (Decimal(self.pairs_close[i][0]) - self.pairs_stop_price[i])
+                    if qty > Decimal('0'):
+                        self.order = self.buy(data=self.pairs[i], qty=float(qty))
+
+    def stop(self):
+        self.log(f'총 트레이딩 수 : {self.total_trading_count}')
+        self.return_rate = Indicator.get_percent(self.initial_asset, self.broker.getcash())
+        self.log(f"수익률 : {self.return_rate}%")
+
 if __name__ == '__main__':
     data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
 
     cerebro = bt.Cerebro()
     cerebro.broker.setcash(10000000) # 초기 시드 설정
-    cerebro.broker.setcommission(0.0005) # 수수료 설정
+    cerebro.broker.setcommission(0.0005, leverage=1) # 수수료 설정
     cerebro.addstrategy(UpbitBBV2) # 전략 추가
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')  # 결과 분석기 추가
 
