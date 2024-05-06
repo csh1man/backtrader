@@ -52,6 +52,7 @@ class DataUtil:
     거래소명 static 변수 선언
     """
     COMPANY_BYBIT = "BYBIT"
+    COMPANY_UPBIT = "UPBIT"
 
     """
     캔들 데이터가 저장된 디렉토리 경로 저장

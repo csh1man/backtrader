@@ -11,8 +11,8 @@ pairs = {
     'BTCUSDT': DataUtil.CANDLE_TICK_1HOUR,
     '1000BONKUSDT': DataUtil.CANDLE_TICK_30M,
     '1000PEPEUSDT': DataUtil.CANDLE_TICK_30M,
-    'SOLUSDT' : DataUtil.CANDLE_TICK_30M,
-    'DOGEUSDT' : DataUtil.CANDLE_TICK_30M,
+    'SOLUSDT': DataUtil.CANDLE_TICK_30M,
+    'DOGEUSDT': DataUtil.CANDLE_TICK_30M,
     # 'XRPUSDT': DataUtil.CANDLE_TICK_30M,
     # 'SEIUSDT': DataUtil.CANDLE_TICK_30M,
     # 'TIAUSDT': DataUtil.CANDLE_TICK_30M,
@@ -300,7 +300,6 @@ if __name__ == '__main__':
     for pair, tick_kind in pairs.items():
         file_name += pair +"-"
     file_name += "multiRsiWithBTC"
-    qs.reports.html(returns, output=f'alt_multipair.html', title=file_name)
 
     df = pd.DataFrame(order_balance_list, columns=["date", "value"])
     df['date'] = pd.to_datetime(df['date'])

@@ -2,12 +2,14 @@ import backtrader as bt
 from util.Util import DataUtil
 from decimal import Decimal
 from indicator.Indicators import Indicator
+import quantstats as qs
+import pandas as pd
 
 pairs = {
-    # 'BTCUSDT': DataUtil.CANDLE_TICK_2HOUR,
+    'BTCUSDT': DataUtil.CANDLE_TICK_2HOUR,
     'ETHUSDT': DataUtil.CANDLE_TICK_2HOUR,
-    # 'SOLUSDT': DataUtil.CANDLE_TICK_2HOUR,
-    # 'BCHUSDT': DataUtil.CANDLE_TICK_2HOUR
+    'SOLUSDT': DataUtil.CANDLE_TICK_2HOUR,
+    'BCHUSDT': DataUtil.CANDLE_TICK_2HOUR,
 }
 
 tick_size = {
@@ -28,6 +30,8 @@ step_size = {
 target_percent = {
     'BTCUSDT': Decimal('1.0'),
     'ETHUSDT': Decimal('1.0'),
+    'SOLUSDT': Decimal('1.0'),
+    'BCHUSDT': Decimal('1.0'),
 }
 
 
@@ -52,8 +56,8 @@ class MultiBBV1Strategy(bt.Strategy):
             'BCHUSDT': 10
         },
         atr_constant=Decimal('1.5'),
-        pyramiding=1,
-        initRiskSize=Decimal('10'),
+        pyramiding=3,
+        initRiskSize=Decimal('1 0'),
         addRiskSize=Decimal('5'),
     )
 
@@ -133,8 +137,28 @@ class MultiBBV1Strategy(bt.Strategy):
                     self.winning_trading_count += 1
 
     def next(self):
+        account_value = self.broker.get_cash()  # 현재 현금(보유 포지션 제외) 자산의 가격을 획득
+        broker_leverage = self.broker.comminfo[None].p.leverage  # cerebro에 설정한 레버리지 값 -> setcommission
+        position_value = 0.0
+        bought_value = 0.0
+        for pair in self.pairs:
+            position_value += self.getposition(pair).size * pair.low[0]
+            bought_value += self.getposition(pair).size * self.getposition(
+                pair).price  # 진입한 수량 x 평단가 즉, 현재 포지션 전체 가치를 의미(현금 제외)
+
+        account_value += position_value - bought_value * (broker_leverage - 1) / broker_leverage
+        self.order_balance_list.append([self.pairs_date[0].datetime(0), account_value])
+
+        # order_balance = self.broker.get_cash()
+        # self.order_balance_list.append([self.pair_date[0].datetime(0), order_balance])
+        self.date_value.append(self.pairs_date[0].datetime(0))
+        position_value = self.broker.getvalue()
+        for i in range(1, len(self.datas)):
+            position_value += self.getposition(self.datas[i]).size * self.pairs_low[i][0]
+
+        self.my_assets.append(position_value)
+
         for i in range(0, len(self.pairs)):
-            self.log(f'[{self.pairs_date[i].datetime(0)}]')
             name = self.names[i]
             current_equity = Decimal(str(self.broker.getcash()))
 
@@ -183,19 +207,54 @@ class MultiBBV1Strategy(bt.Strategy):
         self.log(f"수익률 : {self.return_rate}%")
 
 if __name__ == '__main__':
-    # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+    data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
     # data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
-    data_path = "/Users/tjgus/Desktop/project/krtrade/backData"
+    # data_path = "/Users/tjgus/Desktop/project/krtrade/backData"
     cerebro = bt.Cerebro()
     cerebro.broker.setcash(10000000)
     cerebro.broker.setcommission(0.0002, leverage=30)
     cerebro.addstrategy(MultiBBV1Strategy)
+    cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')  # 결과 분석기 추가
 
     for pair, tick_kind in pairs.items():
         df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BYBIT, pair, tick_kind)
+        # df = DataUtil.get_candle_data_in_scape(df, '2021-09-20 00:00:00', '2024-05-01 23:00:00')
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 
-    print('start Portfolio Value: %.2f' % cerebro.broker.getvalue())
-    cerebro.run()
+    results = cerebro.run()
+    strat = results[0]
+    pyfoliozer = strat.analyzers.getbyname('pyfolio')
+    returns, positions, transactions, gross_lev = pyfoliozer.get_pf_items()
+    returns.index = returns.index.tz_convert(None)
+
     print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
+
+    print(f'strat.my_assets type :{type(strat.my_assets)}')
+    asset_list = pd.DataFrame({'asset': strat.my_assets}, index=pd.to_datetime(strat.date_value))
+    order_balance_list = strat.order_balance_list
+
+    mdd = qs.stats.max_drawdown(asset_list).iloc[0]
+    print(f" quanstats's my variable MDD : {mdd * 100:.2f} %")
+    mdd = Indicator.calculate_max_draw_down(asset_list)
+    print(f" quanstats's my function MDD : {mdd * 100:.2f} %")
+    mdd = qs.stats.max_drawdown(returns)
+    print(f" quanstats's my returns MDD : {mdd * 100:.2f} %")
+
+    file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+
+    for pair, tick_kind in pairs.items():
+        file_name += pair + "-"
+    file_name += "multiBBV1"
+
+    df = pd.DataFrame(order_balance_list, columns=["date", "value"])
+    df['date'] = pd.to_datetime(df['date'])
+    df['date'] = df['date'].dt.date
+    df = df.sort_values('value', ascending=True).drop_duplicates('date').sort_index()
+    df['value'] = df['value'].astype('float64')
+    df['value'] = df['value'].pct_change()
+    df['date'] = pd.to_datetime(df['date'])
+    df = df.dropna()
+    df = df.set_index('date')
+    df.index.name = 'date'
+    qs.reports.html(df['value'], output=f"{file_name}.html", download_filename=f"{file_name}.html", title=file_name)
