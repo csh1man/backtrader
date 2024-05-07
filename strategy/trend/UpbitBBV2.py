@@ -2,11 +2,13 @@ import backtrader as bt
 from util.Util import DataUtil
 from decimal import Decimal, ROUND_HALF_UP
 from indicator.Indicators import Indicator
+import pandas as pd
+import quantstats as qs
 
 pairs = {
-    # "KRW-BTC": DataUtil.CANDLE_TICK_4HOUR,
     "KRW-ETH": DataUtil.CANDLE_TICK_4HOUR,
-    # "KRW-BCH": DataUtil.CANDLE_TICK_4HOUR,
+    "KRW-BTC": DataUtil.CANDLE_TICK_4HOUR,
+    "KRW-BCH": DataUtil.CANDLE_TICK_4HOUR,
     # "KRW-SOL": DataUtil.CANDLE_TICK_4HOUR
 }
 
@@ -37,14 +39,14 @@ class UpbitBBV2(bt.Strategy):
         riskPerTrade=Decimal('2'),
         bb_span={
             'KRW-BTC': 80,
-            'KRW-ETH': 50,
-            'KRW-BCH': 50,
+            'KRW-ETH': 80,
+            'KRW-BCH': 80,
             'KRW-SOL': 50
         },
         bb_mult={
             'KRW-BTC': 1,
-            'KRW-ETH': 1.5,
-            'KRW-BCH': 1.5,
+            'KRW-ETH': 1,
+            'KRW-BCH': 1,
             'KRW-SOL': 1.5
         },
         atr_length={
@@ -82,6 +84,10 @@ class UpbitBBV2(bt.Strategy):
         self.pairs_bb_bot = []
 
         # 자산 추적용 변수 할당
+        self.order = None
+        self.date_value = []
+        self.my_assets = []
+
         self.order_balance_list = []
         self.initial_asset = self.broker.getvalue()
         self.return_rate = 0
@@ -137,11 +143,35 @@ class UpbitBBV2(bt.Strategy):
         for order in self.broker.get_orders_open():
             self.broker.cancel(order)
 
+    def record_asset(self):
+        account_value = self.broker.get_cash()  # 현재 현금(보유 포지션 제외) 자산의 가격을 획득
+        broker_leverage = self.broker.comminfo[None].p.leverage  # cerebro에 설정한 레버리지 값 -> setcommission
+        position_value = 0.0
+        bought_value = 0.0
+        for pair in self.pairs:
+            position_value += self.getposition(pair).size * pair.low[0]
+            bought_value += self.getposition(pair).size * self.getposition(
+                pair).price  # 진입한 수량 x 평단가 즉, 현재 포지션 전체 가치를 의미(현금 제외)
+
+        account_value += position_value - bought_value * (broker_leverage - 1) / broker_leverage
+        self.order_balance_list.append([self.pairs_date[0].datetime(0), account_value])
+        self.date_value.append(self.pairs_date[0].datetime(0))
+        position_value = self.broker.getvalue()
+        for i in range(1, len(self.datas)):
+            position_value += self.getposition(self.datas[i]).size * self.pairs_low[i][0]
+
+        self.my_assets.append(position_value)
+
     def next(self):
+        # 자산 기록 및 추적
+        self.record_asset()
+
+        # 모든 오픈 지정가 미체결주문 취소
         self.cancel_all()
+
+        # 각 페어를 돌면서
         for i in range(0, len(self.pairs)):
             name = self.names[i]
-
             # 포지션 획득
             entry_position_size = self.getposition(self.pairs[i]).size
             # 진입 포지션이 없을 경우
@@ -155,8 +185,13 @@ class UpbitBBV2(bt.Strategy):
                     qty = (self.p.riskPerTrade / Decimal('100')) / (
                                 Decimal(self.pairs_close[i][0]) - self.pairs_stop_price[i])
                     qty = Decimal(str(self.broker.getcash())) * qty
-                    qty = qty.quantize(Decimal('0.000001'), rounding=ROUND_HALF_UP)
-                    self.order = self.buy(data=self.pairs[i], size=float(qty))
+                    qty = qty.quantize(Decimal('0.0001'), rounding=ROUND_HALF_UP)
+                    if qty * Decimal(str(self.pairs_close[i][0])) < Decimal(str(self.broker.getcash())):
+                        self.order = self.buy(data=self.pairs[i], size=float(qty))
+                    else:
+                        qty = Decimal(str(self.broker.getcash())) * Decimal('0.98') / Decimal(str(self.pairs_close[i][0]))
+                        qty.quantize(Decimal('0.000001'), rounding=ROUND_HALF_UP)
+                        self.order = self.buy(data=self.pairs[i], size=float(qty))
 
             # 진입 포지션이 존재할 경우 종료 조건 확인 또는 손절가 지정가 주문 생성
             elif entry_position_size > 0:
@@ -164,6 +199,7 @@ class UpbitBBV2(bt.Strategy):
                     self.order = self.sell(data=self.pairs[i], size=entry_position_size)
                     self.pairs_stop_price[i] = Decimal('-1')
                 elif self.pairs_close[i][-1] > self.pairs_stop_price[i] > self.pairs_close[i][0]:
+                    self.log(f'{name} => {self.pairs_date[i].datetime(0)} 손절')
                     self.order = self.sell(data=self.pairs[i], size=entry_position_size)
                     self.pairs_stop_price[i] = Decimal('-1')
                     # self.order = self.sell(exectype=bt.Order.Limit, data=self.pairs[i], price=float(self.pairs_stop_price[i]), size=entry_position_size)
@@ -176,8 +212,8 @@ class UpbitBBV2(bt.Strategy):
 
 
 if __name__ == '__main__':
-    # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
-    data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+    data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+    # data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
     cerebro = bt.Cerebro()
     cerebro.broker.setcash(10000000) # 초기 시드 설정
     cerebro.broker.setcommission(0.0005, leverage=1) # 수수료 설정
@@ -195,3 +231,22 @@ if __name__ == '__main__':
     results = cerebro.run()
     print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
 
+    file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+
+    for pair, tick_kind in pairs.items():
+        file_name += pair + "-"
+    file_name += "UpbitBBV2"
+
+    strat = results[0]
+    order_balance_list = strat.order_balance_list
+    df = pd.DataFrame(order_balance_list, columns=["date", "value"])
+    df['date'] = pd.to_datetime(df['date'])
+    df['date'] = df['date'].dt.date
+    df = df.sort_values('value', ascending=True).drop_duplicates('date').sort_index()
+    df['value'] = df['value'].astype('float64')
+    df['value'] = df['value'].pct_change()
+    df['date'] = pd.to_datetime(df['date'])
+    df = df.dropna()
+    df = df.set_index('date')
+    df.index.name = 'date'
+    qs.reports.html(df['value'], output=f"{file_name}.html", download_filename=f"{file_name}.html", title=file_name)
