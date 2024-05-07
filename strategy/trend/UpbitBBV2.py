@@ -1,11 +1,11 @@
 import backtrader as bt
 from util.Util import DataUtil
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from indicator.Indicators import Indicator
 
 pairs = {
-    "KRW-BTC": DataUtil.CANDLE_TICK_4HOUR,
-    # "KRW-ETH": DataUtil.CANDLE_TICK_4HOUR,
+    # "KRW-BTC": DataUtil.CANDLE_TICK_4HOUR,
+    "KRW-ETH": DataUtil.CANDLE_TICK_4HOUR,
     # "KRW-BCH": DataUtil.CANDLE_TICK_4HOUR,
     # "KRW-SOL": DataUtil.CANDLE_TICK_4HOUR
 }
@@ -20,6 +20,8 @@ def get_tick_size(price):
         return Decimal('100')
     elif price >= 100000:
         return Decimal('50')
+    elif price >= 10000:
+        return Decimal('10')
     elif price >= 1000:
         return Decimal('5')
     elif price >= 100:
@@ -46,7 +48,7 @@ class UpbitBBV2(bt.Strategy):
             'KRW-SOL': 1.5
         },
         atr_length={
-            'KRW-BTC': 10,
+            'KRW-BTC': 4,
             'KRW-ETH': 10,
             'KRW-BCH': 10,
             'KRW-SOL': 10
@@ -126,7 +128,7 @@ class UpbitBBV2(bt.Strategy):
                 self.log(f'{order.ref:<3} {cur_date} =>'
                          f' [매도{order.Status[order.status]:^10}] 종목 : {order.data._name} \t'
                          f'수량:{order.size} \t'
-                         f'가격:{order.created.price:.4f}')
+                         f'가격:{order.created.price:.4f}\n')
                 if order.executed.pnl > 0:
                     self.winning_trading_count += 1
 
@@ -136,30 +138,46 @@ class UpbitBBV2(bt.Strategy):
             self.broker.cancel(order)
 
     def next(self):
+        self.cancel_all()
         for i in range(0, len(self.pairs)):
             name = self.names[i]
+
+            # 포지션 획득
             entry_position_size = self.getposition(self.pairs[i]).size
-            if entry_position_size > 0:
+            # 진입 포지션이 없을 경우
+            if entry_position_size == 0:
+                if self.pairs_close[i][-1] < self.pairs_bb_top[i][-1] and self.pairs_close[i][0] > self.pairs_bb_top[i][0]:
+                    self.pairs_stop_price[i] = Decimal(str(self.pairs_close[i][0])) - Decimal(
+                        str(self.pairs_atr[i][0])) * self.p.atr_constant[name]
+                    self.pairs_stop_price[i] = int(
+                        self.pairs_stop_price[i] / get_tick_size(self.pairs_close[i][0])) * get_tick_size(
+                        self.pairs_close[i][0])
+                    qty = (self.p.riskPerTrade / Decimal('100')) / (
+                                Decimal(self.pairs_close[i][0]) - self.pairs_stop_price[i])
+                    qty = Decimal(str(self.broker.getcash())) * qty
+                    qty = qty.quantize(Decimal('0.000001'), rounding=ROUND_HALF_UP)
+                    self.order = self.buy(data=self.pairs[i], size=float(qty))
+
+            # 진입 포지션이 존재할 경우 종료 조건 확인 또는 손절가 지정가 주문 생성
+            elif entry_position_size > 0:
                 if self.pairs_close[i][-1] > self.pairs_bb_mid[i][-1] and self.pairs_close[i][0] < self.pairs_bb_mid[i][0]:
                     self.order = self.sell(data=self.pairs[i], size=entry_position_size)
-                else:
-                    self.order = self.sell(exectype=bt.Order.Limit, data=self.pairs[i], price=float(self.pairs_stop_price[i]), size=entry_position_size)
-            else:
-                if self.pairs_close[i][-1] < self.pairs_bb_top[i][-1] and self.pairs_close[i][0] > self.pairs_bb_top[i][0]:
-                    self.pairs_stop_price[i] = Decimal(str(self.pairs_close[i][0])) - Decimal(str(self.pairs_atr[i][0])) * self.p.atr_constant[name]
-                    self.pairs_stop_price[i] = int(self.pairs_stop_price[i] / get_tick_size(self.pairs_close[i][0])) * get_tick_size(self.pairs_close[i][0])
-                    qty = (self.p.riskPerTrade / Decimal('100')) / (Decimal(self.pairs_close[i][0]) - self.pairs_stop_price[i])
-                    if qty > Decimal('0'):
-                        self.order = self.buy(data=self.pairs[i], qty=float(qty))
+                    self.pairs_stop_price[i] = Decimal('-1')
+                elif self.pairs_close[i][-1] > self.pairs_stop_price[i] > self.pairs_close[i][0]:
+                    self.order = self.sell(data=self.pairs[i], size=entry_position_size)
+                    self.pairs_stop_price[i] = Decimal('-1')
+                    # self.order = self.sell(exectype=bt.Order.Limit, data=self.pairs[i], price=float(self.pairs_stop_price[i]), size=entry_position_size)
+
 
     def stop(self):
         self.log(f'총 트레이딩 수 : {self.total_trading_count}')
         self.return_rate = Indicator.get_percent(self.initial_asset, self.broker.getcash())
         self.log(f"수익률 : {self.return_rate}%")
 
-if __name__ == '__main__':
-    data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
 
+if __name__ == '__main__':
+    # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+    data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
     cerebro = bt.Cerebro()
     cerebro.broker.setcash(10000000) # 초기 시드 설정
     cerebro.broker.setcommission(0.0005, leverage=1) # 수수료 설정
