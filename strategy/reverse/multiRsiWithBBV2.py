@@ -1,7 +1,6 @@
 import backtrader as bt
 from util.Util import DataUtil
 from decimal import Decimal, ROUND_HALF_UP
-from indicator.Indicators import Indicator
 import quantstats as qs
 import pandas as pd
 import matplotlib.pyplot as plt
