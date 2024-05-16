@@ -166,9 +166,6 @@ class UpbitBBV2(bt.Strategy):
         # 자산 기록 및 추적
         self.record_asset()
 
-        # 모든 오픈 지정가 미체결주문 취소
-        self.cancel_all()
-
         # 각 페어를 돌면서
         for i in range(0, len(self.pairs)):
             name = self.names[i]
@@ -212,8 +209,9 @@ class UpbitBBV2(bt.Strategy):
 
 
 if __name__ == '__main__':
-    data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+    # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
     # data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+    data_path = "/Users/tjgus/Desktop/project/krtrade/backData";
     cerebro = bt.Cerebro()
     cerebro.broker.setcash(10000000) # 초기 시드 설정
     cerebro.broker.setcommission(0.0005, leverage=1) # 수수료 설정
@@ -231,8 +229,8 @@ if __name__ == '__main__':
     results = cerebro.run()
     print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
 
-    file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
-
+    # file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+    file_name = "/Users/tjgus/Desktop/project/krtrade/backData/result/"
     for pair, tick_kind in pairs.items():
         file_name += pair + "-"
     file_name += "UpbitBBV2"
