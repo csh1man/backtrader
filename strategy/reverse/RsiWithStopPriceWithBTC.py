@@ -2,6 +2,8 @@ import backtrader as bt
 from util.Util import DataUtil
 from decimal import Decimal
 from indicator.Indicators import Indicator
+from datetime import datetime
+
 pairs = {
     'BTCUSDT': DataUtil.CANDLE_TICK_1HOUR,
     'XRPUSDT': DataUtil.CANDLE_TICK_30M
@@ -29,8 +31,11 @@ class RsiWithStopPriceWithBTC(bt.Strategy):
         default_percent={
             'XRPUSDT': Decimal('4'),
         },
-        tick_size = {
+        tick_size={
             'XRPUSDT': Decimal('0.0001')
+        },
+        step_size={
+            'XRPUSDT': Decimal('1')
         },
         rsi_length=2,
         rsi_high=80,
@@ -39,11 +44,11 @@ class RsiWithStopPriceWithBTC(bt.Strategy):
     )
 
     def log(self, txt):
-        print(txt)
+        print(f'{txt}')
 
     def __init__(self):
         """
-        비트코인 정보 초기화 
+        비트코인 정보 초기화
         """
         self.btc = self.datas[0]
         self.btc_open = self.btc.open
@@ -165,29 +170,39 @@ class RsiWithStopPriceWithBTC(bt.Strategy):
         for i in range(1, len(self.pairs)):
             name = self.names[i]
             position_size = self.getposition(self.pairs[i]).size
-            # if position_size > 0:
-            #     if self.pairs_rsi[i][0] > self.p.rsi_high:
-            #         self.order = self.sell(data=self.pairs[i], size=position_size)
-            #     else:
-            #         self.order = self.sell(exectype=bt.Order.Limit, data=self.pairs[i], price=float(self.pairs_stop_price[name]), size=position_size)
+            if position_size > 0:
+                if self.pairs_rsi[i][0] >= self.p.rsi_high:
+                    self.order = self.sell(data=self.pairs[i], size=position_size)
+                elif self.pairs_close[i][0] < self.pairs_stop_price[name]:
+                    self.order = self.sell(data=self.pairs[i], size=position_size)
+                    # self.log(f'{self.pairs_date[i].datetime(0)} 지정가 종료 주문 생성 : {self.pairs_stop_price[name]}')
+                    # self.order = self.sell(exectype=bt.Order.Limit, data=self.pairs[i], price=float(self.pairs_stop_price[name]), size=position_size)
+
+            price = Decimal('0.0')
+            situation = ""
+            if self.btc_close[0] >= self.bb_top[0]:
+                price = Decimal(str(self.pairs_close[i][0])) * (
+                            Decimal('1') - self.p.bullish_percent[name] / Decimal('100'))
+                situation = "bullish"
+            elif self.bb_bot[0] <= self.btc_close[0] < self.bb_top[0]:
+                price = Decimal(str(self.pairs_close[i][0])) * (
+                            Decimal('1') - self.p.default_percent[name] / Decimal('100'))
+                situation = "default"
+            elif self.bb_bot[0] > self.btc_close[0]:
+                price = Decimal(str(self.pairs_close[i][0])) * (
+                            Decimal('1') - self.p.bearish_percent[name] / Decimal('100'))
+                situation = "bearish"
+            price = int(price / self.p.tick_size[name]) * self.p.tick_size[name]
+            stop_price = Decimal(str(price)) - Decimal(str(self.pairs_atr[i][0])) * self.p.atr_constant[name]
+            stop_price = int(stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
+            self.pairs_stop_price[name] = stop_price
             if self.pairs_pyramiding[name] < self.p.pyramiding:
-                price = Decimal('0.0')
-                if self.btc_close[0] >= self.btc_high[0]:
-                    price = Decimal(str(self.pairs_close[i][0])) * (Decimal('1') - self.p.bullish_percent[name] / Decimal('100'))
-                elif self.btc_low[0] <= self.btc_close[0] < self.btc_high[0]:
-                    price = Decimal(str(self.pairs_close[i][0])) * (Decimal('1') - self.p.default_percent[name] / Decimal('100'))
-                elif self.btc_low[0] > self.btc_close[0]:
-                    price = Decimal(str(self.pairs_close[i][0])) * (Decimal('1') - self.p.bearish_percent[name] / Decimal('100'))
-
-                price = int(price / self.p.tick_size[name]) * self.p.tick_size[name]
-                stop_price = Decimal(str(self.pairs_close[i][0])) - Decimal(str(self.pairs_atr[i][0])) * self.p.atr_constant[name]
-                self.pairs_stop_price[name] = stop_price
-
                 entry_size = self.p.risk / Decimal('100')
                 entry_size = entry_size / (entry_size-stop_price)
                 entry_size = entry_size * Decimal(str(self.broker.get_cash()))
-                self.log(f'{self.pairs_date[i].datetime(0)} => {price}')
-                # self.order = self.buy(exectype=bt.Order.Limit,data=self.pairs[i],price=float(price),size=float(entry_size))
+                entry_size = int(entry_size / self.p.step_size[name]) * self.p.step_size[name]
+                self.log(f'{self.pairs_date[i].datetime(0)} 지정가 진입 주문 생성 : {price} : 상황 : [{situation}]')
+                self.order = self.buy(exectype=bt.Order.Limit,data=self.pairs[i],price=float(price),size=float(entry_size))
 
     def stop(self):
         self.log(f'총 트레이딩 수 : {self.total_trading_count}')
@@ -197,11 +212,11 @@ class RsiWithStopPriceWithBTC(bt.Strategy):
 
 
 if __name__ == '__main__':
-    data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
-
+    # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+    data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
     cerebro = bt.Cerebro()
     cerebro.broker.setcash(10000000)
-    cerebro.broker.setcommission(0.0002, leverage=4)
+    cerebro.broker.setcommission(0.0002, leverage=100)
     cerebro.addstrategy(RsiWithStopPriceWithBTC)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')  # 결과 분석기 추가
 
