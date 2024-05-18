@@ -1,4 +1,5 @@
 import pandas as pd
+from decimal import Decimal
 import json
 from config.Configuration import DBConfig
 
@@ -99,7 +100,9 @@ class DataUtil:
         """
         return df[(df['datetime'] >= start_date) & (df['datetime'] <= end_date)]
 
-
+    @staticmethod
+    def convert_to_decimal(data):
+        return Decimal(str(data))
 class JsonUtil:
     @staticmethod
     def get_candle_date_list(candle_data, tick_kind, is_ascend):
