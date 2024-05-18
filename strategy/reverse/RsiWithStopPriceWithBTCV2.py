@@ -8,23 +8,10 @@ from datetime import datetime
 
 pairs = {
     'BTCUSDT': DataUtil.CANDLE_TICK_30M,
-    'XRPUSDT': DataUtil.CANDLE_TICK_30M
+    '1000BONKUSDT': DataUtil.CANDLE_TICK_30M,
+    'SEIUSDT': DataUtil.CANDLE_TICK_30M
 }
 
-
-'''
- 1. BTC BB 값 : 정상
- 2. BTC 캔들과 리플 캔들 시간 동기화 : 정상
- 3. 지표값 ATR : 정상
- 4. 지표값 RSI : 정상
- 5. BTC 위치 확인 : 정상
- 6. 타겟 가격 확인 : 정상
- 7. 손절 가격 확인 : 정상
- 8. 진입 타점 : 비정상
- 219672024-05-01 16:00:00 => [매수Completed ] 종목 : XRPUSDT 	수량:45677724.0 	가격:0.4897	피라미딩 횟수:1
- 219682024-05-01 19:30:00 => [매도Completed ] 종목 : XRPUSDT 	수량:-45677724.0 	가격:0.4928
- 만 들어가지고, 17:00:00에 진입이 안되고있음.
-'''
 class RsiWithStopPriceWithBTCV2(bt.Strategy):
     params = dict(
         bb_span=100,
@@ -32,25 +19,39 @@ class RsiWithStopPriceWithBTCV2(bt.Strategy):
         atr_length={
             'BTCUSDT':10,
             'XRPUSDT':10,
+            '1000BONKUSDT': 10,
+            'SEIUSDT':3
         },
         atr_constant={
             'BTCUSDT':Decimal('2.0'),
             'XRPUSDT':Decimal('2.0'),
+            '1000BONKUSDT': Decimal('2.0'),
+            'SEIUSDT': Decimal('2.0')
         },
         bullish_percent={
             'XRPUSDT': Decimal('2'),
+            '1000BONKUSDT': Decimal('2'),
+            'SEIUSDT': Decimal('1.5'),
         },
         bearish_percent={
             'XRPUSDT': Decimal('2'),
+            '1000BONKUSDT': Decimal('2'),
+            'SEIUSDT': Decimal('1.5'),
         },
         default_percent={
             'XRPUSDT': Decimal('4'),
+            '1000BONKUSDT': Decimal('4'),
+            'SEIUSDT': Decimal('4'),
         },
         tick_size={
-            'XRPUSDT': Decimal('0.0001')
+            'XRPUSDT': Decimal('0.0001'),
+            '1000BONKUSDT': Decimal('0.0000010'),
+            'SEIUSDT': Decimal('0.00010'),
         },
         step_size={
-            'XRPUSDT': Decimal('1')
+            'XRPUSDT': Decimal('1'),
+            '1000BONKUSDT': Decimal('100'),
+            'SEIUSDT': Decimal('1'),
         },
         rsi_length=2,
         rsi_high=80,
@@ -66,14 +67,18 @@ class RsiWithStopPriceWithBTCV2(bt.Strategy):
         피라미딩 횟수 초기화
         '''
         self.pairs_pyramiding = {
-            'XRPUSDT': 0
+            'XRPUSDT': 0,
+            '1000BONKUSDT': 0,
+            'SEIUSDT': 0
         }
 
         '''
         손절가격 초기화
         '''
         self.pairs_stop_price = {
-            'XRPUSDT': Decimal('-1')
+            'XRPUSDT': Decimal('-1'),
+            '1000BONKUSDT': Decimal('-1'),
+            'SEIUSDT': Decimal('-1')
         }
 
         '''
@@ -238,8 +243,7 @@ class RsiWithStopPriceWithBTCV2(bt.Strategy):
 
 
 if __name__ == '__main__':
-    data_path = "/Users/tjgus/Desktop/project/krtrade/backData"
-
+    data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
     cerebro = bt.Cerebro()
     cerebro.broker.setcash(10000000)
     cerebro.broker.setcommission(0.0002, leverage=100)
@@ -248,8 +252,6 @@ if __name__ == '__main__':
 
     for pair, tick_kind in pairs.items():
         df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BYBIT, pair, tick_kind)
-        # df = DataUtil.get_candle_data_in_scape(df, '2022-12-31 00:00:00', '2024-05-18 23:00:00')
-        # df = DataUtil.get_candle_data_in_scape(df, '2024-04-28 00:00:00', '2024-05-18 23:00:00')
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 
@@ -269,16 +271,14 @@ if __name__ == '__main__':
 
     mdd = qs.stats.max_drawdown(asset_list).iloc[0]
     print(f" quanstats's my variable MDD : {mdd * 100:.2f} %")
-    mdd = Indicator.calculate_max_draw_down(asset_list)
-    print(f" quanstats's my function MDD : {mdd * 100:.2f} %")
     mdd = qs.stats.max_drawdown(returns)
     print(f" quanstats's my returns MDD : {mdd * 100:.2f} %")
 
-    file_name = "/Users/tjgus/Desktop/project/krtrade/testDataDirectory/"
+    file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
 
     for pair, tick_kind in pairs.items():
         file_name += pair + "-"
-    file_name += "multiRsiWithBTC"
+    file_name += "RsiWithStopPriceWithBTCV2"
 
     df = pd.DataFrame(order_balance_list, columns=["date", "value"])
     df['date'] = pd.to_datetime(df['date'])

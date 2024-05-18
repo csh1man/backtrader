@@ -23,7 +23,7 @@ class MultiRsiWithBtcBB(bt.Strategy):
     params = dict(
         leverage=Decimal('4'),
         risks=[
-            Decimal('1'),  # 1차 진입% 
+            Decimal('1'),  # 1차 진입%
             Decimal('1'),  # 2차 진입%
             Decimal('2'),  # 3차 진입%
             Decimal('4'),  # 4차 진입%
