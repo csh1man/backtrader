@@ -8,8 +8,10 @@ from datetime import datetime
 
 pairs = {
     'BTCUSDT': DataUtil.CANDLE_TICK_30M,
+    'SEIUSDT': DataUtil.CANDLE_TICK_30M,
+    '1000PEPEUSDT': DataUtil.CANDLE_TICK_30M,
     '1000BONKUSDT': DataUtil.CANDLE_TICK_30M,
-    'SEIUSDT': DataUtil.CANDLE_TICK_30M
+    'DOGEUSDT': DataUtil.CANDLE_TICK_30M,
 }
 
 class RsiWithStopPriceWithBTCV2(bt.Strategy):
@@ -20,38 +22,52 @@ class RsiWithStopPriceWithBTCV2(bt.Strategy):
             'BTCUSDT':10,
             'XRPUSDT':10,
             '1000BONKUSDT': 10,
-            'SEIUSDT':3
+            'SEIUSDT':3,
+            'DOGEUSDT':3,
+            '1000PEPEUSDT':3
         },
         atr_constant={
             'BTCUSDT':Decimal('2.0'),
             'XRPUSDT':Decimal('2.0'),
             '1000BONKUSDT': Decimal('2.0'),
-            'SEIUSDT': Decimal('2.0')
+            'SEIUSDT': Decimal('2.0'),
+            'DOGEUSDT': Decimal('2.0'),
+            '1000PEPEUSDT': Decimal('2.0')
         },
         bullish_percent={
             'XRPUSDT': Decimal('2'),
             '1000BONKUSDT': Decimal('2'),
             'SEIUSDT': Decimal('1.5'),
+            'DOGEUSDT': Decimal('1.5'),
+            '1000PEPEUSDT': Decimal('2.0')
         },
         bearish_percent={
             'XRPUSDT': Decimal('2'),
             '1000BONKUSDT': Decimal('2'),
             'SEIUSDT': Decimal('1.5'),
+            'DOGEUSDT': Decimal('1.5'),
+            '1000PEPEUSDT': Decimal('2.0')
         },
         default_percent={
             'XRPUSDT': Decimal('4'),
             '1000BONKUSDT': Decimal('4'),
             'SEIUSDT': Decimal('4'),
+            'DOGEUSDT': Decimal('2.0'),
+            '1000PEPEUSDT': Decimal('4.0')
         },
         tick_size={
             'XRPUSDT': Decimal('0.0001'),
             '1000BONKUSDT': Decimal('0.0000010'),
             'SEIUSDT': Decimal('0.00010'),
+            'DOGEUSDT': Decimal('0.00001'),
+            '1000PEPEUSDT': Decimal('0.0000001')
         },
         step_size={
             'XRPUSDT': Decimal('1'),
             '1000BONKUSDT': Decimal('100'),
             'SEIUSDT': Decimal('1'),
+            'DOGEUSDT': Decimal('1'),
+            '1000PEPEUSDT': Decimal('1')
         },
         rsi_length=2,
         rsi_high=80,
@@ -69,7 +85,9 @@ class RsiWithStopPriceWithBTCV2(bt.Strategy):
         self.pairs_pyramiding = {
             'XRPUSDT': 0,
             '1000BONKUSDT': 0,
-            'SEIUSDT': 0
+            'SEIUSDT': 0,
+            'DOGEUSDT': 0,
+            '1000PEPEUSDT': 0,
         }
 
         '''
@@ -78,7 +96,9 @@ class RsiWithStopPriceWithBTCV2(bt.Strategy):
         self.pairs_stop_price = {
             'XRPUSDT': Decimal('-1'),
             '1000BONKUSDT': Decimal('-1'),
-            'SEIUSDT': Decimal('-1')
+            'SEIUSDT': Decimal('-1'),
+            'DOGEUSDT': Decimal('-1'),
+            '1000PEPEUSDT': Decimal('-1')
         }
 
         '''
@@ -169,6 +189,7 @@ class RsiWithStopPriceWithBTCV2(bt.Strategy):
         cur_date = f"{order.data.datetime.date(0)} {str(order.data.datetime.time(0)).split('.')[0]}"
         if order.status in [order.Completed]:
             if order.isbuy():
+                self.total_trading_count += 1
                 self.pairs_pyramiding[order.data._name] += 1
                 self.log(f'{order.ref:<3}{cur_date} =>'
                          f' [매수{order.Status[order.status]:^10}] 종목 : {order.data._name} \t'
@@ -183,7 +204,6 @@ class RsiWithStopPriceWithBTCV2(bt.Strategy):
                 self.pairs_pyramiding[order.data._name] = 0
                 self.pairs_stop_price[order.data._name] = Decimal('-1')
                 # buy와 Sell이 한 쌍이므로 팔렸을 때 한 건으로 친다.
-                self.total_trading_count += 1
                 # 팔렸을 때 만약 이익이 0보다 크면 승리한 거래 건이므로 승리 횟수를 증가시킨다.
                 if order.executed.pnl > 0:
                     self.winning_trading_count += 1
@@ -243,7 +263,8 @@ class RsiWithStopPriceWithBTCV2(bt.Strategy):
 
 
 if __name__ == '__main__':
-    data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+    # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+    data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
     cerebro = bt.Cerebro()
     cerebro.broker.setcash(10000000)
     cerebro.broker.setcommission(0.0002, leverage=100)
@@ -274,7 +295,8 @@ if __name__ == '__main__':
     mdd = qs.stats.max_drawdown(returns)
     print(f" quanstats's my returns MDD : {mdd * 100:.2f} %")
 
-    file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+    # file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+    file_name = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
 
     for pair, tick_kind in pairs.items():
         file_name += pair + "-"

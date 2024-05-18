@@ -5,14 +5,14 @@ from indicator.Indicators import Indicator
 from datetime import datetime
 
 pairs = {
-    'BTCUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    'BTCUSDT': DataUtil.CANDLE_TICK_30M,
     'XRPUSDT': DataUtil.CANDLE_TICK_30M
 }
 
 
 class RsiWithStopPriceWithBTC(bt.Strategy):
     params = dict(
-        bb_span=50,
+        bb_span=100,
         bb_mult=1.0,
         atr_length={
             'BTCUSDT': 10,
