@@ -21,7 +21,7 @@ class RsiWithStopPriceWithBTCV2(bt.Strategy):
         atr_length={
             'BTCUSDT':10,
             'XRPUSDT':10,
-            '1000BONKUSDT': 10,
+            '1000BONKUSDT': 3,
             'SEIUSDT':3,
             'DOGEUSDT':3,
             '1000PEPEUSDT':3
@@ -50,10 +50,10 @@ class RsiWithStopPriceWithBTCV2(bt.Strategy):
         },
         default_percent={
             'XRPUSDT': Decimal('4'),
-            '1000BONKUSDT': Decimal('4'),
-            'SEIUSDT': Decimal('4'),
+            '1000BONKUSDT': Decimal('3'),
+            'SEIUSDT': Decimal('3'),
             'DOGEUSDT': Decimal('2.0'),
-            '1000PEPEUSDT': Decimal('4.0')
+            '1000PEPEUSDT': Decimal('3.0')
         },
         tick_size={
             'XRPUSDT': Decimal('0.0001'),
@@ -249,7 +249,10 @@ class RsiWithStopPriceWithBTCV2(bt.Strategy):
             stop_price = int(stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
 
             portion = self.p.risk / Decimal('100')
-            portion = portion / (price - stop_price)
+            if price != stop_price:
+                portion = portion / (price - stop_price)
+            else:
+                portion = Decimal('0.98')
             qty = DataUtil.convert_to_decimal(self.broker.get_cash()) * portion
             qty = int(qty / self.p.step_size[name]) * self.p.step_size[name]
             # self.log(f'{self.pairs_date[i].datetime(0)} => {price}, pyramiding : {self.pairs_pyramiding[name]}')
@@ -263,11 +266,11 @@ class RsiWithStopPriceWithBTCV2(bt.Strategy):
 
 
 if __name__ == '__main__':
-    # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
-    data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+    data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+    # data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
     cerebro = bt.Cerebro()
-    cerebro.broker.setcash(10000000)
-    cerebro.broker.setcommission(0.0002, leverage=100)
+    cerebro.broker.setcash(940000)
+    cerebro.broker.setcommission(0.0002, leverage=10)
     cerebro.addstrategy(RsiWithStopPriceWithBTCV2)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')  # 결과 분석기 추가
 
@@ -295,8 +298,8 @@ if __name__ == '__main__':
     mdd = qs.stats.max_drawdown(returns)
     print(f" quanstats's my returns MDD : {mdd * 100:.2f} %")
 
-    # file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
-    file_name = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+    file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+    # file_name = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
 
     for pair, tick_kind in pairs.items():
         file_name += pair + "-"
