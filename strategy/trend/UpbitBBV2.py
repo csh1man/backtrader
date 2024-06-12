@@ -189,7 +189,7 @@ class UpbitBBV2(bt.Strategy):
                         qty = Decimal(str(self.broker.getcash())) * Decimal('0.98') / Decimal(str(self.pairs_close[i][0]))
                         qty.quantize(Decimal('0.000001'), rounding=ROUND_HALF_UP)
                         self.order = self.buy(data=self.pairs[i], size=float(qty))
-
+                    self.log(f'{self.pairs_date[i].datetime(0)} => price : {self.pairs_close[i][0]} , stop price : {self.pairs_stop_price[i]}')
             # 진입 포지션이 존재할 경우 종료 조건 확인 또는 손절가 지정가 주문 생성
             elif entry_position_size > 0:
                 if self.pairs_close[i][-1] > self.pairs_bb_mid[i][-1] and self.pairs_close[i][0] < self.pairs_bb_mid[i][0]:
@@ -199,7 +199,6 @@ class UpbitBBV2(bt.Strategy):
                     self.log(f'{name} => {self.pairs_date[i].datetime(0)} 손절')
                     self.order = self.sell(data=self.pairs[i], size=entry_position_size)
                     self.pairs_stop_price[i] = Decimal('-1')
-                    # self.order = self.sell(exectype=bt.Order.Limit, data=self.pairs[i], price=float(self.pairs_stop_price[i]), size=entry_position_size)
 
 
     def stop(self):
@@ -210,8 +209,8 @@ class UpbitBBV2(bt.Strategy):
 
 if __name__ == '__main__':
     # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
-    # data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
-    data_path = "/Users/tjgus/Desktop/project/krtrade/backData";
+    data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+    # data_path = "/Users/tjgus/Desktop/project/krtrade/backData";
     cerebro = bt.Cerebro()
     cerebro.broker.setcash(10000000) # 초기 시드 설정
     cerebro.broker.setcommission(0.0005, leverage=1) # 수수료 설정
@@ -230,7 +229,8 @@ if __name__ == '__main__':
     print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
 
     # file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
-    file_name = "/Users/tjgus/Desktop/project/krtrade/backData/result/"
+    # file_name = "/Users/tjgus/Desktop/project/krtrade/backData/result/"
+    file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
     for pair, tick_kind in pairs.items():
         file_name += pair + "-"
     file_name += "UpbitBBV2"

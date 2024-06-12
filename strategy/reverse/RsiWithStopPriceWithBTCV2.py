@@ -8,10 +8,12 @@ from datetime import datetime
 
 pairs = {
     'BTCUSDT': DataUtil.CANDLE_TICK_30M,
-    'SEIUSDT': DataUtil.CANDLE_TICK_30M,
-    '1000PEPEUSDT': DataUtil.CANDLE_TICK_30M,
-    '1000BONKUSDT': DataUtil.CANDLE_TICK_30M,
+    # 'SEIUSDT': DataUtil.CANDLE_TICK_30M,
+    # '1000PEPEUSDT': DataUtil.CANDLE_TICK_30M,
+    # '1000BONKUSDT': DataUtil.CANDLE_TICK_30M,
     'DOGEUSDT': DataUtil.CANDLE_TICK_30M,
+    'XRPUSDT': DataUtil.CANDLE_TICK_30M,
+    'SOLUSDT': DataUtil.CANDLE_TICK_30M
 }
 
 class RsiWithStopPriceWithBTCV2(bt.Strategy):
@@ -20,10 +22,11 @@ class RsiWithStopPriceWithBTCV2(bt.Strategy):
         bb_mult=1.0,
         atr_length={
             'BTCUSDT':10,
-            'XRPUSDT':10,
+            'XRPUSDT':3,
             '1000BONKUSDT': 3,
             'SEIUSDT':3,
             'DOGEUSDT':3,
+            'SOLUSDT': 3,
             '1000PEPEUSDT':3
         },
         atr_constant={
@@ -32,20 +35,23 @@ class RsiWithStopPriceWithBTCV2(bt.Strategy):
             '1000BONKUSDT': Decimal('2.0'),
             'SEIUSDT': Decimal('2.0'),
             'DOGEUSDT': Decimal('2.0'),
+            'SOLUSDT': Decimal('2.0'),
             '1000PEPEUSDT': Decimal('2.0')
         },
         bullish_percent={
             'XRPUSDT': Decimal('2'),
             '1000BONKUSDT': Decimal('2'),
             'SEIUSDT': Decimal('1.5'),
-            'DOGEUSDT': Decimal('1.5'),
+            'DOGEUSDT': Decimal('2'),
+            'SOLUSDT': Decimal('2'),
             '1000PEPEUSDT': Decimal('2.0')
         },
         bearish_percent={
-            'XRPUSDT': Decimal('2'),
+            'XRPUSDT': Decimal('3'),
             '1000BONKUSDT': Decimal('2'),
             'SEIUSDT': Decimal('1.5'),
-            'DOGEUSDT': Decimal('1.5'),
+            'DOGEUSDT': Decimal('3'),
+            'SOLUSDT': Decimal('3'),
             '1000PEPEUSDT': Decimal('2.0')
         },
         default_percent={
@@ -53,6 +59,7 @@ class RsiWithStopPriceWithBTCV2(bt.Strategy):
             '1000BONKUSDT': Decimal('3'),
             'SEIUSDT': Decimal('3'),
             'DOGEUSDT': Decimal('2.0'),
+            'SOLUSDT': Decimal('4.0'),
             '1000PEPEUSDT': Decimal('3.0')
         },
         tick_size={
@@ -60,6 +67,7 @@ class RsiWithStopPriceWithBTCV2(bt.Strategy):
             '1000BONKUSDT': Decimal('0.0000010'),
             'SEIUSDT': Decimal('0.00010'),
             'DOGEUSDT': Decimal('0.00001'),
+            'SOLUSDT': Decimal('0.010'),
             '1000PEPEUSDT': Decimal('0.0000001')
         },
         step_size={
@@ -67,6 +75,7 @@ class RsiWithStopPriceWithBTCV2(bt.Strategy):
             '1000BONKUSDT': Decimal('100'),
             'SEIUSDT': Decimal('1'),
             'DOGEUSDT': Decimal('1'),
+            'SOLUSDT': Decimal('0.1'),
             '1000PEPEUSDT': Decimal('1')
         },
         rsi_length=2,
@@ -87,6 +96,7 @@ class RsiWithStopPriceWithBTCV2(bt.Strategy):
             '1000BONKUSDT': 0,
             'SEIUSDT': 0,
             'DOGEUSDT': 0,
+            'SOLUSDT': 0,
             '1000PEPEUSDT': 0,
         }
 
@@ -98,6 +108,7 @@ class RsiWithStopPriceWithBTCV2(bt.Strategy):
             '1000BONKUSDT': Decimal('-1'),
             'SEIUSDT': Decimal('-1'),
             'DOGEUSDT': Decimal('-1'),
+            'SOLUSDT': Decimal('-1'),
             '1000PEPEUSDT': Decimal('-1')
         }
 
@@ -266,8 +277,8 @@ class RsiWithStopPriceWithBTCV2(bt.Strategy):
 
 
 if __name__ == '__main__':
-    data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
-    # data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+    # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+    data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
     cerebro = bt.Cerebro()
     cerebro.broker.setcash(940000)
     cerebro.broker.setcommission(0.0002, leverage=10)
@@ -298,8 +309,8 @@ if __name__ == '__main__':
     mdd = qs.stats.max_drawdown(returns)
     print(f" quanstats's my returns MDD : {mdd * 100:.2f} %")
 
-    file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
-    # file_name = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+    # file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+    file_name = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
 
     for pair, tick_kind in pairs.items():
         file_name += pair + "-"
