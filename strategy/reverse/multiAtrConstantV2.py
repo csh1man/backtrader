@@ -1,0 +1,199 @@
+import backtrader as bt
+import pandas as pd
+import quantstats as qs
+from util.Util import DataUtil
+from decimal import Decimal
+from indicator.Indicators import Indicator
+
+pairs = {
+    'BTCUSDT' : DataUtil.CANDLE_TICK_4HOUR,
+    "1000BONKUSDT" : DataUtil.CANDLE_TICK_30M
+}
+
+
+class MultiAtrConstantV2(bt.Strategy):
+    params = dict(
+        bb_span=20,
+        bb_mult=1.0,
+        leverage=10,
+        risks=[Decimal(2), Decimal(2), Decimal(4), Decimal(6), Decimal(8)],
+        step_size={
+            'BTCUSDT': Decimal('0.001'),
+            '1000BONKUSDT': Decimal('100'),
+        },
+        tick_size={
+            'BTCUSDT': Decimal('0.10'),
+            '1000BONKUSDT': Decimal('0.0000010')
+        },
+        atr_length={
+            'BTCUSDT': 1,
+            '1000BONKUSDT': 1
+        },
+        atr_avg_length={
+            'BTCUSDT': 1,
+            '1000BONKUSDT': 1
+        },
+        ma_length={
+            'BTCUSDT': [20, 5],
+            '1000BONKUSDT': [3, 5]
+        },
+        bull_constants={
+            '1000BONKUSDT': [Decimal(1.5), Decimal(1.8), Decimal(2), Decimal(4), Decimal(6)]
+        },
+        def_constants={
+            '1000BONKUSDT': [Decimal(2), Decimal(4), Decimal(6), Decimal(8), Decimal(10)]
+        },
+        bear_constants={
+            '1000BONKUSDT': [Decimal(2), Decimal(4), Decimal(6), Decimal(8), Decimal(10)]
+        }
+    )
+
+    def log(self, txt):
+        print(f'{txt}')
+
+    def __init__(self):
+
+        '''
+        기본 캔들 데이터 변수 추가
+        '''
+        self.names = []
+        self.pairs = []
+        self.opens = []
+        self.highs = []
+        self.lows = []
+        self.closes = []
+        self.dates = []
+        self.atrs = []
+
+        '''
+        자산 추정용 변수 추가
+        '''
+        self.order = None
+        self.date_value = []
+        self.my_assets = []
+        self.order_balance_list = []
+        self.initial_asset = self.broker.getvalue()
+        self.return_rate = 0
+        self.total_trading_count = 0
+        self.winning_trading_count = 0
+        self.winning_rate = 0
+
+        for i in range(0, len(self.datas)):
+            # 이름 및 캔들 데이터 초기화
+            self.names.append(self.datas[i]._name)
+            self.pairs.append(self.datas[i])
+
+            # ohlc 데이터 초기화
+            self.opens.append(self.datas[i].open)
+            self.highs.append(self.datas[i].high)
+            self.lows.append(self.datas[i].low)
+            self.closes.append(self.datas[i].close)
+            self.dates.append(self.datas[i].datetime)
+
+        # 비트코인 볼린저밴드 초기화
+        self.bb = bt.indicators.BollingerBands(self.closes[0], period=self.p.bb_span, devfactor=self.p.bb_mult)
+        self.bb_top = self.bb.lines.top
+        self.bb_mid = self.bb.lines.mid
+        self.bb_bot = self.bb.lines.bot
+
+        # atr 초기화
+        for i in range(0, len(self.datas)):
+            tr = bt.indicators.TrueRange(self.pairs[i])
+            atr = bt.indicators.SmoothedMovingAverage(tr, period=self.p.atr_length[self.names[i]])
+            atr = bt.indicators.MovingAverageSimple(atr, period=self.p.atr_avg_length[self.names[i]])
+            self.atrs.append(atr)
+
+        # 이평선 초기화
+        self.short_ma = []
+        self.long_ma = []
+        for i in range(0, len(self.pairs)):
+            name = self.names[i]
+            self.short_ma.append(bt.indicators.MovingAverageSimple(self.closes[i], period=self.p.ma_length[name][0]))
+            self.long_ma.append(bt.indicators.MovingAverageSimple(self.closes[i], period=self.p.ma_length[name][1]))
+
+    '''
+    모든 미체결 지정가주문을 취소한다.
+    '''
+    def cancel_all(self):
+        for order in self.broker.get_orders_open():
+            self.broker.cancel(order)
+
+    def record_asset(self):
+        account_value = self.broker.get_cash()  # 현재 현금(보유 포지션 제외) 자산의 가격을 획득
+        broker_leverage = self.broker.comminfo[None].p.leverage  # cerebro에 설정한 레버리지 값 -> setcommission
+        position_value = 0.0
+        bought_value = 0.0
+        for pair in self.pairs:
+            position_value += self.getposition(pair).size * pair.low[0]
+            bought_value += self.getposition(pair).size * self.getposition(
+                pair).price  # 진입한 수량 x 평단가 즉, 현재 포지션 전체 가치를 의미(현금 제외)
+
+        account_value += position_value - bought_value * (broker_leverage - 1) / broker_leverage
+        self.order_balance_list.append([self.dates[0].datetime(0), account_value])
+        self.date_value.append(self.dates[0].datetime(0))
+        position_value = self.broker.getvalue()
+        for i in range(1, len(self.datas)):
+            position_value += self.getposition(self.datas[i]).size * self.lows[i][0]
+
+        self.my_assets.append(position_value)
+
+    def notify_order(self, order):
+        cur_date = f"{order.data.datetime.date(0)} {str(order.data.datetime.time(0)).split('.')[0]}"
+        if order.status in [order.Completed]:
+            if order.isbuy():
+                self.log(f'{order.ref:<3}{cur_date} =>'
+                         f' [매수{order.Status[order.status]:^10}] 종목 : {order.data._name} \t'
+                         f'수량:{order.size} \t'
+                         f'가격:{order.created.price:.4f}')
+            elif order.issell():
+                self.log(f'{order.ref:<3}{cur_date} =>'
+                         f' [매도{order.Status[order.status]:^10}] 종목 : {order.data._name} \t'
+                         f'수량:{order.size} \t'
+                         f'가격:{order.created.price:.4f}')
+                # buy와 Sell이 한 쌍이므로 팔렸을 때 한 건으로 친다.
+                self.total_trading_count += 1
+                # 팔렸을 때 만약 이익이 0보다 크면 승리한 거래 건이므로 승리 횟수를 증가시킨다.
+                if order.executed.pnl > 0:
+                    self.winning_trading_count += 1
+
+    def next(self):
+        self.cancel_all()
+        self.record_asset()
+        for i in range(1, len(self.pairs)):
+            name = self.names[i]
+            if self.short_ma[i][0] < self.long_ma[i][0]:
+                self.order = self.sell(data=self.pairs[i], size=self.getposition(self.pairs[i]).size)
+
+            constants = None
+            if self.closes[0][0] >= self.bb_top[0]:
+                constants = self.p.bull_constants[name]
+            elif self.bb_bot[0] <= self.closes[0][0] < self.bb_top[0]:
+                constants = self.p.def_constants[name]
+            elif self.bb_bot[0] > self.closes[0][0]:
+                constants = self.p.bear_constants[name]
+
+            prices = []
+            for j in range(0, len(constants)):
+                price = DataUtil.convert_to_decimal(self.closes[i][0]) - DataUtil.convert_to_decimal(self.atrs[i][0]) * constants[j]
+                price = int(price / self.p.tick_size[name]) * self.p.tick_size[name]
+                prices.append(price)
+
+            for j in range(0, len(prices)):
+                self.log(f'{self.dates[i].datetime(0)} => {prices[j]}')
+
+
+if __name__ == '__main__':
+    data_path = "/Users/tjgus/Desktop/project/krtrade/backData"
+    cerebro = bt.Cerebro()
+    cerebro.addstrategy(MultiAtrConstantV2)
+
+    cerebro.broker.setcash(1000)
+    cerebro.broker.setcommission(0.0002, leverage=10)
+
+    # data loading
+    for pair, tick_kind in pairs.items():
+        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BYBIT, pair, tick_kind)
+        data = bt.feeds.PandasData(dataname=df, datetime='datetime')
+        cerebro.adddata(data, name=pair)
+
+    cerebro.run()
