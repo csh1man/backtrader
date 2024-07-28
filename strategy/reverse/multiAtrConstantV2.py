@@ -7,7 +7,9 @@ from indicator.Indicators import Indicator
 
 pairs = {
     'BTCUSDT' : DataUtil.CANDLE_TICK_4HOUR,
-    "1000BONKUSDT" : DataUtil.CANDLE_TICK_30M
+    "1000BONKUSDT" : DataUtil.CANDLE_TICK_30M,
+    '1000PEPEUSDT' : DataUtil.CANDLE_TICK_30M,
+    'SEIUSDT': DataUtil.CANDLE_TICK_30M
 }
 
 
@@ -15,36 +17,52 @@ class MultiAtrConstantV2(bt.Strategy):
     params = dict(
         bb_span=20,
         bb_mult=1.0,
-        leverage=10,
+        leverage=Decimal('10'),
         risks=[Decimal(2), Decimal(2), Decimal(4), Decimal(6), Decimal(8)],
         step_size={
             'BTCUSDT': Decimal('0.001'),
             '1000BONKUSDT': Decimal('100'),
+            '1000PEPEUSDT': Decimal('100'),
+            'SEIUSDT' : Decimal('1')
         },
         tick_size={
             'BTCUSDT': Decimal('0.10'),
-            '1000BONKUSDT': Decimal('0.0000010')
+            '1000BONKUSDT': Decimal('0.0000010'),
+            '1000PEPEUSDT' : Decimal('0.0000001'),
+            'SEIUSDT': Decimal('0.00010')
         },
         atr_length={
             'BTCUSDT': 1,
-            '1000BONKUSDT': 1
+            '1000BONKUSDT': 1,
+            '1000PEPEUSDT': 2,
+            'SEIUSDT': 2,
         },
         atr_avg_length={
             'BTCUSDT': 1,
-            '1000BONKUSDT': 1
+            '1000BONKUSDT': 1,
+            '1000PEPEUSDT': 1,
+            'SEIUSDT': 1
         },
         ma_length={
             'BTCUSDT': [20, 5],
-            '1000BONKUSDT': [3, 5]
+            '1000BONKUSDT': [3, 5],
+            '1000PEPEUSDT': [3, 5],
+            'SEIUSDT' : [3, 5]
         },
         bull_constants={
-            '1000BONKUSDT': [Decimal(1.5), Decimal(1.8), Decimal(2), Decimal(4), Decimal(6)]
+            '1000BONKUSDT': [Decimal(1.5), Decimal(1.8), Decimal(2), Decimal(4), Decimal(6)],
+            '1000PEPEUSDT': [Decimal(1.5), Decimal(1.8), Decimal(2), Decimal(4), Decimal(6)],
+            'SEIUSDT': [Decimal(1.5), Decimal(1.8), Decimal(2), Decimal(4), Decimal(6)]
         },
         def_constants={
-            '1000BONKUSDT': [Decimal(2), Decimal(4), Decimal(6), Decimal(8), Decimal(10)]
+            '1000BONKUSDT': [Decimal(2), Decimal(4), Decimal(6), Decimal(8), Decimal(10)],
+            '1000PEPEUSDT': [Decimal(2), Decimal(4), Decimal(6), Decimal(8), Decimal(10)],
+            'SEIUSDT': [Decimal(2), Decimal(4), Decimal(6), Decimal(8), Decimal(10)]
         },
         bear_constants={
-            '1000BONKUSDT': [Decimal(2), Decimal(4), Decimal(6), Decimal(8), Decimal(10)]
+            '1000BONKUSDT': [Decimal(2), Decimal(4), Decimal(6), Decimal(8), Decimal(10)],
+            '1000PEPEUSDT': [Decimal(2), Decimal(4), Decimal(6), Decimal(8), Decimal(10)],
+            'SEIUSDT': [Decimal(2), Decimal(4), Decimal(6), Decimal(8), Decimal(10)]
         }
     )
 
@@ -178,17 +196,23 @@ class MultiAtrConstantV2(bt.Strategy):
                 price = int(price / self.p.tick_size[name]) * self.p.tick_size[name]
                 prices.append(price)
 
+            equity = DataUtil.convert_to_decimal(self.broker.getcash())
             for j in range(0, len(prices)):
-                self.log(f'{self.dates[i].datetime(0)} => {prices[j]}')
+                if prices[j] == Decimal('0'):
+                    continue
+                qty = self.p.leverage * equity * self.p.risks[j] / Decimal(100) / prices[j]
+                self.order = self.buy(exectype=bt.Order.Limit, data=self.pairs[i], price=float(prices[j]), size=float(qty))
 
 
 if __name__ == '__main__':
-    data_path = "/Users/tjgus/Desktop/project/krtrade/backData"
+    # data_path = "/Users/tjgus/Desktop/project/krtrade/backData"
+    data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
     cerebro = bt.Cerebro()
     cerebro.addstrategy(MultiAtrConstantV2)
 
     cerebro.broker.setcash(1000)
     cerebro.broker.setcommission(0.0002, leverage=10)
+    cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')  # 결과 분석기 추가
 
     # data loading
     for pair, tick_kind in pairs.items():
@@ -196,4 +220,38 @@ if __name__ == '__main__':
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 
-    cerebro.run()
+    print('Before Portfolio Value: %.2f' % cerebro.broker.getvalue())
+    results = cerebro.run()
+    strat = results[0]
+    pyfoliozer = strat.analyzers.getbyname('pyfolio')
+    returns, positions, transactions, gross_lev = pyfoliozer.get_pf_items()
+    returns.index = returns.index.tz_convert(None)
+
+    print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
+
+    print(f'strat.my_assets type :{type(strat.my_assets)}')
+    asset_list = pd.DataFrame({'asset': strat.my_assets}, index=pd.to_datetime(strat.date_value))
+    order_balance_list = strat.order_balance_list
+
+    mdd = qs.stats.max_drawdown(asset_list).iloc[0]
+    print(f" quanstats's my variable MDD : {mdd * 100:.2f} %")
+    mdd = qs.stats.max_drawdown(returns)
+    print(f" quanstats's my returns MDD : {mdd * 100:.2f} %")
+
+    file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+
+    for pair, tick_kind in pairs.items():
+        file_name += pair + "-"
+    file_name += "multiAtrConstantV2"
+
+    df = pd.DataFrame(order_balance_list, columns=["date", "value"])
+    df['date'] = pd.to_datetime(df['date'])
+    df['date'] = df['date'].dt.date
+    df = df.sort_values('value', ascending=True).drop_duplicates('date').sort_index()
+    df['value'] = df['value'].astype('float64')
+    df['value'] = df['value'].pct_change()
+    df['date'] = pd.to_datetime(df['date'])
+    df = df.dropna()
+    df = df.set_index('date')
+    df.index.name = 'date'
+    qs.reports.html(df['value'], output=f"{file_name}.html", download_filename=f"{file_name}.html", title=file_name)
