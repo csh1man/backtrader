@@ -9,6 +9,7 @@ pairs = {
     'BTCUSDT' : DataUtil.CANDLE_TICK_4HOUR,
     "1000BONKUSDT" : DataUtil.CANDLE_TICK_30M,
     '1000PEPEUSDT' : DataUtil.CANDLE_TICK_30M,
+    'INJUSDT' : DataUtil.CANDLE_TICK_30M,
     'SEIUSDT': DataUtil.CANDLE_TICK_30M
 }
 
@@ -23,45 +24,54 @@ class MultiAtrConstantV2(bt.Strategy):
             'BTCUSDT': Decimal('0.001'),
             '1000BONKUSDT': Decimal('100'),
             '1000PEPEUSDT': Decimal('100'),
-            'SEIUSDT' : Decimal('1')
+            'INJUSDT': Decimal('0.1'),
+            'SEIUSDT': Decimal('1')
         },
         tick_size={
             'BTCUSDT': Decimal('0.10'),
             '1000BONKUSDT': Decimal('0.0000010'),
             '1000PEPEUSDT' : Decimal('0.0000001'),
+            'SEIUSDT': Decimal('0.00010'),
+            'INJUSDT': Decimal('0.001'),
             'SEIUSDT': Decimal('0.00010')
         },
         atr_length={
             'BTCUSDT': 1,
             '1000BONKUSDT': 1,
             '1000PEPEUSDT': 2,
+            'INJUSDT': 2,
             'SEIUSDT': 2,
         },
         atr_avg_length={
             'BTCUSDT': 1,
             '1000BONKUSDT': 1,
             '1000PEPEUSDT': 1,
+            'INJUSDT': 1,
             'SEIUSDT': 1
         },
         ma_length={
             'BTCUSDT': [20, 5],
             '1000BONKUSDT': [3, 5],
             '1000PEPEUSDT': [3, 5],
-            'SEIUSDT' : [3, 5]
+            'INJUSDT': [3, 5],
+            'SEIUSDT': [3, 5]
         },
         bull_constants={
             '1000BONKUSDT': [Decimal(1.5), Decimal(1.8), Decimal(2), Decimal(4), Decimal(6)],
             '1000PEPEUSDT': [Decimal(1.5), Decimal(1.8), Decimal(2), Decimal(4), Decimal(6)],
+            'INJUSDT': [Decimal(1.5), Decimal(1.8), Decimal(2), Decimal(4), Decimal(6)],
             'SEIUSDT': [Decimal(1.5), Decimal(1.8), Decimal(2), Decimal(4), Decimal(6)]
         },
         def_constants={
             '1000BONKUSDT': [Decimal(2), Decimal(4), Decimal(6), Decimal(8), Decimal(10)],
             '1000PEPEUSDT': [Decimal(2), Decimal(4), Decimal(6), Decimal(8), Decimal(10)],
+            'INJUSDT': [Decimal(2), Decimal(4), Decimal(6), Decimal(8), Decimal(10)],
             'SEIUSDT': [Decimal(2), Decimal(4), Decimal(6), Decimal(8), Decimal(10)]
         },
         bear_constants={
             '1000BONKUSDT': [Decimal(2), Decimal(4), Decimal(6), Decimal(8), Decimal(10)],
             '1000PEPEUSDT': [Decimal(2), Decimal(4), Decimal(6), Decimal(8), Decimal(10)],
+            'INJUSDT': [Decimal(2), Decimal(4), Decimal(6), Decimal(8), Decimal(10)],
             'SEIUSDT': [Decimal(2), Decimal(4), Decimal(6), Decimal(8), Decimal(10)]
         }
     )
@@ -183,11 +193,11 @@ class MultiAtrConstantV2(bt.Strategy):
                 self.order = self.sell(data=self.pairs[i], size=self.getposition(self.pairs[i]).size)
 
             constants = None
-            if self.closes[0][0] >= self.bb_top[0]:
+            if self.closes[0][-1] >= self.bb_top[-1]:
                 constants = self.p.bull_constants[name]
-            elif self.bb_bot[0] <= self.closes[0][0] < self.bb_top[0]:
+            elif self.bb_bot[-1] <= self.closes[0][-1] < self.bb_top[-1]:
                 constants = self.p.def_constants[name]
-            elif self.bb_bot[0] > self.closes[0][0]:
+            elif self.bb_bot[-1] > self.closes[0][-1]:
                 constants = self.p.bear_constants[name]
 
             prices = []
@@ -206,7 +216,9 @@ class MultiAtrConstantV2(bt.Strategy):
 
 if __name__ == '__main__':
     # data_path = "/Users/tjgus/Desktop/project/krtrade/backData"
-    data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+    # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+    data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+
     cerebro = bt.Cerebro()
     cerebro.addstrategy(MultiAtrConstantV2)
 
@@ -238,7 +250,8 @@ if __name__ == '__main__':
     mdd = qs.stats.max_drawdown(returns)
     print(f" quanstats's my returns MDD : {mdd * 100:.2f} %")
 
-    file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+    # file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+    file_name = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
 
     for pair, tick_kind in pairs.items():
         file_name += pair + "-"
