@@ -25,14 +25,12 @@ class MultiAtrConstantV3(bt.Strategy):
             '1000BONKUSDT': Decimal('100'),
             '1000PEPEUSDT': Decimal('100'),
             'APEUSDT': Decimal('0.1'),
-            'SEIUSDT': Decimal('1'),
             'OPUSDT': Decimal('0.1')
         },
         tick_size={
             '1000BONKUSDT': Decimal('0.0000010'),
             '1000PEPEUSDT': Decimal('0.0000001'),
             'APEUSDT': Decimal('0.0001'),
-            'SEIUSDT': Decimal('0.00010'),
             'OPUSDT': Decimal('0.0001')
         },
         atr_length={
@@ -54,10 +52,10 @@ class MultiAtrConstantV3(bt.Strategy):
             'OPUSDT': [3, 5]
         },
         bull_constants={
-            '1000BONKUSDT': [Decimal('1.5'), Decimal('1.8'), Decimal('2.0'), Decimal('3.0'), Decimal('4.0')],
-            '1000PEPEUSDT': [Decimal('1.5'), Decimal('1.8'), Decimal('2.0'), Decimal('3.0'), Decimal('4.0')],
-            'APEUSDT': [Decimal('1.5'), Decimal('1.8'), Decimal('2.0'), Decimal('3.0'), Decimal('4.0')],
-            'OPUSDT': [Decimal('1.5'), Decimal('1.8'), Decimal('2.0'), Decimal('3.0'), Decimal('4.0')],
+            '1000BONKUSDT': [Decimal('1.0'), Decimal('1.5'), Decimal('1.8'), Decimal('2.0'), Decimal('3.0')],
+            '1000PEPEUSDT':  [Decimal('1.0'), Decimal('1.5'), Decimal('1.8'), Decimal('2.0'), Decimal('3.0')],
+            'APEUSDT':  [Decimal('1.0'), Decimal('1.5'), Decimal('1.8'), Decimal('2.0'), Decimal('3.0')],
+            'OPUSDT':  [Decimal('1.0'), Decimal('1.5'), Decimal('1.8'), Decimal('2.0'), Decimal('3.0')],
         },
         def_constants={
             '1000BONKUSDT': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('10.0')],
@@ -199,8 +197,8 @@ class MultiAtrConstantV3(bt.Strategy):
 
 if __name__ == '__main__':
     # data_path = "/Users/tjgus/Desktop/project/krtrade/backData"
-    data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
-    # data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+    # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+    data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
 
     cerebro = bt.Cerebro()
     cerebro.addstrategy(MultiAtrConstantV3)
@@ -233,8 +231,8 @@ if __name__ == '__main__':
     mdd = qs.stats.max_drawdown(returns)
     print(f" quanstats's my returns MDD : {mdd * 100:.2f} %")
 
-    file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
-    # file_name = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+    # file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+    file_name = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
 
     for pair, tick_kind in pairs.items():
         file_name += pair + "-"
