@@ -54,6 +54,7 @@ class DataUtil:
     """
     COMPANY_BYBIT = "BYBIT"
     COMPANY_UPBIT = "UPBIT"
+    COMPANY_BITHUMB = "BITHUMB"
 
     """
     캔들 데이터가 저장된 디렉토리 경로 저장
@@ -103,6 +104,57 @@ class DataUtil:
     @staticmethod
     def convert_to_decimal(data):
         return Decimal(str(data))
+
+    '''
+    getTickSize(float price) =>
+    if price >= 1000000
+        1000
+    else if price >= 500000
+        500
+    else if price >= 100000
+        100
+    else if price >= 50000
+        50
+    else if price >= 10000
+        10
+    else if price >= 5000
+        5
+    else if price >= 1000
+        1
+    else if price >= 100
+        1
+    else if price >= 10
+        0.01
+    else if price >= 1
+        0.001
+    else
+        0.0001
+    '''
+    @staticmethod
+    def get_bithumb_tick_size(price):
+        if price >= 1000000:
+            return Decimal('1000')
+        elif price >= 500000:
+            return Decimal('500')
+        elif price >= 100000:
+            return Decimal('100')
+        elif price >= 50000:
+            return Decimal('50')
+        elif price >= 10000:
+            return Decimal('10')
+        elif price >= 5000:
+            return Decimal('5')
+        elif price >= 1000:
+            return Decimal('1')
+        elif price >= 100:
+            return Decimal('1')
+        elif price >= 10:
+            return Decimal('0.01')
+        elif price >= 1:
+            return Decimal('0.001')
+        else:
+            return Decimal('0.0001')
+
 class JsonUtil:
     @staticmethod
     def get_candle_date_list(candle_data, tick_kind, is_ascend):
