@@ -5,46 +5,58 @@ from util.Util import DataUtil
 from decimal import Decimal
 
 pairs = {
-    '1000PEPEUSDT' : DataUtil.CANDLE_TICK_30M,
+    '1000BONKUSDT' : DataUtil.CANDLE_TICK_30M,
 }
 
 class MultiDcaLongShortV1(bt.Strategy):
     params = dict(
         init_risk={
-          '1000PEPEUSDT': Decimal('1.5'),
+            '1000PEPEUSDT': Decimal('1.5'),
+            '1000BONKUSDT': Decimal('1.5')
         },
         acc={
-          '1000PEPEUSDT': Decimal('0.5')
+            '1000PEPEUSDT': Decimal('0.5'),
+            '1000BONKUSDT': Decimal('0.5')
         },
         step_size={
             '1000PEPEUSDT': Decimal('100'),
+            '1000BONKUSDT': Decimal('100')
         },
         tick_size={
-            '1000PEPEUSDT': Decimal('0.0000001')
+            '1000PEPEUSDT': Decimal('0.0000001'),
+            '1000BONKUSDT' : Decimal('0.0000010')
         },
         init_long_order_percent={
-            '1000PEPEUSDT': Decimal('4.0')
+            '1000PEPEUSDT': Decimal('4.0'),
+            '1000BONKUSDT': Decimal('4.0')
         },
         init_short_order_percent={
-            '1000PEPEUSDT': Decimal('3.0')
+            '1000PEPEUSDT': Decimal('3.0'),
+            '1000BONKUSDT': Decimal('3.0')
         },
         add_long_order_percent={
             '1000PEPEUSDT': Decimal('3'),
+            '1000BONKUSDT': Decimal('3'),
         },
         add_short_order_percent={
-            '1000PEPEUSDT': Decimal('3')
+            '1000PEPEUSDT': Decimal('3'),
+            '1000BONKUSDT': Decimal('3')
         },
         long_take_profit_percent={
-            '1000PEPEUSDT': Decimal('1.0')
+            '1000PEPEUSDT': Decimal('1.0'),
+            '1000BONKUSDT': Decimal('1.0')
         },
         long_add_take_profit_percent={
-            '1000PEPEUSDT': Decimal('1.0')
+            '1000PEPEUSDT': Decimal('1.0'),
+            '1000BONKUSDT': Decimal('1.0')
         },
         short_take_profit_percent={
-            '1000PEPEUSDT': Decimal('0.5')
+            '1000PEPEUSDT': Decimal('0.5'),
+            '1000BONKUSDT': Decimal('0.5')
         },
         short_add_take_profit_percent={
-            '1000PEPEUSDT': Decimal('0.5')
+            '1000PEPEUSDT': Decimal('0.5'),
+            '1000BONKUSDT': Decimal('0.5')
         },
 
         high_band_length=5,
@@ -155,15 +167,9 @@ class MultiDcaLongShortV1(bt.Strategy):
 
                 long_entry_price = DataUtil.convert_to_decimal(self.highest[i][0]) * (Decimal('1') - self.p.init_long_order_percent[name] / Decimal('100'))
                 long_entry_price = int(long_entry_price / self.p.tick_size[name]) * self.p.tick_size[name]
-
-                short_entry_price = DataUtil.convert_to_decimal(self.lowest[i][0]) * (
-                            Decimal('1') + self.p.init_short_order_percent[name] / Decimal('100'))
-                short_entry_price = int(short_entry_price / self.p.tick_size[name]) * self.p.tick_size[name]
-
                 if DataUtil.convert_to_decimal(self.closes[i][0]) < long_entry_price:
+                    self.log(f'{self.dates[i].datetime(0)} => {self.closes[i][0]}')
                     self.order = self.buy(exectype=bt.Order.Limit, data=self.pairs[i], size=float(init_qty), price=self.closes[i][0])
-                # elif DataUtil.convert_to_decimal(self.closes[i][0]) > short_entry_price:
-                #     self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i], size=float(init_qty))
 
             elif current_position_size > 0:
                 cur_qty = DataUtil.convert_to_decimal(current_position_size) * self.p.acc[name] / Decimal('2')
@@ -182,25 +188,6 @@ class MultiDcaLongShortV1(bt.Strategy):
                 exit_price = entry_avg_price * (Decimal('1') + profit_percent / Decimal('100'))
                 exit_price = int(exit_price / self.p.tick_size[name]) * self.p.tick_size[name]
                 self.order = self.sell(exectype=bt.Order.Limit, data=self.pairs[i], price=float(exit_price), size=float(current_position_size))
-
-            # elif current_position_size < 0:
-            #     cur_qty = DataUtil.convert_to_decimal(current_position_size) * self.p.acc[name] / Decimal('2')
-            #     cur_qty = abs(cur_qty)
-            #     cur_qty = int(cur_qty / self.p.step_size[name]) * self.p.step_size[name]
-            #
-            #     entry_avg_price = DataUtil.convert_to_decimal(self.getposition(self.pairs[i]).price)
-            #     short_entry_price = entry_avg_price * (Decimal('1') + self.p.add_short_order_percent[name] / Decimal('100'))
-            #     short_entry_price = int(short_entry_price / self.p.tick_size[name]) * self.p.tick_size[name]
-            #     if self.closes[i][0] > short_entry_price:
-            #         self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i], qty=float(cur_qty))
-            #
-            #     profit_percent = self.p.short_take_profit_percent[name]
-            #     if self.rsis[i][0] > self.p.rsi_high_limit:
-            #         profit_percent += self.p.short_add_take_profit_percent[name]
-            #     exit_price = entry_avg_price * (Decimal('1') + profit_percent / Decimal('100'))
-            #     exit_price = int(exit_price / self.p.tick_size[name]) * self.p.tick_size[name]
-            #
-            #     self.order = self.buy(exectype=bt.Order.Limit, data=self.pairs[i], price=float(exit_price), size=float(abs(current_position_size)))
 
 if __name__ == '__main__':
     # data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
