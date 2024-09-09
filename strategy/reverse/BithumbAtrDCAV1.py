@@ -7,6 +7,7 @@ from decimal import Decimal
 pairs = {
     'KRW-BTC' : DataUtil.CANDLE_TICK_30M,
     'KRW-PEPE': DataUtil.CANDLE_TICK_30M,
+    'KRW-FLZ': DataUtil.CANDLE_TICK_30M,
 }
 
 
@@ -16,11 +17,15 @@ class BithumbAtrDCAV1(bt.Strategy):
         bb_mult=1.0,
         atr_length={
             'KRW-BTC': 50,
-            'KRW-PEPE':50
+            'KRW-PEPE':50,
+            'KRW-SUN': 50,
+            'KRW-FLZ': 50,
         },
         atr_avg_length={
             'KRW-BTC': 200,
-            'KRW-PEPE': 200
+            'KRW-PEPE': 200,
+            'KRW-SUN': 200,
+            'KRW-FLZ': 200,
         },
         rsi_length=2,
         rsi_low=50,
@@ -28,19 +33,29 @@ class BithumbAtrDCAV1(bt.Strategy):
         add_risks=[Decimal('3'), Decimal('3'), Decimal('3'), Decimal('3'), Decimal('3')],
 
         bull_constants={
-            'KRW-PEPE': [Decimal('1.2'), Decimal('1.5'), Decimal('1.8'), Decimal('2.0'), Decimal('2.2')]
+            'KRW-PEPE': [Decimal('1.2'), Decimal('1.5'), Decimal('1.8'), Decimal('2.0'), Decimal('2.2')],
+            'KRW-SUN': [Decimal('1.2'), Decimal('1.5'), Decimal('1.8'), Decimal('2.0'), Decimal('2.2')],
+            'KRW-FLZ': [Decimal('1.2'), Decimal('1.5'), Decimal('1.8'), Decimal('2.0'), Decimal('2.2')]
         },
         def_constants={
-            'KRW-PEPE': [Decimal('1.5'), Decimal('2'), Decimal('3'), Decimal('4'), Decimal('5')]
+            'KRW-PEPE': [Decimal('1.5'), Decimal('2'), Decimal('3'), Decimal('4'), Decimal('5')],
+            'KRW-SUN': [Decimal('1.5'), Decimal('2'), Decimal('3'), Decimal('4'), Decimal('5')],
+            'KRW-FLZ': [Decimal('1.5'), Decimal('2'), Decimal('3'), Decimal('4'), Decimal('5')]
         },
         bear_constants={
-            'KRW-PEPE': [Decimal('1.0'), Decimal('1.2'), Decimal('1.5'), Decimal('1.8'), Decimal('2.0')]
+            'KRW-PEPE': [Decimal('1.0'), Decimal('1.2'), Decimal('1.5'), Decimal('1.8'), Decimal('2.0')],
+            'KRW-SUN': [Decimal('1.0'), Decimal('1.2'), Decimal('1.5'), Decimal('1.8'), Decimal('2.0')],
+            'KRW-FLZ': [Decimal('1.0'), Decimal('1.2'), Decimal('1.5'), Decimal('1.8'), Decimal('2.0')]
         },
         exit_percent={
-            'KRW-PEPE': Decimal('0.7')
+            'KRW-PEPE': Decimal('0.7'),
+            'KRW-SUN': Decimal('0.5'),
+            'KRW-FLZ': Decimal('0.5'),
         },
         add_exit_percent={
-            'KRW-PEPE': Decimal('1.3')
+            'KRW-PEPE': Decimal('1.3'),
+            'KRW-SUN': Decimal('0.5'),
+            'KRW-FLZ': Decimal('0.5')
         }
     )
 
