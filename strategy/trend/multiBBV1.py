@@ -57,7 +57,7 @@ class MultiBBV1Strategy(bt.Strategy):
         },
         atr_constant=Decimal('1.5'),
         pyramiding=3,
-        initRiskSize=Decimal('1 0'),
+        initRiskSize=Decimal('1.0'),
         addRiskSize=Decimal('5'),
     )
 

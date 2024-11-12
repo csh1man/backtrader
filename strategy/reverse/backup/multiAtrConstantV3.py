@@ -12,8 +12,8 @@ V3의 경우, 현재 페어가 일정 기간 이전 캔들보다 가격이 상�
 pairs = {
     '1000BONKUSDT': DataUtil.CANDLE_TICK_30M,
     '1000PEPEUSDT':DataUtil.CANDLE_TICK_30M,
-    'APEUSDT': DataUtil.CANDLE_TICK_30M,
-    'OPUSDT': DataUtil.CANDLE_TICK_30M
+    # 'APEUSDT': DataUtil.CANDLE_TICK_30M,
+    # 'OPUSDT': DataUtil.CANDLE_TICK_30M
 }
 
 

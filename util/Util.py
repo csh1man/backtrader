@@ -53,6 +53,7 @@ class DataUtil:
     거래소명 static 변수 선언
     """
     COMPANY_BYBIT = "BYBIT"
+    COMPANY_BINANCE = "BINANCE"
     COMPANY_UPBIT = "UPBIT"
     COMPANY_BITHUMB = "BITHUMB"
 

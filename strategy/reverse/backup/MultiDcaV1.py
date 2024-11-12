@@ -5,34 +5,39 @@ from util.Util import DataUtil
 from decimal import Decimal
 
 pairs = {
-    'POPCATUSDT' : DataUtil.CANDLE_TICK_30M
+    '1000PEPEUSDT' : DataUtil.CANDLE_TICK_30M
 }
 
 class MultiDcaV1(bt.Strategy):
     params=dict(
         start_percent=Decimal('1.5'),
         init_target_percent={
-            'POPCATUSDT': Decimal('1.0')
+            'POPCATUSDT': Decimal('1.0'),
+            '1000PEPEUSDT': Decimal('1.0')
         },
         init_target_percent2={
-            'POPCATUSDT': Decimal('2.0')
+            'POPCATUSDT': Decimal('2.5'),
+            '1000PEPEUSDT': Decimal('2.5')
         },
         add_target_percent={
-            'POPCATUSDT': Decimal('0.5')
+            'POPCATUSDT': Decimal('1.0'),
+            '1000PEPEUSDT': Decimal('1.0')
         },
         profit_percent=Decimal('0.5'),
         add_profit_percent=Decimal('0.5'),
         acc=Decimal('0.5'),
         rsi_length=2,
-        rsi_low_limit=Decimal('50'),
+        rsi_low_limit=50,
         ma_len1=5,
         ma_len2=7,
         ma_len3=9,
         step_size={
-            'POPCATUSDT': Decimal('1')
+            'POPCATUSDT': Decimal('1'),
+            '1000PEPEUSDT': Decimal('100')
         },
         tick_size={
-            'POPCATUSDT': Decimal('0.0001')
+            'POPCATUSDT': Decimal('0.0001'),
+            '1000PEPEUSDT': Decimal('0.0000001')
         }
     )
 
@@ -122,7 +127,10 @@ class MultiDcaV1(bt.Strategy):
 
     def next(self):
         for i in range(0, len(self.pairs)):
+            self.cancel_all()
+            self.record_asset()
             name = self.names[i]
+
             ma1 = round(DataUtil.convert_to_decimal(self.ma1[i][0]) / self.p.tick_size[name]) * self.p.tick_size[name]
             ma2 = round(DataUtil.convert_to_decimal(self.ma2[i][0]) / self.p.tick_size[name]) * self.p.tick_size[name]
             ma3 = round(DataUtil.convert_to_decimal(self.ma3[i][0]) / self.p.tick_size[name]) * self.p.tick_size[name]
@@ -130,61 +138,35 @@ class MultiDcaV1(bt.Strategy):
             is_trend = ma3 < ma2 < ma1
             position_size = self.getposition(self.pairs[i]).size
             if position_size == 0:
+                init_total_value = DataUtil.convert_to_decimal(self.broker.getvalue())
+                init_qty = (init_total_value * self.p.start_percent / Decimal('100')) / DataUtil.convert_to_decimal(self.closes[i][0])
+                init_qty = int(init_qty / self.p.step_size[name]) * self.p.step_size[name]
+
                 price = 0.0
                 if is_trend:
                     price = DataUtil.convert_to_decimal(self.closes[i][0]) * (Decimal('1.0') - self.p.init_target_percent[name] / Decimal('100'))
                     price = int(price / self.p.tick_size[name]) * self.p.tick_size[name]
                 else:
                     price = DataUtil.convert_to_decimal(self.closes[i][0]) * (Decimal('1.0') - self.p.init_target_percent2[name] / Decimal('100'))
-            self.log(f'{self.dates[i].datetime(0)} => {price}')
+                    price = int(price / self.p.tick_size[name]) * self.p.tick_size[name]
 
-            # self.cancel_all()
-            # self.record_asset()
-            #
-            # name = self.names[i]
-            # is_trend = self.ma3[i][0] < self.ma2[i][0] < self.ma1[i][0]
-            #
-            # current_position_size = self.getposition(self.pairs[i]).size
-            # if current_position_size == 0:
-            #     init_total_value = DataUtil.convert_to_decimal(self.broker.get_cash())
-            #     init_qty = (init_total_value * self.p.start_percent / Decimal('100')) / DataUtil.convert_to_decimal(self.closes[i][0])
-            #     init_qty = int(init_qty / self.p.step_size[name]) * self.p.step_size[name]
-            #
-            #     price = None
-            #     if is_trend:
-            #         price = DataUtil.convert_to_decimal(self.closes[i][0]) * (
-            #                     Decimal('1.0') - self.p.init_target_percent[name] / Decimal('100'))
-            #         price = int(price / self.p.tick_size[name]) * self.p.tick_size[name]
-            #     else:
-            #         price = DataUtil.convert_to_decimal(self.closes[i][0]) * (
-            #                 Decimal('1.0') - self.p.init_target_percent2[name] / Decimal('100'))
-            #         price = int(price / self.p.tick_size[name]) * self.p.tick_size[name]
-            #
-            #         self.log(f'{self.dates[i].datetime(0)} => {price}')
-            #         if init_qty > 0:
-            #             pass
-            #             # self.order = self.buy(exectype=bt.Order.Limit, data=self.pairs[i], price=float(price),
-            #             #                       size=float(init_qty))
-            # elif current_position_size > 0:
-            #     current_avg_price = self.getposition(self.pairs[i]).price
-            #     cur_qty = DataUtil.convert_to_decimal(current_position_size) * DataUtil.convert_to_decimal(self.p.acc) / Decimal('2')
-            #     cur_qty = int(cur_qty / self.p.step_size[name]) * self.p.step_size[name]
-            #
-            #     price = DataUtil.convert_to_decimal(current_avg_price) * (
-            #             Decimal('1.0') - self.p.add_target_percent[name] / Decimal('100'))
-            #     price = int(price / self.p.tick_size[name]) * self.p.tick_size[name]
-            #     self.log(f'{self.dates[i].datetime(0)} => {price}')
-            #     if cur_qty > 0:
-            #         # self.order = self.buy(exectype=bt.Order.Limit, data=self.pairs[i], price=float(price),
-            #         #                       size=float(cur_qty))
-            #
-            #         percent = self.p.profit_percent
-            #         if self.rsis[i][0] < self.p.rsi_low_limit:
-            #             percent = percent + self.p.add_profit_percent
-            #         exit_price = DataUtil.convert_to_decimal(current_avg_price) * (Decimal('1.0') + percent / Decimal('100'))
-            #         exit_price = int(exit_price / self.p.tick_size[name]) * self.p.tick_size[name]
-                    # self.order = self.sell(exectype=bt.Order.Limit, data=self.pairs[i], price=float(exit_price),
-                    #                        size=float(current_position_size))
+                self.order = self.buy(exectype=bt.Order.Limit, data=self.pairs[i], price=float(price), size=float(init_qty))
+            elif position_size > 0:
+                cur_qty = DataUtil.convert_to_decimal(position_size) * self.p.acc / Decimal('2')
+                cur_qty = int(cur_qty / self.p.step_size[name]) * self.p.step_size[name]
+
+                avg_price = self.getposition(self.pairs[i]).price
+                price = DataUtil.convert_to_decimal(avg_price) * (Decimal('1') - self.p.add_target_percent[name] / Decimal('100'))
+                price = int(price / self.p.tick_size[name]) * self.p.tick_size[name]
+                self.order = self.buy(exectype=bt.Order.Limit, data=self.pairs[i], price=float(price), size=float(cur_qty))
+
+                exit_percent = self.p.profit_percent
+                if self.rsis[i][0] < self.p.rsi_low_limit:
+                    exit_percent += self.p.add_profit_percent
+                exit_price = DataUtil.convert_to_decimal(avg_price) * (Decimal('1') + exit_percent / Decimal('100'))
+                exit_price = int(exit_price / self.p.tick_size[name]) * self.p.tick_size[name]
+                self.order = self.sell(exectype=bt.Order.Limit, data=self.pairs[i], price=float(exit_price), size=float(position_size))
+
 
 if __name__ == '__main__':
     cerebro = bt.Cerebro()
@@ -193,8 +175,8 @@ if __name__ == '__main__':
     cerebro = bt.Cerebro()
     cerebro.addstrategy(MultiDcaV1)
 
-    cerebro.broker.setcash(5000000)
-    cerebro.broker.setcommission(0.0002, leverage=1)
+    cerebro.broker.setcash(1000)
+    cerebro.broker.setcommission(0.0002, leverage=3)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')  # 결과 분석기 추가
 
     # data loading
@@ -208,34 +190,34 @@ if __name__ == '__main__':
     strat = results[0]
     print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
 
-    # pyfoliozer = strat.analyzers.getbyname('pyfolio')
-    # returns, positions, transactions, gross_lev = pyfoliozer.get_pf_items()
-    # returns.index = returns.index.tz_convert(None)
-    #
-    # print(f'strat.my_assets type :{type(strat.my_assets)}')
-    # asset_list = pd.DataFrame({'asset': strat.my_assets}, index=pd.to_datetime(strat.date_value))
-    # order_balance_list = strat.order_balance_list
-    #
-    # mdd = qs.stats.max_drawdown(asset_list).iloc[0]
-    # print(f" quanstats's my variable MDD : {mdd * 100:.2f} %")
-    # mdd = qs.stats.max_drawdown(returns)
-    # print(f" quanstats's my returns MDD : {mdd * 100:.2f} %")
-    #
-    # # file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
-    # file_name = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
-    #
-    # for pair, tick_kind in pairs.items():
-    #     file_name += pair + "-"
-    # file_name += "MultiDcaV1"
-    #
-    # df = pd.DataFrame(order_balance_list, columns=["date", "value"])
-    # df['date'] = pd.to_datetime(df['date'])
-    # df['date'] = df['date'].dt.date
-    # df = df.sort_values('value', ascending=True).drop_duplicates('date').sort_index()
-    # df['value'] = df['value'].astype('float64')
-    # df['value'] = df['value'].pct_change()
-    # df['date'] = pd.to_datetime(df['date'])
-    # df = df.dropna()
-    # df = df.set_index('date')
-    # df.index.name = 'date'
-    # qs.reports.html(df['value'], output=f"{file_name}.html", download_filename=f"{file_name}.html", title=file_name)
+    pyfoliozer = strat.analyzers.getbyname('pyfolio')
+    returns, positions, transactions, gross_lev = pyfoliozer.get_pf_items()
+    returns.index = returns.index.tz_convert(None)
+
+    print(f'strat.my_assets type :{type(strat.my_assets)}')
+    asset_list = pd.DataFrame({'asset': strat.my_assets}, index=pd.to_datetime(strat.date_value))
+    order_balance_list = strat.order_balance_list
+
+    mdd = qs.stats.max_drawdown(asset_list).iloc[0]
+    print(f" quanstats's my variable MDD : {mdd * 100:.2f} %")
+    mdd = qs.stats.max_drawdown(returns)
+    print(f" quanstats's my returns MDD : {mdd * 100:.2f} %")
+
+    # file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+    file_name = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+
+    for pair, tick_kind in pairs.items():
+        file_name += pair + "-"
+    file_name += "MultiDcaV1"
+
+    df = pd.DataFrame(order_balance_list, columns=["date", "value"])
+    df['date'] = pd.to_datetime(df['date'])
+    df['date'] = df['date'].dt.date
+    df = df.sort_values('value', ascending=True).drop_duplicates('date').sort_index()
+    df['value'] = df['value'].astype('float64')
+    df['value'] = df['value'].pct_change()
+    df['date'] = pd.to_datetime(df['date'])
+    df = df.dropna()
+    df = df.set_index('date')
+    df.index.name = 'date'
+    qs.reports.html(df['value'], output=f"{file_name}.html", download_filename=f"{file_name}.html", title=file_name)
