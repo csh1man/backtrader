@@ -166,6 +166,9 @@ class MultiDcaLongShortV1(bt.Strategy):
             # 미체결 주문 모두 취소
             self.cancel_all(name)
 
+            # 자산 기록
+            self.record_asset()
+
             # 현재 포지션 정보 획득
             position_size = self.getposition(self.pairs[i]).size
 
@@ -182,10 +185,9 @@ class MultiDcaLongShortV1(bt.Strategy):
 
                 # 롱 진입 기준 가격 계산
                 long_init_entry_standard_price = DataUtil.convert_to_decimal(self.highest[i][0]) \
-                                                * (Decimal('1') - self.p.init_long_order_percent[name] / Decimal('100')) \
-                                                / DataUtil.convert_to_decimal(self.closes[i][0])
-                # long_init_entry_standard_price = int(long_init_entry_standard_price / price_unit) * price_unit
-                self.log(f'price : {long_init_entry_standard_price} / qty : {long_init_entry_qty}')
+                                                * (Decimal('1') - self.p.init_long_order_percent[name] / Decimal('100'))
+                long_init_entry_standard_price = int(long_init_entry_standard_price / price_unit) * price_unit
+
                 if long_init_entry_qty > Decimal('0') and DataUtil.convert_to_decimal(self.closes[i][0]) < long_init_entry_standard_price:
                     self.order = self.buy(exectype=bt.Order.Market, data=self.pairs[i], size=float(float(long_init_entry_qty)))
             elif position_size > 0:
@@ -237,9 +239,6 @@ if __name__ == '__main__':
     print(f'strat.my_assets type :{type(strat.my_assets)}')
     asset_list = pd.DataFrame({'asset': strat.my_assets}, index=pd.to_datetime(strat.date_value))
     order_balance_list = strat.order_balance_list
-
-    mdd = qs.stats.max_drawdown(asset_list).iloc[0]
-    print(f" quanstats's my variable MDD : {mdd * 100:.2f} %")
     mdd = qs.stats.max_drawdown(returns)
     print(f" quanstats's my returns MDD : {mdd * 100:.2f} %")
 
