@@ -7,47 +7,97 @@ from util.Util import DataUtil
 from decimal import Decimal
 
 pairs = {
-    'FETUSDT' : DataUtil.CANDLE_TICK_30M,
+    # 'FETUSDT' : DataUtil.CANDLE_TICK_30M,
+    '1000BONKUSDT' : DataUtil.CANDLE_TICK_30M,
+    # 'ETCUSDT' : DataUtil.CANDLE_TICK_30M,
 }
 
-init_equity = {
+long_init_equity = {
+    'FETUSDT' : Decimal('0'),
+    '1000BONKUSDT' : Decimal('0'),
+    'ETCUSDT' : Decimal('0')
+}
+
+short_init_equity = {
     'FETUSDT' : Decimal('0')
 }
 
 class MultiDcaLongShortV1(bt.Strategy):
     params = dict(
         long_leverage={
-            'FETUSDT' : Decimal('3.0')
+            'FETUSDT' : Decimal('5.0'),
+            '1000BONKUSDT' : Decimal('5.0'),
+            'ETCUSDT' : Decimal('5.0')
+        },
+        short_leverage={
+            'FETUSDT' : Decimal('1.0'),
+            '1000BONKUSDT': Decimal('1.0'),
         },
         init_risk={
             'FETUSDT': Decimal('1.5'),
+            '1000BONKUSDT' : Decimal('1.5'),
+            'ETCUSDT' : Decimal('1.5')
         },
         acc={
             'FETUSDT': Decimal('0.5'),
+            '1000BONKUSDT' : Decimal('0.5'),
+            'ETCUSDT' : Decimal('0.5')
         },
         step_size={
             'FETUSDT': Decimal('10000'),
+            '1000BONKUSDT' :Decimal('1000000'),
+            'ETCUSDT' : Decimal('100')
         },
         tick_size={
             'FETUSDT': Decimal('1'),
+            '1000BONKUSDT' : Decimal('1'),
+            'ETCUSDT' : Decimal('1')
         },
         init_long_order_percent={
             'FETUSDT': Decimal('4.0'),
+            '1000BONKUSDT' :Decimal('5.0'),
+            'ETCUSDT' : Decimal('3')
         },
         add_long_order_percent={
             'FETUSDT': Decimal('3.0'),
+            '1000BONKUSDT' : Decimal('4.0'),
+            'ETCUSDT' : Decimal('3.0')
         },
         long_take_profit_percent={
             'FETUSDT': Decimal('1.0'),
+            '1000BONKUSDT' : Decimal('1.0'),
+            'ETCUSDT' : Decimal('1.0')
         },
         long_add_take_profit_percent={
             'FETUSDT': Decimal('1.0'),
+            '1000BONKUSDT' : Decimal('1.0'),
+            'ETCUSDT' : Decimal('1.0')
+        },
+        init_short_order_percent={
+            'FETUSDT' : Decimal('4'),
+            '1000BONKUSDT' : Decimal('4'),
+        },
+        add_short_order_percent={
+            'FETUSDT' : Decimal('3.0'),
+            '1000BONKUSDT': Decimal('3'),
+        },
+        short_take_profit_percent={
+            'FETUSDT' : Decimal('1.0'),
+            '1000BONKUSDT': Decimal('1'),
+        },
+        short_add_take_profit_percent={
+            'FETUSDT' : Decimal('1.0'),
+            '1000BONKUSDT': Decimal('1'),
         },
         high_band_length={
             'FETUSDT' : 5,
+            '1000BONKUSDT' : 10,
+            'ETCUSDT' : 5
         },
         low_band_length={
             'FETUSDT' : 5,
+            '1000BONKUSDT' : 10,
+            'ETCUSDT' : 5
         },
         rsi_length=2,
         rsi_low_limit=Decimal('50'),
@@ -136,24 +186,26 @@ class MultiDcaLongShortV1(bt.Strategy):
                          f' [매수{order.Status[order.status]:^10}] 종목 : {order.data._name} \t'
                          f'수량:{order.size} \t'
                          f'가격:{order.created.price:.4f}')
+                self.total_trading_count += 1
             elif order.issell():
                 self.log(f'{order.ref:<3}{cur_date} =>'
                          f' [매도{order.Status[order.status]:^10}] 종목 : {order.data._name} \t'
                          f'수량:{order.size} \t'
                          f'가격:{order.created.price:.4f}')
-                # buy와 Sell이 한 쌍이므로 팔렸을 때 한 건으로 친다.
-                self.total_trading_count += 1
-                # 팔렸을 때 만약 이익이 0보다 크면 승리한 거래 건이므로 승리 횟수를 증가시킨다.
                 if order.executed.pnl > 0:
                     self.winning_trading_count += 1
+
+    def stop(self):
+        self.log(f'total trading count : {self.total_trading_count}')
 
     def next(self):
         for i in range(0, len(self.pairs)):
             # 이름 획득
             name = self.names[i]
 
-            # 롱 레버리지 획득
+            # 롱/숏 레버리지 획득
             long_leverage = self.p.long_leverage[name]
+            short_leverage = self.p.short_leverage[name]
 
             # 초기 진입 수량 획득
             init_risk = self.p.init_risk[name]
@@ -177,25 +229,39 @@ class MultiDcaLongShortV1(bt.Strategy):
                 # 진입 포지션이 하나도 없을 경우, 현재 진입가능 수량을 기록하여 둔다.
                 # 진입이 다되었다고하면 더이상 진입이 안되도록 하기 위함이다.
                 available_equity = DataUtil.convert_to_decimal(self.broker.get_cash())
-                init_equity[name] = long_leverage * available_equity
 
-                # 초기 진입 수량 계산
-                long_init_entry_qty = init_equity[name] * init_risk / Decimal('100') / DataUtil.convert_to_decimal(self.closes[i][0])
+                # 롱 초기 자산 기록
+                long_init_equity[name] = long_leverage * available_equity
+                short_init_equity[name] = short_leverage * available_equity
+
+                # 롱 초기 진입 수량 계산
+                long_init_entry_qty = long_init_equity[name] * init_risk / Decimal('100') / DataUtil.convert_to_decimal(self.closes[i][0])
                 long_init_entry_qty = int(long_init_entry_qty / qty_unit) * qty_unit
+
+                # 숏 초기 진입 수량 계산
+                short_init_entry_qty = short_init_equity[name] * init_risk / Decimal('100') / DataUtil.convert_to_decimal(self.closes[i][0])
+                short_init_entry_qty = int(short_init_entry_qty / qty_unit) * qty_unit
 
                 # 롱 진입 기준 가격 계산
                 long_init_entry_standard_price = DataUtil.convert_to_decimal(self.highest[i][0]) \
                                                 * (Decimal('1') - self.p.init_long_order_percent[name] / Decimal('100'))
                 long_init_entry_standard_price = int(long_init_entry_standard_price / price_unit) * price_unit
 
-                if long_init_entry_qty > Decimal('0') and DataUtil.convert_to_decimal(self.closes[i][0]) < long_init_entry_standard_price:
-                    self.order = self.buy(exectype=bt.Order.Market, data=self.pairs[i], size=float(float(long_init_entry_qty)))
+                # 숏 진입 기준 가격 계산
+                short_init_entry_standard_price = DataUtil.convert_to_decimal(self.lowest[i][0]) \
+                                                  * (Decimal('1') + self.p.init_short_order_percent[name] / Decimal('100'))
+                short_init_entry_standard_price = int(short_init_entry_standard_price / price_unit) * price_unit
+
+                # if long_init_entry_qty > Decimal('0') and DataUtil.convert_to_decimal(self.closes[i][0]) < long_init_entry_standard_price:
+                #     self.order = self.buy(exectype=bt.Order.Market, data=self.pairs[i], size=float(long_init_entry_qty))
+                if short_init_entry_qty > Decimal('0') and DataUtil.convert_to_decimal(self.closes[i][0]) > short_init_entry_standard_price:
+                    self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i], size=float(short_init_entry_qty))
             elif position_size > 0:
                 long_add_entry_qty = DataUtil.convert_to_decimal(position_size) * add_risk / Decimal('2')
                 long_add_entry_qty = int(long_add_entry_qty / qty_unit) * qty_unit
 
                 entry_avg_price = DataUtil.convert_to_decimal(self.getposition(self.pairs[i]).price)
-                if init_equity[name] > entry_avg_price * DataUtil.convert_to_decimal(position_size):
+                if long_init_equity[name] > entry_avg_price * DataUtil.convert_to_decimal(position_size):
                     long_add_entry_standard_price = entry_avg_price * (Decimal('1') - self.p.add_long_order_percent[name] / Decimal('100'))
                     long_add_entry_standard_price = int(long_add_entry_standard_price / price_unit) * price_unit
                     if self.closes[i][0] < long_add_entry_standard_price:
@@ -209,6 +275,23 @@ class MultiDcaLongShortV1(bt.Strategy):
                     exit_price = int(exit_price / self.p.tick_size[name]) * self.p.tick_size[name]
                     self.order = self.sell(exectype=bt.Order.Limit, data=self.pairs[i], price=float(exit_price),
                                            size=float(position_size))
+            elif position_size < 0:
+                short_add_entry_qty = abs(DataUtil.convert_to_decimal(position_size)) * add_risk / Decimal('2')
+                short_add_entry_qty = int(short_add_entry_qty / qty_unit) * qty_unit
+
+                entry_avg_price = DataUtil.convert_to_decimal(self.getposition(self.pairs[i]).price)
+                if short_init_equity[name] > entry_avg_price * abs(DataUtil.convert_to_decimal(position_size)):
+                    short_add_entry_standard_price = entry_avg_price * (Decimal('1') - self.p.add_short_order_percent[name] / Decimal('100'))
+                    short_add_entry_standard_price = int(short_add_entry_standard_price / price_unit) * price_unit
+                    if self.closes[i][0] > short_add_entry_standard_price:
+                        self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i], size=float(short_add_entry_qty))
+
+                    profit_percent = self.p.short_take_profit_percent[name]
+                    if self.rsis[i][0] > self.p.rsi_high_limit:
+                        profit_percent += self.p.short_add_take_profit_percent[name]
+                    exit_price = entry_avg_price * (Decimal('1') - profit_percent / Decimal('100'))
+                    exit_price = int(exit_price / self.p.tick_size[name]) * self.p.tick_size[name]
+                    self.order = self.buy(exectype=bt.Order.Limit, data=self.pairs[i], price=float(exit_price), size=float(position_size))
 
 if __name__ == '__main__':
     data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
@@ -217,13 +300,14 @@ if __name__ == '__main__':
     cerebro.addstrategy(MultiDcaLongShortV1)
 
     cerebro.broker.setcash(200000000000000)
+    cerebro.broker.set_slippage_perc(0)
     cerebro.broker.setcommission(0.0025, leverage=100)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')  # 결과 분석기 추가
 
     # data loading
     for pair, tick_kind in pairs.items():
         df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BINANCE, pair, tick_kind)
-        # df = DataUtil.get_candle_data_in_scape(df, '2023-02-01 00:00:00', '2024-11-08 00:00:00')
+        df = DataUtil.get_candle_data_in_scape(df, '2023-01-01 00:00:00', '2024-11-13 00:00:00')
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 
