@@ -3,9 +3,12 @@ import pandas as pd
 import quantstats as qs
 from util.Util import DataUtil
 from decimal import Decimal
+import math
 
 pairs = {
-    'BTCUSDT' : DataUtil.CANDLE_TICK_4HOUR
+    'BTCUSDT' : DataUtil.CANDLE_TICK_4HOUR,
+    'ETHUSDT' : DataUtil.CANDLE_TICK_4HOUR,
+    'BCHUSDT' : DataUtil.CANDLE_TICK_4HOUR,
 }
 
 class MultiLongAndShortV1(bt.Strategy):
@@ -15,6 +18,14 @@ class MultiLongAndShortV1(bt.Strategy):
             'BTCUSDT': {
                 'long': Decimal('1.0'),
                 'short': Decimal('1.0')
+            },
+            'ETHUSDT': {
+                'long' : Decimal('1.0'),
+                'short' : Decimal('1.0')
+            },
+            'BCHUSDT': {
+                'long' : Decimal('1.0'),
+                'short': Decimal('1.0')
             }
         },
         # 롱/숏 손실 비율 셋팅
@@ -22,31 +33,51 @@ class MultiLongAndShortV1(bt.Strategy):
             'BTCUSDT': {
                 'long': Decimal('1.0'),
                 'short': Decimal('1.0')
+            },
+            'ETHUSDT': {
+                'long': Decimal('1.0'),
+                'short': Decimal('1.0')
+            },
+            'BCHUSDT': {
+                'long': Decimal('1.0'),
+                'short': Decimal('1.0')
             }
         },
         # 가격 단위 셋팅
         tick_size={
-            'BTCUSDT': Decimal('0.10')
+            'BTCUSDT': Decimal('0.10'),
+            'ETHUSDT': Decimal('0.01'),
+            'BCHUSDT': Decimal('0.05'),
         },
         # 수량 단위 셋팅
         step_size={
-            'BTCUSDT': Decimal('0.001')
+            'BTCUSDT': Decimal('0.001'),
+            'ETHUSDT': Decimal('0.01'),
+            'BCHUSDT': Decimal('0.01'),
         },
         # 고가 채널 주기 셋팅
         high_band_length={
             'BTCUSDT': 30,
+            'ETHUSDT': 30,
+            'BCHUSDT': 30,
         },
         # 저가 채널 주기 셋팅
         low_band_length={
             'BTCUSDT': 15,
+            'ETHUSDT': 15,
+            'BCHUSDT': 15
         },
         # 볼린저밴드 주기 셋팅
         bb={
             'length': {
-                'BTCUSDT':80,
+                'BTCUSDT':50,
+                'ETHUSDT':50,
+                'BCHUSDT':80,
             },
             'mult': {
                 'BTCUSDT':2,
+                'ETHUSDT':2,
+                'BCHUSDT':2,
             }
         },
 
@@ -54,9 +85,22 @@ class MultiLongAndShortV1(bt.Strategy):
         atr={
             'length': {
                 'BTCUSDT': 10,
+                'ETHUSDT': 10,
+                'BCHUSDT': 10,
             },
             'constant': {
-                'BTCUSDT': Decimal('1.0')
+                'BTCUSDT': {
+                    'long' : Decimal('1.0'),
+                    'short' : Decimal('1.0')
+                },
+                'ETHUSDT': {
+                    'long' : Decimal('1.0'),
+                    'short' : Decimal('1.0')
+                },
+                'BCHUSDT': {
+                    'long' : Decimal('2.0'),
+                    'short' : Decimal('1.0')
+                }
             }
         }
     )
@@ -108,10 +152,10 @@ class MultiLongAndShortV1(bt.Strategy):
             self.lowest.append(lowest)
 
             # 볼린저밴드 저장 
-            # bb = bt.indicators.BollingerBands(self.closes[i], period=self.p.bb['length'][name], devfactor=self.p.bb['mult'][name])
-            # self.bb_top.append(bb.lines.top)
-            # self.bb_mid.append(bb.lines.mid)
-            # self.bb_low.append(bb.lines.bot)
+            bb = bt.indicators.BollingerBands(self.closes[i], period=self.p.bb['length'][name], devfactor=self.p.bb['mult'][name])
+            self.bb_top.append(bb.lines.top)
+            self.bb_mid.append(bb.lines.mid)
+            self.bb_low.append(bb.lines.bot)
 
             # atr 저장
             atr = bt.indicators.AverageTrueRange(self.pairs[i], period=self.p.atr['length'][name])
@@ -139,28 +183,28 @@ class MultiLongAndShortV1(bt.Strategy):
         for order in open_orders:
             if target_name and order.data._name != target_name:
                 continue
-            self.log(
-                f"Cancelling Order: Ref: {order.ref}, Name: {order.data._name}, Price: {order.created.price}, Status: {order.status}")
             if order.status in [bt.Order.Submitted, bt.Order.Accepted]:
                 self.broker.cancel(order)
-                self.log(f"Order Ref: {order.ref} for {order.data._name} is now cancelled")
-            else:
-                self.log(f"Order Ref: {order.ref} cannot be cancelled, Status: {order.status}")
 
     def notify_order(self, order):
         cur_date = f"{order.data.datetime.date(0)} {str(order.data.datetime.time(0)).split('.')[0]}"
         if order.status in [order.Completed]:
             if order.isbuy():
-                self.log(f'{order.ref:<3}{cur_date} =>'
+                self.log(f'{order.ref:<3} {cur_date} =>'
                          f' [매수{order.Status[order.status]:^10}] 종목 : {order.data._name} \t'
                          f'수량:{order.size} \t'
                          f'가격:{order.created.price:.4f}')
                 self.total_trading_count += 1
             elif order.issell():
-                self.log(f'{order.ref:<3}{cur_date} =>'
+                self.log(f'{order.ref:<3} {cur_date} =>'
                          f' [매도{order.Status[order.status]:^10}] 종목 : {order.data._name} \t'
                          f'수량:{order.size} \t'
-                         f'가격:{order.created.price:.4f}')
+                         f'가격:{order.created.price:.4f}\n')
+                if order.executed.pnl > 0:
+                    self.winning_trading_count += 1
+
+    def stop(self):
+        self.log(f'전체 트레이딩 횟수 : {self.total_trading_count}')
 
     def record_asset(self):
         account_value = self.broker.get_cash()  # 현재 현금(보유 포지션 제외) 자산의 가격을 획득
@@ -186,57 +230,64 @@ class MultiLongAndShortV1(bt.Strategy):
 
         for i in range(0, len(self.pairs)):
             name = self.names[i]
-            # self.cancel_all(target_name=name)  # 미체결 주문 모두 취소
-            open_orders = self.broker.get_orders_open()
-            self.log(f'{self.dates[i].datetime(0)} => open order count : {len(open_orders)}')
-            for order in open_orders:
-                if order.data._name != name:
-                    continue
-                self.log(
-                    f"Cancelling Order: Ref: {order.ref}, Name: {order.data._name}, Price: {order.created.price}, Status: {order.status}")
-                if order.status in [bt.Order.Submitted, bt.Order.Accepted]:
-                    self.broker.cancel(order)
-                    self.log(f"Order Ref: {order.ref} for {order.data._name} is now cancelled")
-                else:
-                    self.log(f"Order Ref: {order.ref} cannot be cancelled, Status: {order.status}")
+            self.cancel_all(target_name=name)  # 미체결 주문 모두 취소
 
             leverage = self.p.leverage[name]['long']
+            short_leverage = self.p.leverage[name]['short']
             date = self.dates[i].datetime(0)
-
             close = DataUtil.convert_to_decimal(self.closes[i][0])
             before_close = DataUtil.convert_to_decimal(self.closes[i][-1])
-
             atr = DataUtil.convert_to_decimal(self.atrs[i][0])
             highest = DataUtil.convert_to_decimal(self.highest[i][0])
             lowest = DataUtil.convert_to_decimal(self.lowest[i][0])
-            self.log(f'{date} => open : {self.opens[i][0]} / high : {self.highs[i][0]} / low : {self.lows[i][0]} / close : {self.closes[i][0]} / highest : {self.highest[i][0]}')
+            # if not math.isnan(self.bb_low[i][-1]):
+            #     self.log(f'{date} close : {close} / before close : {before_close} / bb_low[-1] : {self.bb_low[i][-1]} / bb_low[0] : {self.bb_low[i][0]}')
 
             current_position_size = self.getposition(self.pairs[i]).size
             if current_position_size == 0:
-                stop_price = highest - atr * self.p.atr['constant'][name]
-                stop_price = int(stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
-                self.long_stop_prices[i] = stop_price
+                if not math.isnan(self.bb_low[i][-1]) and before_close > DataUtil.convert_to_decimal(self.bb_low[i][-1]) and close < DataUtil.convert_to_decimal(self.bb_low[i][0]):
+                    stop_price = close + atr * self.p.atr['constant'][name]['short']
+                    stop_price = int(stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
+                    self.short_stop_prices[i] = stop_price
+                    qty = short_leverage * DataUtil.convert_to_decimal(self.broker.get_cash()) * self.p.risk[name]['long'] / Decimal('100') / abs(close-stop_price)
+                    qty = int(qty / self.p.step_size[name]) * self.p.step_size[name]
+                    if qty * close >=  short_leverage * DataUtil.convert_to_decimal(self.broker.get_cash()):
+                        qty = short_leverage * DataUtil.convert_to_decimal(self.broker.get_cash()) * Decimal('0.98') / close
+                        qty = int(qty / self.p.step_size[name]) * self.p.step_size[name]
+                    self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i],size=float(qty))
+                else:
+                    stop_price = highest - atr * self.p.atr['constant'][name]['long']
+                    stop_price = int(stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
+                    self.long_stop_prices[i] = stop_price
 
-                qty = leverage * DataUtil.convert_to_decimal(self.broker.get_cash()) * self.p.risk[name]['long'] / Decimal('100') / abs(highest - stop_price)
-                qty = int(qty / self.p.step_size[name]) * self.p.step_size[name]
-                self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(
-                    
-                ), size=float(qty))
+                    qty = leverage * DataUtil.convert_to_decimal(self.broker.get_cash()) * self.p.risk[name]['long'] / Decimal('100') / abs(highest - stop_price)
+                    qty = int(qty / self.p.step_size[name]) * self.p.step_size[name]
+                    # 진입하려는 수량에 대한 시드 값이 현재 현금보다 클 경우, 들어가지 않는 오류가 발생한다. 따라서, 만약 진입하려는 수량의 시드가 현금보다 클 경우 현금의 98%만을 진입한다.
+                    if qty * highest >= leverage * DataUtil.convert_to_decimal(self.broker.get_cash()):
+                        qty = leverage * DataUtil.convert_to_decimal(self.broker.get_cash()) * Decimal('0.98') / highest
+                        qty = int(qty / self.p.step_size[name]) * self.p.step_size[name]
+                    self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(highest), size=float(qty))
+
             if current_position_size > 0:
                 if before_close > self.long_stop_prices[i] > close:
                     self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i], size=current_position_size)
                     self.long_stop_prices[i] = Decimal('0')
                 else:
                     self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], size=current_position_size, price=float(lowest))
+            elif current_position_size < 0:
+                if before_close < self.short_stop_prices[i] < close:
+                    self.order = self.buy(exectype=bt.Order.Market, data=self.pairs[i], size=current_position_size)
+                elif before_close < DataUtil.convert_to_decimal(self.bb_low[i][-1]) and close > DataUtil.convert_to_decimal(self.bb_low[i][0]):
+                    self.order = self.buy(exectype=bt.Order.Market, data=self.pairs[i], size=current_position_size)
 
 if __name__ == '__main__':
-    data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
-
+    # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+    data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
     cerebro = bt.Cerebro()
     cerebro.addstrategy(MultiLongAndShortV1)
 
     cerebro.broker.setcash(50000000)
-    cerebro.broker.setcommission(commission=0.0005, leverage=1)
+    cerebro.broker.setcommission(commission=0.0005, leverage=2)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
@@ -244,10 +295,16 @@ if __name__ == '__main__':
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 
-    print('Before Portfolio Value: %.2f' % cerebro.broker.getvalue())
+    before_balance = cerebro.broker.getvalue()
+    print('Before Portfolio Value: %.2f' % before_balance)
     results = cerebro.run()
     strat = results[0]
-    print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
+    after_balance = cerebro.broker.getvalue()
+    print('Final Portfolio Value: %.2f' % after_balance)
+
+    # 수익률 계산
+    return_percentage = ((after_balance - before_balance) / before_balance) * 100
+    print('Strategy Return: %.2f%%' % return_percentage)
 
     pyfoliozer = strat.analyzers.getbyname('pyfolio')
     returns, positions, transactions, gross_lev = pyfoliozer.get_pf_items()
@@ -258,3 +315,22 @@ if __name__ == '__main__':
     order_balance_list = strat.order_balance_list
     mdd = qs.stats.max_drawdown(returns)
     print(f" quanstats's my returns MDD : {mdd * 100:.2f} %")
+
+    file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+    for pair, tick_kind in pairs.items():
+        file_name += pair + "-"
+    file_name += "MultiLongAndShortV1"
+
+    strat = results[0]
+    order_balance_list = strat.order_balance_list
+    df = pd.DataFrame(order_balance_list, columns=["date", "value"])
+    df['date'] = pd.to_datetime(df['date'])
+    df['date'] = df['date'].dt.date
+    df = df.sort_values('value', ascending=True).drop_duplicates('date').sort_index()
+    df['value'] = df['value'].astype('float64')
+    df['value'] = df['value'].pct_change()
+    df['date'] = pd.to_datetime(df['date'])
+    df = df.dropna()
+    df = df.set_index('date')
+    df.index.name = 'date'
+    qs.reports.html(df['value'], output=f"{file_name}.html", download_filename=f"{file_name}.html", title=file_name)
