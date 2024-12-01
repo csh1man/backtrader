@@ -11,7 +11,7 @@ pairs = {
     'SOLUSDT' : DataUtil.CANDLE_TICK_4HOUR,
 }
 
-class MultiDonchian(bt.Strategy):
+class MultiDonchianShortV1(bt.Strategy):
     params = dict(
         # 롱/숏 레버리지 셋팅
         leverage={
@@ -235,7 +235,7 @@ if __name__ == '__main__':
     # data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
     # data_path = "/Users/tjgus/Desktop/project/krtrade/backData"
     cerebro = bt.Cerebro()
-    cerebro.addstrategy(MultiDonchian)
+    cerebro.addstrategy(MultiDonchianShortV1)
 
     cerebro.broker.setcash(50000000)
     cerebro.broker.setcommission(commission=0.0005, leverage=100)

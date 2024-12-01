@@ -7,8 +7,8 @@ import quantstats as qs
 
 pairs = {
     "KRW-ETH": DataUtil.CANDLE_TICK_4HOUR,
-    "KRW-BTC": DataUtil.CANDLE_TICK_4HOUR,
     "KRW-BCH": DataUtil.CANDLE_TICK_4HOUR,
+    "KRW-BTC": DataUtil.CANDLE_TICK_4HOUR,
     # "KRW-SOL": DataUtil.CANDLE_TICK_4HOUR
 }
 
@@ -50,15 +50,15 @@ class UpbitBBV2(bt.Strategy):
             'KRW-SOL': 1.5
         },
         atr_length={
-            'KRW-BTC': 4,
+            'KRW-BTC': 10,
             'KRW-ETH': 10,
             'KRW-BCH': 10,
             'KRW-SOL': 10
         },
         atr_constant={
-            'KRW-BTC': Decimal('2.0'),
-            'KRW-ETH': Decimal('1.5'),
-            'KRW-BCH': Decimal('1.5'),
+            'KRW-BTC': Decimal('1.5'),
+            'KRW-ETH': Decimal('1.0'),
+            'KRW-BCH': Decimal('1.0'),
             'KRW-SOL': Decimal('1.5')
         }
     )
@@ -208,12 +208,12 @@ class UpbitBBV2(bt.Strategy):
 
 
 if __name__ == '__main__':
-    # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+    data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
     # data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
-    data_path = "/Users/tjgus/Desktop/project/krtrade/backData";
+    # data_path = "/Users/tjgus/Desktop/project/krtrade/backData";
     cerebro = bt.Cerebro()
     cerebro.broker.setcash(10000000) # 초기 시드 설정
-    cerebro.broker.setcommission(0.0005, leverage=1) # 수수료 설정
+    cerebro.broker.setcommission(0.0005, leverage=3) # 수수료 설정
     cerebro.addstrategy(UpbitBBV2) # 전략 추가
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')  # 결과 분석기 추가
 
@@ -229,8 +229,8 @@ if __name__ == '__main__':
     results = cerebro.run()
     print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
 
-    # file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
-    file_name = "/Users/tjgus/Desktop/project/krtrade/backData/result/"
+    file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+    # file_name = "/Users/tjgus/Desktop/project/krtrade/backData/result/"
     # file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
     for pair, tick_kind in pairs.items():
         file_name += pair + "-"
