@@ -6,71 +6,101 @@ from decimal import Decimal
 import math
 
 pairs = {
-    'BCHUSDT' : DataUtil.CANDLE_TICK_4HOUR,
-    'EOSUSDT' : DataUtil.CANDLE_TICK_4HOUR,
-    'NEARUSDT' : DataUtil.CANDLE_TICK_4HOUR,
+    'BTCUSDT' : DataUtil.CANDLE_TICK_4HOUR,
+    # 'ETHUSDT' : DataUtil.CANDLE_TICK_4HOUR,
+    # 'BCHUSDT' : DataUtil.CANDLE_TICK_4HOUR,
 }
 
-class MultiDonchianShortV1(bt.Strategy):
+class MultiLongAndShortV2(bt.Strategy):
     params = dict(
         # 롱/숏 레버리지 셋팅
         leverage={
+            'BTCUSDT': {
+                'long': Decimal('1.0'),
+                'short': Decimal('1.0')
+            },
+            'ETHUSDT': {
+                'long' : Decimal('1.0'),
+                'short' : Decimal('1.0')
+            },
             'BCHUSDT': {
-                'short': Decimal('4.0'),
-            },
-            'EOSUSDT': {
-                'short' : Decimal('2.0'),
-            },
-            'NEARUSDT': {
-                'short' : Decimal('2.0'),
+                'long' : Decimal('1.0'),
+                'short': Decimal('1.0')
             }
         },
+        # 롱/숏 손실 비율 셋팅
         risk={
+            'BTCUSDT': {
+                'long': Decimal('1.0'),
+                'short': Decimal('1.0')
+            },
+            'ETHUSDT': {
+                'long': Decimal('1.0'),
+                'short': Decimal('1.0')
+            },
             'BCHUSDT': {
-                'short': Decimal('1.0'),
-            },
-            'EOSUSDT': {
-                'short': Decimal('1.0'),
-            },
-            'NEARUSDT': {
-                'short': Decimal('1.0'),
+                'long': Decimal('1.0'),
+                'short': Decimal('1.0')
             }
         },
+        # 가격 단위 셋팅
         tick_size={
-            'BCHUSDT': Decimal('0.10'),
-            'EOSUSDT': Decimal('0.0001'),
-            'NEARUSDT': Decimal('0.001'),
+            'BTCUSDT': Decimal('0.10'),
+            'ETHUSDT': Decimal('0.01'),
+            'BCHUSDT': Decimal('0.05'),
         },
+        # 수량 단위 셋팅
         step_size={
+            'BTCUSDT': Decimal('0.001'),
+            'ETHUSDT': Decimal('0.01'),
             'BCHUSDT': Decimal('0.01'),
-            'EOSUSDT': Decimal('0.1'),
-            'NEARUSDT': Decimal('0.1'),
         },
+        # 고가 채널 주기 셋팅
         high_band_length={
-            'BCHUSDT': 15,
-            'EOSUSDT': 20,
-            'NEARUSDT': 10,
+            'long': {
+                'BTCUSDT': 30,
+                'ETHUSDT': 30,
+                'BCHUSDT': 30,
+            },
+            'short': {
+                'BTCUSDT': 15,
+                'ETHUSDT': 30,
+                'BCHUSDT': 30,
+            }
+
         },
+        # 저가 채널 주기 셋팅
         low_band_length={
-            'BCHUSDT': 50,
-            'EOSUSDT': 80,
-            'NEARUSDT': 100
+            'long': {
+                'BTCUSDT': 15,
+                'ETHUSDT': 15,
+                'BCHUSDT': 15
+            },
+            'short': {
+                'BTCUSDT': 50,
+                'ETHUSDT': 15,
+                'BCHUSDT': 15
+            }
         },
+        #ATR 주기 셋팅
         atr={
             'length': {
+                'BTCUSDT': 10,
+                'ETHUSDT': 10,
                 'BCHUSDT': 10,
-                'EOSUSDT': 3,
-                'NEARUSDT': 3,
             },
             'constant': {
+                'BTCUSDT': {
+                    'long' : Decimal('1.0'),
+                    'short' : Decimal('1.0')
+                },
+                'ETHUSDT': {
+                    'long' : Decimal('1.0'),
+                    'short' : Decimal('1.0')
+                },
                 'BCHUSDT': {
-                    'short' : Decimal('1.0'),
-                },
-                'EOSUSDT': {
-                    'short' : Decimal('2.0'),
-                },
-                'NEARUSDT': {
-                    'short' : Decimal('1.0'),
+                    'long' : Decimal('2.0'),
+                    'short' : Decimal('1.0')
                 }
             }
         }
@@ -88,6 +118,7 @@ class MultiDonchianShortV1(bt.Strategy):
         self.dates = []
 
         # 손절 가격 저장용 변수 초기화
+        self.long_stop_prices = []
         self.short_stop_prices = []
 
         # 기본 캔들 정보 저장
@@ -99,23 +130,35 @@ class MultiDonchianShortV1(bt.Strategy):
             self.lows.append(self.datas[i].low)
             self.closes.append(self.datas[i].close)
             self.dates.append(self.datas[i].datetime)
+            self.long_stop_prices.append(Decimal('0'))
             self.short_stop_prices.append(Decimal('0'))
 
         # 지표 데이터 저장용 변수 초기화
+        self.bb_top = []
+        self.bb_mid = []
+        self.bb_low = []
         self.highest = []
+        self.short_highest = []
         self.lowest = []
+        self.short_lowest = []
         self.atrs = []
 
         # 지표 데이터 저장
         for i in range(0, len(self.pairs)):
             name = self.names[i]
             # 고가 채널 저장
-            highest = bt.indicators.Highest(self.highs[i], period=self.p.high_band_length[name])
+            highest = bt.indicators.Highest(self.highs[i], period=self.p.high_band_length['long'][name])
             self.highest.append(highest)
 
+            short_highest = bt.indicators.Highest(self.highs[i], period=self.p.high_band_length['short'][name])
+            self.short_highest.append(short_highest)
+
             # 저가 채널 저장
-            lowest = bt.indicators.Lowest(self.lows[i], period=self.p.low_band_length[name])
+            lowest = bt.indicators.Lowest(self.lows[i], period=self.p.low_band_length['long'][name])
             self.lowest.append(lowest)
+
+            short_lowest = bt.indicators.Lowest(self.lows[i], period=self.p.low_band_length['short'][name])
+            self.short_lowest.append(short_lowest)
 
             # atr 저장
             atr = bt.indicators.AverageTrueRange(self.pairs[i], period=self.p.atr['length'][name])
@@ -171,24 +214,14 @@ class MultiDonchianShortV1(bt.Strategy):
         broker_leverage = self.broker.comminfo[None].p.leverage  # cerebro에 설정한 레버리지 값 -> setcommission
         position_value = 0.0
         bought_value = 0.0
-
-        # 롱과 숏 포지션에 대한 자산 계산
         for pair in self.pairs:
-            position = self.getposition(pair)
-            size = position.size
-            if size > 0:  # 롱 포지션
-                position_value += size * pair.low[0]  # 포지션 크기 * 현재 가격 (롱은 가격 상승에 따른 자산 증가)
-                bought_value += size * position.price  # 진입한 수량 x 평단가
-                account_value += position_value - bought_value * (broker_leverage - 1) / broker_leverage
-            elif size < 0:  # 숏 포지션
-                position_value += abs(size) * pair.high[0]  # 포지션 크기 * 현재 가격 (숏은 가격 하락에 따른 자산 증가)
-                bought_value += abs(size) * position.price  # 숏의 경우 평단가가 중요하므로 계산에 포함
-                account_value += bought_value * (broker_leverage - 1) / broker_leverage - position_value
+            position_value += self.getposition(pair).size * pair.low[0]
+            bought_value += self.getposition(pair).size * self.getposition(
+                pair).price  # 진입한 수량 x 평단가 즉, 현재 포지션 전체 가치를 의미(현금 제외)
 
+        account_value += position_value - bought_value * (broker_leverage - 1) / broker_leverage
         self.order_balance_list.append([self.dates[0].datetime(0), account_value])
         self.date_value.append(self.dates[0].datetime(0))
-
-        # 전체 자산 기록
         position_value = self.broker.getvalue()
         for i in range(1, len(self.datas)):
             position_value += self.getposition(self.datas[i]).size * self.lows[i][0]
@@ -202,57 +235,65 @@ class MultiDonchianShortV1(bt.Strategy):
             name = self.names[i]
             self.cancel_all(target_name=name)  # 미체결 주문 모두 취소
 
-            leverage = self.p.leverage[name]['short']
+            leverage = self.p.leverage[name]['long']
+            short_leverage = self.p.leverage[name]['short']
+            date = self.dates[i].datetime(0)
             close = DataUtil.convert_to_decimal(self.closes[i][0])
             before_close = DataUtil.convert_to_decimal(self.closes[i][-1])
             atr = DataUtil.convert_to_decimal(self.atrs[i][0])
             highest = DataUtil.convert_to_decimal(self.highest[i][0])
             lowest = DataUtil.convert_to_decimal(self.lowest[i][0])
+            # if not math.isnan(self.bb_low[i][-1]):
+            #     self.log(f'{date} close : {close} / before close : {before_close} / bb_low[-1] : {self.bb_low[i][-1]} / bb_low[0] : {self.bb_low[i][0]}')
+
             current_position_size = self.getposition(self.pairs[i]).size
-
-            # 진입 포지션이 없을 경우
             if current_position_size == 0:
-                # 손절 가격 계산 및 저장
-                if name != 'NEARUSDT':
-                    stop_price = close + atr * self.p.atr['constant'][name]['short']
-                    stop_price = int(stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
-                    self.short_stop_prices[i] = stop_price
+                if not math.isnan(self.short_lowest[i][-2]) and not math.isnan(self.short_lowest[i][-1]):
+                    if before_close > DataUtil.convert_to_decimal(self.short_lowest[i][-2]) and close < DataUtil.convert_to_decimal(self.short_lowest[i][-1]):
+                        stop_price = close + atr * self.p.atr['constant'][name]['short']
+                        stop_price = int(stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
+                        self.short_stop_prices[i] = stop_price
+                        qty = short_leverage * DataUtil.convert_to_decimal(self.broker.get_cash()) * self.p.risk[name][
+                            'long'] / Decimal('100') / abs(close - stop_price)
+                        qty = int(qty / self.p.step_size[name]) * self.p.step_size[name]
+                        if qty * close >= short_leverage * DataUtil.convert_to_decimal(self.broker.get_cash()):
+                            qty = short_leverage * DataUtil.convert_to_decimal(self.broker.get_cash()) * Decimal(
+                                '0.98') / close
+                            qty = int(qty / self.p.step_size[name]) * self.p.step_size[name]
+                        self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i], size=float(qty))
+                    else:
+                        stop_price = highest - atr * self.p.atr['constant'][name]['long']
+                        stop_price = int(stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
+                        self.long_stop_prices[i] = stop_price
+
+                        qty = leverage * DataUtil.convert_to_decimal(self.broker.get_cash()) * self.p.risk[name]['long'] / Decimal('100') / abs(highest - stop_price)
+                        qty = int(qty / self.p.step_size[name]) * self.p.step_size[name]
+                        # 진입하려는 수량에 대한 시드 값이 현재 현금보다 클 경우, 들어가지 않는 오류가 발생한다. 따라서, 만약 진입하려는 수량의 시드가 현금보다 클 경우 현금의 98%만을 진입한다.
+                        if qty * highest >= leverage * DataUtil.convert_to_decimal(self.broker.get_cash()):
+                            qty = leverage * DataUtil.convert_to_decimal(self.broker.get_cash()) * Decimal('0.98') / highest
+                            qty = int(qty / self.p.step_size[name]) * self.p.step_size[name]
+                        self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(highest), size=float(qty))
+
+            if current_position_size > 0:
+                if before_close > self.long_stop_prices[i] > close:
+                    self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i], size=current_position_size)
+                    self.long_stop_prices[i] = Decimal('0')
                 else:
-                    stop_price = lowest + atr * self.p.atr['constant'][name]['short']
-                    stop_price = int(stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
-                    self.short_stop_prices[i] = stop_price
-
-                # 수량 계산
-                qty = leverage * DataUtil.convert_to_decimal(self.broker.get_cash()) * self.p.risk[name]['short'] / Decimal('100') / abs(lowest - stop_price)
-                qty = int(qty / self.p.step_size[name]) * self.p.step_size[name]
-
-                # 계산된 수량에 대해서 진입하는데 필요한 자산이 레버리지 * 현재 자산보다 크면 진입이 되지 않는다.
-                # 따라서 현재 자산의 98% x 레버리지 만큼 진입한다.
-                if qty * lowest >= leverage * DataUtil.convert_to_decimal(self.broker.get_cash()):
-                    qty = leverage * DataUtil.convert_to_decimal(self.broker.get_cash()) * Decimal('0.98') / lowest
-                    qty = int(qty / self.p.step_size[name]) * self.p.step_size[name]
-
-                # 지정가 주문 체결
-                self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], price=float(lowest), size=float(qty))
-
-            # 현재 포지션이 존재할 경우
-            if current_position_size < 0:
-                # 현재 가격이 손절 가격 밑으로 내려왔을 경우 손절
-                if before_close < self.short_stop_prices[i] <= close:
-                    self.order = self.buy(exectype=bt.Order.Market, data=self.pairs[i], size=abs(current_position_size))
-                    self.short_stop_prices[i] = Decimal('0')
+                    self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], size=current_position_size, price=float(lowest))
+            elif current_position_size < 0:
+                if before_close < self.short_stop_prices[i] < close:
+                    self.order = self.buy(exectype=bt.Order.Market, data=self.pairs[i], size=current_position_size)
                 else:
-                    self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], size=abs(current_position_size), price=float(highest))
+                    self.order = self.buy(exectype=bt.Order.Market, data=self.pairs[i], size=current_position_size, price=self.short_highest[i][0])
 
 if __name__ == '__main__':
     # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
     data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
-    # data_path = "/Users/tjgus/Desktop/project/krtrade/backData"
     cerebro = bt.Cerebro()
-    cerebro.addstrategy(MultiDonchianShortV1)
+    cerebro.addstrategy(MultiLongAndShortV2)
 
     cerebro.broker.setcash(50000000)
-    cerebro.broker.setcommission(commission=0.0005, leverage=100)
+    cerebro.broker.setcommission(commission=0.0005, leverage=2)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
@@ -282,11 +323,9 @@ if __name__ == '__main__':
     print(f" quanstats's my returns MDD : {mdd * 100:.2f} %")
 
     file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
-    # file_name = "/Users/tjgus/Desktop/project/krtrade/backData/result/"
-    # file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
     for pair, tick_kind in pairs.items():
         file_name += pair + "-"
-    file_name += "MultiDonchianShortV1"
+    file_name += "MultiLongAndShortV2"
 
     strat = results[0]
     order_balance_list = strat.order_balance_list
