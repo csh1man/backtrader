@@ -8,8 +8,8 @@ import math
 pairs = {
     'BTCUSDT' : DataUtil.CANDLE_TICK_4HOUR,
     'ETHUSDT' : DataUtil.CANDLE_TICK_4HOUR,
-    'BCHUSDT' : DataUtil.CANDLE_TICK_4HOUR,
-    'SOLUSDT' : DataUtil.CANDLE_TICK_4HOUR,
+    # 'BCHUSDT' : DataUtil.CANDLE_TICK_4HOUR,
+    'SOLUSDT': DataUtil.CANDLE_TICK_4HOUR,
 }
 
 class MultiDonchian(bt.Strategy):
@@ -27,6 +27,9 @@ class MultiDonchian(bt.Strategy):
             },
             'BCHUSDT': {
                 'short': Decimal('2.0'),
+            },
+            'NEARUSDT': {
+                'short': Decimal('2.0'),
             }
         },
         risk={
@@ -41,31 +44,39 @@ class MultiDonchian(bt.Strategy):
             },
             'BCHUSDT': {
                 'short': [Decimal('3.0'), Decimal('2.0'), Decimal('1.0')],
+            },
+            'NEARUSDT': {
+                'short': [Decimal('0.5'), Decimal('1.5'), Decimal('2.0')],
             }
+
         },
         tick_size={
             'BTCUSDT': Decimal('0.10'),
             'ETHUSDT': Decimal('0.01'),
             'SOLUSDT': Decimal('0.01'),
-            'BCHUSDT' : Decimal('0.10')
+            'BCHUSDT' : Decimal('0.10'),
+            'NEARUSDT': Decimal('0.001'),
         },
         step_size={
             'BTCUSDT': Decimal('0.001'),
             'ETHUSDT': Decimal('0.01'),
             'SOLUSDT': Decimal('0.1'),
             'BCHUSDT': Decimal('0.01'),
+            'NEARUSDT': Decimal('0.1')
         },
         high_band_length={
             'BTCUSDT': 30,
             'ETHUSDT': 60,
             'SOLUSDT': 30,
             'BCHUSDT': 15,
+            'NEARUSDT': 15,
         },
         low_band_length={
             'BTCUSDT': 15,
             'ETHUSDT': 15,
             'SOLUSDT': 15,
-            'BCHUSDT': 50
+            'BCHUSDT': 50,
+            'NEARUSDT':80,
         },
         atr={
             'length': {
@@ -73,6 +84,7 @@ class MultiDonchian(bt.Strategy):
                 'ETHUSDT': 10,
                 'SOLUSDT': 10,
                 'BCHUSDT': 10,
+                'NEARUSDT': 10,
             },
             'constant': {
                 'BTCUSDT': {
@@ -85,6 +97,9 @@ class MultiDonchian(bt.Strategy):
                     'long' : Decimal('2.0'),
                 },
                 'BCHUSDT': {
+                    'short': Decimal('2.0'),
+                },
+                'NEARUSDT': {
                     'short': Decimal('2.0'),
                 }
             }
@@ -108,7 +123,8 @@ class MultiDonchian(bt.Strategy):
             'BTCUSDT':0,
             'ETHUSDT':0,
             'SOLUSDT' : 0,
-            'BCHUSDT': 0
+            'BCHUSDT': 0,
+            'NEARUSDT': 0,
         }
 
         # 기본 캔들 정보 저장
@@ -217,7 +233,7 @@ class MultiDonchian(bt.Strategy):
             name = self.names[i]
             self.cancel_all(target_name=name)  # 미체결 주문 모두 취소
             leverage = None
-            if name != 'BCHUSDT':
+            if name not in ('BCHUSDT', 'NEARUSDT') :
                 leverage = self.p.leverage[name]['long']
             else:
                 leverage = self.p.leverage[name]['short']
@@ -230,7 +246,7 @@ class MultiDonchian(bt.Strategy):
 
             # 진입 포지션이 없을 경우
             if current_position_size == 0:
-                if name != 'BCHUSDT':
+                if name not in ('BCHUSDT', 'NEARUSDT'):
                     # 손절 가격 계산 및 저장
                     stop_price = highest - atr * self.p.atr['constant'][name]['long']
                     stop_price = int(stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
@@ -248,7 +264,7 @@ class MultiDonchian(bt.Strategy):
 
                     # 지정가 주문 체결
                     self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(highest), size=float(qty))
-                elif name == 'BCHUSDT':
+                elif name in ('BCHUSDT', 'NEARUSDT'):
                     stop_price = lowest + atr * self.p.atr['constant'][name]['short']
                     stop_price = int(stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
                     self.long_stop_prices[i] = stop_price
@@ -290,7 +306,7 @@ if __name__ == '__main__':
     cerebro.addstrategy(MultiDonchian)
 
     cerebro.broker.setcash(50000000)
-    cerebro.broker.setcommission(commission=0.0005, leverage=100)
+    cerebro.broker.setcommission(commission=0.0005, leverage=3)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
