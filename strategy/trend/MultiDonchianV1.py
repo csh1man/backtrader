@@ -8,8 +8,9 @@ import math
 pairs = {
     'BTCUSDT' : DataUtil.CANDLE_TICK_4HOUR,
     'ETHUSDT' : DataUtil.CANDLE_TICK_4HOUR,
-    # 'BCHUSDT' : DataUtil.CANDLE_TICK_4HOUR,
-    'SOLUSDT': DataUtil.CANDLE_TICK_4HOUR,
+    'BCHUSDT' : DataUtil.CANDLE_TICK_4HOUR,
+    'SOLUSDT' : DataUtil.CANDLE_TICK_4HOUR,
+    'BNBUSDT' : DataUtil.CANDLE_TICK_4HOUR,
 }
 
 class MultiDonchian(bt.Strategy):
@@ -28,8 +29,8 @@ class MultiDonchian(bt.Strategy):
             'BCHUSDT': {
                 'short': Decimal('2.0'),
             },
-            'NEARUSDT': {
-                'short': Decimal('2.0'),
+            'BNBUSDT': {
+                'long': Decimal('2.0'),
             }
         },
         risk={
@@ -45,8 +46,8 @@ class MultiDonchian(bt.Strategy):
             'BCHUSDT': {
                 'short': [Decimal('3.0'), Decimal('2.0'), Decimal('1.0')],
             },
-            'NEARUSDT': {
-                'short': [Decimal('0.5'), Decimal('1.5'), Decimal('2.0')],
+            'BNBUSDT': {
+                'long': [Decimal('2'), Decimal('1.0'), Decimal('1.0')],
             }
 
         },
@@ -55,28 +56,28 @@ class MultiDonchian(bt.Strategy):
             'ETHUSDT': Decimal('0.01'),
             'SOLUSDT': Decimal('0.01'),
             'BCHUSDT' : Decimal('0.10'),
-            'NEARUSDT': Decimal('0.001'),
+            'BNBUSDT' : Decimal('0.010'),
         },
         step_size={
             'BTCUSDT': Decimal('0.001'),
             'ETHUSDT': Decimal('0.01'),
             'SOLUSDT': Decimal('0.1'),
             'BCHUSDT': Decimal('0.01'),
-            'NEARUSDT': Decimal('0.1')
+            'BNBUSDT' : Decimal('0.01'),
         },
         high_band_length={
             'BTCUSDT': 30,
             'ETHUSDT': 60,
             'SOLUSDT': 30,
             'BCHUSDT': 15,
-            'NEARUSDT': 15,
+            'BNBUSDT': 50,
         },
         low_band_length={
             'BTCUSDT': 15,
             'ETHUSDT': 15,
             'SOLUSDT': 15,
             'BCHUSDT': 50,
-            'NEARUSDT':80,
+            'BNBUSDT':15,
         },
         atr={
             'length': {
@@ -84,7 +85,7 @@ class MultiDonchian(bt.Strategy):
                 'ETHUSDT': 10,
                 'SOLUSDT': 10,
                 'BCHUSDT': 10,
-                'NEARUSDT': 10,
+                'BNBUSDT': 10,
             },
             'constant': {
                 'BTCUSDT': {
@@ -99,8 +100,8 @@ class MultiDonchian(bt.Strategy):
                 'BCHUSDT': {
                     'short': Decimal('2.0'),
                 },
-                'NEARUSDT': {
-                    'short': Decimal('2.0'),
+                'BNBUSDT': {
+                    'long': Decimal('2.0'),
                 }
             }
         }
@@ -124,7 +125,7 @@ class MultiDonchian(bt.Strategy):
             'ETHUSDT':0,
             'SOLUSDT' : 0,
             'BCHUSDT': 0,
-            'NEARUSDT': 0,
+            'BNBUSDT': 0,
         }
 
         # 기본 캔들 정보 저장
@@ -253,7 +254,7 @@ class MultiDonchian(bt.Strategy):
                     self.long_stop_prices[i] = stop_price
 
                     # 수량 계산
-                    qty = leverage * DataUtil.convert_to_decimal(self.broker.get_cash()) * self.p.risk[name]['long'][self.entry_modes[name]] / Decimal('100') / abs(highest - stop_price)
+                    qty = DataUtil.convert_to_decimal(self.broker.get_cash()) * self.p.risk[name]['long'][self.entry_modes[name]] / Decimal('100') / abs(highest - stop_price)
                     qty = int(qty / self.p.step_size[name]) * self.p.step_size[name]
 
                     # 계산된 수량에 대해서 진입하는데 필요한 자산이 레버리지 * 현재 자산보다 크면 진입이 되지 않는다.
@@ -270,7 +271,7 @@ class MultiDonchian(bt.Strategy):
                     self.long_stop_prices[i] = stop_price
 
                     # 수량 계산
-                    qty = leverage * DataUtil.convert_to_decimal(self.broker.get_cash()) * self.p.risk[name]['short'][
+                    qty = DataUtil.convert_to_decimal(self.broker.get_cash()) * self.p.risk[name]['short'][
                         self.entry_modes[name]] / Decimal('100') / abs(lowest - stop_price)
                     qty = int(qty / self.p.step_size[name]) * self.p.step_size[name]
 
@@ -299,18 +300,18 @@ class MultiDonchian(bt.Strategy):
                     self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], size=abs(current_position_size), price=float(highest))
 
 if __name__ == '__main__':
-    # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
-    data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+    data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+    # data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
     # data_path = "/Users/tjgus/Desktop/project/krtrade/backData"
     cerebro = bt.Cerebro()
     cerebro.addstrategy(MultiDonchian)
 
     cerebro.broker.setcash(50000000)
-    cerebro.broker.setcommission(commission=0.0005, leverage=3)
+    cerebro.broker.setcommission(commission=0.0005, leverage=2)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BYBIT, pair, tick_kind)
+        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BINANCE, pair, tick_kind)
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 
@@ -335,9 +336,9 @@ if __name__ == '__main__':
     mdd = qs.stats.max_drawdown(returns)
     print(f" quanstats's my returns MDD : {mdd * 100:.2f} %")
 
-    file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+    # file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
     # file_name = "/Users/tjgus/Desktop/project/krtrade/backData/result/"
-    # file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+    file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
     for pair, tick_kind in pairs.items():
         file_name += pair + "-"
     file_name += "MultiDonchianv1"

@@ -7,8 +7,8 @@ import math
 
 pairs = {
     'BTCUSDT' : DataUtil.CANDLE_TICK_4HOUR,
-    # 'ETHUSDT' : DataUtil.CANDLE_TICK_4HOUR,
-    # 'BCHUSDT' : DataUtil.CANDLE_TICK_4HOUR,
+    'ETHUSDT' : DataUtil.CANDLE_TICK_4HOUR,
+    'BCHUSDT' : DataUtil.CANDLE_TICK_4HOUR,
 }
 
 class MultiLongAndShortV2(bt.Strategy):
@@ -60,12 +60,12 @@ class MultiLongAndShortV2(bt.Strategy):
             'long': {
                 'BTCUSDT': 30,
                 'ETHUSDT': 30,
-                'BCHUSDT': 30,
+                'BCHUSDT': 50,
             },
             'short': {
                 'BTCUSDT': 15,
                 'ETHUSDT': 30,
-                'BCHUSDT': 30,
+                'BCHUSDT': 15,
             }
 
         },
@@ -79,7 +79,7 @@ class MultiLongAndShortV2(bt.Strategy):
             'short': {
                 'BTCUSDT': 50,
                 'ETHUSDT': 15,
-                'BCHUSDT': 15
+                'BCHUSDT': 50
             }
         },
         #ATR 주기 셋팅
@@ -249,7 +249,7 @@ class MultiLongAndShortV2(bt.Strategy):
             current_position_size = self.getposition(self.pairs[i]).size
             if current_position_size == 0:
                 if not math.isnan(self.short_lowest[i][-2]) and not math.isnan(self.short_lowest[i][-1]):
-                    if before_close > DataUtil.convert_to_decimal(self.short_lowest[i][-2]) and close < DataUtil.convert_to_decimal(self.short_lowest[i][-1]):
+                    if before_close > DataUtil.convert_to_decimal(self.short_lowest[i][-2]) and close < DataUtil.convert_to_decimal(self.short_lowest[i][-1]) and name == 'BCHUSDT':
                         stop_price = close + atr * self.p.atr['constant'][name]['short']
                         stop_price = int(stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
                         self.short_stop_prices[i] = stop_price
@@ -287,8 +287,8 @@ class MultiLongAndShortV2(bt.Strategy):
                     self.order = self.buy(exectype=bt.Order.Market, data=self.pairs[i], size=current_position_size, price=self.short_highest[i][0])
 
 if __name__ == '__main__':
-    # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
-    data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+    data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+    # data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
     cerebro = bt.Cerebro()
     cerebro.addstrategy(MultiLongAndShortV2)
 
@@ -297,7 +297,7 @@ if __name__ == '__main__':
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BYBIT, pair, tick_kind)
+        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BINANCE, pair, tick_kind)
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 
@@ -322,7 +322,8 @@ if __name__ == '__main__':
     mdd = qs.stats.max_drawdown(returns)
     print(f" quanstats's my returns MDD : {mdd * 100:.2f} %")
 
-    file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+    # file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+    file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
     for pair, tick_kind in pairs.items():
         file_name += pair + "-"
     file_name += "MultiLongAndShortV2"
