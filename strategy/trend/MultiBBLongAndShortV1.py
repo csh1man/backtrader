@@ -27,7 +27,7 @@ class MultiBBLongAndShortV1(bt.Strategy):
         risk={
             'BTCUSDT':{
                 'long':4,
-                'short':4
+                'short':2
             },
             'ETHUSDT': {
                 'long': 3,
@@ -39,7 +39,7 @@ class MultiBBLongAndShortV1(bt.Strategy):
             },
             'SOLUSDT': {
                 'long': 5,
-                'short': 3
+                'short': 2
             },
             'BNBUSDT': {
                 'long': 4,
@@ -394,11 +394,11 @@ class MultiBBLongAndShortV1(bt.Strategy):
             else:
 
                 if current_position_size == 0:
-                    short_stop_price = DataUtil.convert_to_decimal(self.low_band[i][0]) - short_atr * short_atr_constant
+                    short_stop_price = DataUtil.convert_to_decimal(self.low_band[i][0]) + short_atr * short_atr_constant
                     short_stop_price = int(short_stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
                     self.short_stop_prices[i] = short_stop_price
 
-                    qty = equity * short_risk / Decimal('100') / abs(DataUtil.convert_to_decimal(self.closes[i][0]) - short_stop_price)
+                    qty = equity * short_risk / Decimal('100') / abs(DataUtil.convert_to_decimal(self.low_band[i][0]) - short_stop_price)
                     if qty * DataUtil.convert_to_decimal(self.closes[i][0]) > equity:
                         qty = equity * Decimal('0.98') / DataUtil.convert_to_decimal(self.low_band[i][0])
                     qty = int(qty / self.p.step_size[name]) * self.p.step_size[name]
@@ -412,8 +412,8 @@ class MultiBBLongAndShortV1(bt.Strategy):
 
 
 if __name__ == '__main__':
-    data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
-    # data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+    # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+    data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
     # data_path = "/Users/tjgus/Desktop/project/krtrade/backData"
     cerebro = bt.Cerebro()
     cerebro.addstrategy(MultiBBLongAndShortV1)
@@ -448,9 +448,9 @@ if __name__ == '__main__':
     mdd = qs.stats.max_drawdown(returns)
     print(f" quanstats's my returns MDD : {mdd * 100:.2f} %")
 
-    # file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+    file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
     # file_name = "/Users/tjgus/Desktop/project/krtrade/backData/result/"
-    file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+    # file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
     for pair, tick_kind in pairs.items():
         file_name += pair + "-"
     file_name += "MultiBBLongAndShortV1"
