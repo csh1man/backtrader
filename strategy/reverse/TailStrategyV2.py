@@ -7,37 +7,52 @@ from decimal import Decimal
 
 pairs = {
     '1000PEPEUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    'ONDOUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    'ORDIUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    'WIFUSDT': DataUtil.CANDLE_TICK_1HOUR,
 }
 
 class TailStrategyV2(bt.Strategy):
     params=dict(
         risk={
             '1000PEPEUSDT' : [Decimal('2.0'), Decimal('4.0'), Decimal('4.0'), Decimal('8.0'), Decimal('8.0')],
+            'WIFUSDT': [Decimal('2.0'), Decimal('4.0'), Decimal('4.0'), Decimal('8.0'), Decimal('8.0')],
         },
         percent={
             '1000PEPEUSDT':{
                 'bull': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('10.0')],
                 'def': [Decimal('3.0'), Decimal('6.0'), Decimal('7.0'), Decimal('10.0'), Decimal('12.0')],
                 'bear': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('12.0'), Decimal('15.0')],
+            },
+            'WIFUSDT': {
+                'bull': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('10.0')],
+                'def': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('12.0'), Decimal('15.0')],
+                'bear': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('12.0'), Decimal('15.0')],
             }
         },
         rsi_length={
-            '1000PEPEUSDT': 3
+            '1000PEPEUSDT': 3,
+            'WIFUSDT': 3,
         },
         rsi_limit={
-            '1000PEPEUSDT': 60
+            '1000PEPEUSDT': 60,
+            'WIFUSDT': 70,
         },
         high_band_span={
             '1000PEPEUSDT': 3,
+            'WIFUSDT': 3,
         },
         low_band_span={
             '1000PEPEUSDT': 3,
+            'WIFUSDT': 3,
         },
         tick_size={
-            '1000PEPEUSDT': Decimal('0.000001'),
+            '1000PEPEUSDT': Decimal('0.0000010'),
+            'WIFUSDT': Decimal('0.0001')
         },
         step_size={
             '1000PEPEUSDT': Decimal('100'),
+            'WIFUSDT': Decimal('1')
         }
     )
     def log(self, txt):
@@ -77,7 +92,6 @@ class TailStrategyV2(bt.Strategy):
             self.low_bands.append(low_band)
 
             rsi = bt.indicators.RSI_Safe(self.closes[i], period=self.p.rsi_length[name])
-            # rsi = bt.ind.RSI_Safe(self.closes[i], period=self.p.rsi_length[name])
             self.rsis.append(rsi)
 
         # 자산 기록용 변수 셋팅
@@ -143,7 +157,7 @@ class TailStrategyV2(bt.Strategy):
         self.record_asset()
         for i in range(0, len(self.pairs)):
             name = self.names[i]
-            self.cancel_all(target_name=name)
+            self.cancel_all(name)
 
             tick_size = self.p.tick_size[name]
             step_size = self.p.step_size[name]
@@ -168,16 +182,22 @@ class TailStrategyV2(bt.Strategy):
             # 현재 포지션 정보 획득
             current_position_size = self.getposition(self.pairs[i]).size
             if current_position_size > 0:
-                avg_price = self.getposition(pair).price
+                avg_price = self.getposition(self.pairs[i]).price
                 if self.rsis[i][0] >= self.p.rsi_limit[name] and self.closes[i][0] >= avg_price:
                     self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i], size=float(current_position_size))
 
             equity = DataUtil.convert_to_decimal(self.broker.getvalue())
+            qtys = []
             for j in range(0, len(prices)):
                 price = prices[j]
                 risk = self.p.risk[name][j]
                 qty = equity * risk / Decimal('100') / price
                 qty = int(qty / step_size) * step_size
+                qtys.append(qty)
+
+            for j in range(0, len(qtys)):
+                qty = qtys[j]
+                price = prices[j]
                 self.order = self.buy(exectype=bt.Order.Limit, data=self.pairs[i], size=float(qty), price=float(price))
 
 
@@ -193,7 +213,6 @@ if __name__ == '__main__':
     cerebro.broker.setcash(13000)
     cerebro.broker.setcommission(commission=0.0005, leverage=3)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
-
     for pair, tick_kind in pairs.items():
         df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BYBIT, pair, tick_kind)
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
