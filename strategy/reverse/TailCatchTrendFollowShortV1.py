@@ -1,3 +1,4 @@
+
 import backtrader as bt
 import pandas as pd
 import quantstats as qs
@@ -6,17 +7,19 @@ from util.Util import DataUtil
 from decimal import Decimal
 
 pairs = {
-    '1000PEPEUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    'WIFUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    'SHIB1000USDT': DataUtil.CANDLE_TICK_1HOUR,
-    'ONDOUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    'ORDIUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    '1000BONKUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    'ETHUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    '1000PEPEUSDT':DataUtil.CANDLE_TICK_1HOUR,
+    'WIFUSDT':DataUtil.CANDLE_TICK_1HOUR,
+    'SHIB1000USDT':DataUtil.CANDLE_TICK_1HOUR,
+    'ONDOUSDT':DataUtil.CANDLE_TICK_1HOUR,
+    'ORDIUSDT':DataUtil.CANDLE_TICK_1HOUR,
+    '1000BONKUSDT':DataUtil.CANDLE_TICK_1HOUR,
 }
 
-class TailStrategyV2(bt.Strategy):
+class TailCatchTrendFollowShortV1(bt.Strategy):
     params=dict(
         risk={
+            'ETHUSDT': Decimal('3.0'),
             '1000PEPEUSDT' : [Decimal('2.0'), Decimal('4.0'), Decimal('4.0'), Decimal('8.0'), Decimal('8.0')],
             'WIFUSDT': [Decimal('2.0'), Decimal('4.0'), Decimal('4.0'), Decimal('8.0'), Decimal('8.0')],
             'ONDOUSDT':[Decimal('2.0'), Decimal('2.0'), Decimal('4.0'), Decimal('4.0'), Decimal('8.0')],
@@ -25,6 +28,11 @@ class TailStrategyV2(bt.Strategy):
             '1000BONKUSDT': [Decimal('2.0'), Decimal('2.0'), Decimal('4.0'), Decimal('4.0'), Decimal('8.0')],
         },
         percent={
+            'ETHUSDT': {
+                'bull': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('10.0')],
+                'def': [Decimal('3.0'), Decimal('6.0'), Decimal('7.0'), Decimal('10.0'), Decimal('12.0')],
+                'bear': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('12.0'), Decimal('15.0')],
+            },
             '1000PEPEUSDT':{
                 'bull': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('10.0')],
                 'def': [Decimal('3.0'), Decimal('6.0'), Decimal('7.0'), Decimal('10.0'), Decimal('12.0')],
@@ -56,7 +64,26 @@ class TailStrategyV2(bt.Strategy):
                 'bear': [Decimal('4.0'), Decimal('6.0'), Decimal('9.0'), Decimal('12.0'), Decimal('15.0')],
             }
         },
+        atr_length={
+            'ETHUSDT': 10,
+            '1000PEPEUSDT': 3,
+            'WIFUSDT': 3,
+            'ONDOUSDT': 3,
+            'ORDIUSDT': 3,
+            'SHIB1000USDT': 3,
+            '1000BONKUSDT': 3,
+        },
+        atr_constant={
+            'ETHUSDT': Decimal('2.0'),
+            '1000PEPEUSDT': Decimal('1.0'),
+            'WIFUSDT': Decimal('1.0'),
+            'ONDOUSDT': Decimal('1.0'),
+            'ORDIUSDT': Decimal('1.0'),
+            'SHIB1000USDT': Decimal('1.0'),
+            '1000BONKUSDT': Decimal('1.0'),
+        },
         rsi_length={
+            'ETHUSDT': 15,
             '1000PEPEUSDT': 3,
             'WIFUSDT': 3,
             'ONDOUSDT': 3,
@@ -65,6 +92,7 @@ class TailStrategyV2(bt.Strategy):
             '1000BONKUSDT': 3,
         },
         rsi_limit={
+            'ETHUSDT': 15,
             '1000PEPEUSDT': 60,
             'WIFUSDT': 70,
             'ONDOUSDT': 70,
@@ -73,6 +101,7 @@ class TailStrategyV2(bt.Strategy):
             '1000BONKUSDT': 60
         },
         high_band_span={
+            'ETHUSDT': 20,
             '1000PEPEUSDT': 3,
             'WIFUSDT': 3,
             'ONDOUSDT': 3,
@@ -81,6 +110,7 @@ class TailStrategyV2(bt.Strategy):
             '1000BONKUSDT': 2,
         },
         low_band_span={
+            'ETHUSDT': 80,
             '1000PEPEUSDT': 3,
             'WIFUSDT': 3,
             'ONDOUSDT': 3,
@@ -88,7 +118,15 @@ class TailStrategyV2(bt.Strategy):
             'SHIB1000USDT': 3,
             '1000BONKUSDT': 2,
         },
+        high_band_constant={
+          'ETHUSDT': Decimal('20')
+        },
+        low_band_constant={
+            'ETHUSDT': Decimal('0')
+        },
         tick_size={
+            'ETHUSDT': Decimal('0.01'),
+            'BCHUSDT': Decimal('0.10'),
             '1000PEPEUSDT': Decimal('0.0000010'),
             'WIFUSDT': Decimal('0.0001'),
             'ONDOUSDT': Decimal('0.0001'),
@@ -97,6 +135,8 @@ class TailStrategyV2(bt.Strategy):
             '1000BONKUSDT': Decimal('0.0000010')
         },
         step_size={
+            'ETHUSDT': Decimal('0.01'),
+            'BCHUSDT': Decimal('0.01'),
             '1000PEPEUSDT': Decimal('100'),
             'WIFUSDT': Decimal('1'),
             'ONDOUSDT': Decimal('1'),
@@ -105,6 +145,7 @@ class TailStrategyV2(bt.Strategy):
             '1000BONKUSDT': Decimal('100')
         }
     )
+
     def log(self, txt):
         print(f'{txt}')
 
@@ -116,7 +157,7 @@ class TailStrategyV2(bt.Strategy):
         self.lows = []
         self.closes = []
         self.dates = []
-
+        self.stop_prices = []
         # 기본 정보 획득
         for i in range(0, len(self.datas)):
             self.names.append(self.datas[i]._name)
@@ -126,11 +167,13 @@ class TailStrategyV2(bt.Strategy):
             self.lows.append(self.datas[i].low)
             self.closes.append(self.datas[i].close)
             self.dates.append(self.datas[i].datetime)
+            self.stop_prices.append(Decimal('0'))
 
         # 지표 정보 획득
         self.high_bands = []
         self.low_bands = []
         self.rsis = []
+        self.atrs = []
         for i in range(0, len(self.pairs)):
             name = self.names[i]
             # 고가 채널 저장
@@ -143,6 +186,9 @@ class TailStrategyV2(bt.Strategy):
 
             rsi = bt.indicators.RSI_Safe(self.closes[i], period=self.p.rsi_length[name])
             self.rsis.append(rsi)
+
+            atr = bt.indicators.AverageTrueRange(self.pairs[i], period=self.p.atr_length[name])
+            self.atrs.append(atr)
 
         # 자산 기록용 변수 셋팅
         self.order = None
@@ -208,47 +254,74 @@ class TailStrategyV2(bt.Strategy):
         for i in range(0, len(self.pairs)):
             name = self.names[i]
             self.cancel_all(name)
+            if name in ['ETHUSDT']:
+                adjust_high_band = DataUtil.convert_to_decimal(self.high_bands[i][0]) - (DataUtil.convert_to_decimal(self.high_bands[i][0]) - DataUtil.convert_to_decimal(self.low_bands[i][0])) * (self.p.high_band_constant[name] / Decimal('100'))
+                adjust_low_band = DataUtil.convert_to_decimal(self.low_bands[i][0]) + (DataUtil.convert_to_decimal(self.high_bands[i][0]) - DataUtil.convert_to_decimal(self.low_bands[i][0])) * (self.p.low_band_constant[name] / Decimal('100'))
+                adjust_high_band = int(adjust_high_band / self.p.tick_size[name]) * self.p.tick_size[name]
+                adjust_low_band = int(adjust_low_band / self.p.tick_size[name]) * self.p.tick_size[name]
 
-            tick_size = self.p.tick_size[name]
-            step_size = self.p.step_size[name]
+                current_position_size = self.getposition(self.pairs[i]).size
+                if current_position_size == 0:
+                    equity = DataUtil.convert_to_decimal(self.broker.getvalue())
+                    stop_price = adjust_low_band + DataUtil.convert_to_decimal(self.atrs[i][0]) * self.p.atr_constant[name]
+                    stop_price = int(stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
+                    self.stop_prices[i] = stop_price
 
-            # 진입모드(bull, def, bear) 계산
-            entry_mode = None
-            if self.closes[i][0] >= self.high_bands[i][-1]:
-                entry_mode = 'bull'
-            elif self.low_bands[i][-1] <= self.closes[i][0] < self.high_bands[i][-1]:
-                entry_mode = 'def'
+                    qty = equity * self.p.risk[name] / Decimal('100')
+                    qty = qty / abs(adjust_low_band - stop_price)
+                    if qty * adjust_low_band >= equity:
+                        qty = equity * Decimal('0.98') / adjust_low_band
+                    qty = int(qty  / self.p.step_size[name]) * self.p.step_size[name]
+                    self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], size=float(qty), price=float(adjust_low_band))
+                if current_position_size < 0:
+                    if DataUtil.convert_to_decimal(self.closes[i][0]) >= self.stop_prices[i]:
+                        self.order = self.buy(exectype=bt.Order.Market, data=self.pairs[i], size=abs(current_position_size))
+                    else:
+                        self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], size=abs(current_position_size), price=float(adjust_high_band))
             else:
-                entry_mode = 'bear'
+                tick_size = self.p.tick_size[name]
+                step_size = self.p.step_size[name]
 
-            # 진입할 퍼센트를 이용하여 진입 가격 계산
-            prices = []
-            for j in range(0, len(self.p.percent[name][entry_mode])):
-                percent = self.p.percent[name][entry_mode][j]
-                price = DataUtil.convert_to_decimal(self.closes[i][0]) * (Decimal('1') - percent / Decimal('100'))
-                price = int(price / tick_size) * tick_size
-                prices.append(price)
+                # 진입모드(bull, def, bear) 계산
+                entry_mode = None
+                if self.closes[i][0] >= self.high_bands[i][-1]:
+                    entry_mode = 'bull'
+                elif self.low_bands[i][-1] <= self.closes[i][0] < self.high_bands[i][-1]:
+                    entry_mode = 'def'
+                else:
+                    entry_mode = 'bear'
 
-            # 현재 포지션 정보 획득
-            current_position_size = self.getposition(self.pairs[i]).size
-            if current_position_size > 0:
-                avg_price = self.getposition(self.pairs[i]).price
-                if self.rsis[i][0] >= self.p.rsi_limit[name] and self.closes[i][0] >= avg_price:
-                    self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i], size=float(current_position_size))
+                # 진입할 퍼센트를 이용하여 진입 가격 계산
+                prices = []
+                for j in range(0, len(self.p.percent[name][entry_mode])):
+                    percent = self.p.percent[name][entry_mode][j]
+                    price = DataUtil.convert_to_decimal(self.closes[i][0]) * (Decimal('1') - percent / Decimal('100'))
+                    price = int(price / tick_size) * tick_size
+                    prices.append(price)
 
-            equity = DataUtil.convert_to_decimal(self.broker.getvalue())
-            qtys = []
-            for j in range(0, len(prices)):
-                price = prices[j]
-                risk = self.p.risk[name][j]
-                qty = equity * risk / Decimal('100') / price
-                qty = int(qty / step_size) * step_size
-                qtys.append(qty)
+                # 현재 포지션 정보 획득
+                current_position_size = self.getposition(self.pairs[i]).size
+                if current_position_size > 0:
+                    avg_price = self.getposition(self.pairs[i]).price
+                    if self.rsis[i][0] >= self.p.rsi_limit[name] and self.closes[i][0] >= avg_price:
+                        self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i],
+                                               size=float(current_position_size))
 
-            for j in range(0, len(qtys)):
-                qty = qtys[j]
-                price = prices[j]
-                self.order = self.buy(exectype=bt.Order.Limit, data=self.pairs[i], size=float(qty), price=float(price))
+                equity = DataUtil.convert_to_decimal(self.broker.getvalue())
+                qtys = []
+                for j in range(0, len(prices)):
+                    price = prices[j]
+                    risk = self.p.risk[name][j]
+                    qty = equity * risk / Decimal('100') / price
+                    qty = int(qty / step_size) * step_size
+                    qtys.append(qty)
+
+                for j in range(0, len(qtys)):
+                    qty = qtys[j]
+                    price = prices[j]
+                    self.order = self.buy(exectype=bt.Order.Limit, data=self.pairs[i], size=float(qty),
+                                          price=float(price))
+
 
 
 
@@ -258,10 +331,10 @@ if __name__ == '__main__':
     # data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
     # data_path = "/Users/tjgus/Desktop/project/krtrade/backData"
     cerebro = bt.Cerebro()
-    cerebro.addstrategy(TailStrategyV2)
+    cerebro.addstrategy(TailCatchTrendFollowShortV1)
 
     cerebro.broker.setcash(13000)
-    cerebro.broker.setcommission(commission=0.0005, leverage=3)
+    cerebro.broker.setcommission(commission=0.0005, leverage=5)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
     for pair, tick_kind in pairs.items():
         df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BYBIT, pair, tick_kind)
@@ -294,7 +367,7 @@ if __name__ == '__main__':
     file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
     for pair, tick_kind in pairs.items():
         file_name += pair + "-"
-    file_name += "TailCatchV2"
+    file_name += "TailCatchTrendFollowShortV1"
 
     strat = results[0]
     order_balance_list = strat.order_balance_list
