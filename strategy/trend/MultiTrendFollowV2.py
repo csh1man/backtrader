@@ -6,8 +6,11 @@ from util.Util import DataUtil
 from decimal import Decimal
 
 pairs = {
-    'ETHUSDT': DataUtil.CANDLE_TICK_4HOUR,
+    # 'ETHUSDT': DataUtil.CANDLE_TICK_4HOUR,
     'BTCUSDT': DataUtil.CANDLE_TICK_4HOUR,
+    # 'BCHUSDT': DataUtil.CANDLE_TICK_4HOUR,
+    # 'EOSUSDT': DataUtil.CANDLE_TICK_4HOUR,
+    # 'BNBUSDT': DataUtil.CANDLE_TICK_4HOUR
 }
 
 class MultiTrendFollowV2(bt.Strategy):
@@ -20,7 +23,7 @@ class MultiTrendFollowV2(bt.Strategy):
             'BTCUSDT': 'TB',  # Trend Follow 롱 + BollingerBand 숏
             'ETHUSDT': 'TT',  # Trend Follow 롱 + BollingerBand 숏
             'SOLUSDT': 'TB',
-            'BCHUSDT': 'BT',  # BollingerBand 롱 + Trend Follow 숏
+            'BCHUSDT': 'TT',  # BollingerBand 롱 + Trend Follow 숏
             'EOSUSDT': 'NT',  # Not 롱 + Trend Follow 숏
             'BNBUSDT': 'BN'  # Bollinger Band 롱 + Not 숏
         },
@@ -38,12 +41,12 @@ class MultiTrendFollowV2(bt.Strategy):
                 'short' : 5,
             },
             'BCHUSDT': {
-                'long' : 30,
-                'short' : 5,
+                'long' : 50,
+                'short' : 15,
             },
             'EOSUSDT': {
-                'long' : 30,
-                'short' : 5,
+                'long' : 15,
+                'short' : 15,
             },
             'BNBUSDT': {
                 'long' : 30,
@@ -64,12 +67,12 @@ class MultiTrendFollowV2(bt.Strategy):
                 'short' : 5,
             },
             'BCHUSDT': {
-                'long' : 30,
-                'short' : 5,
+                'long' : 15,
+                'short' : 50,
             },
             'EOSUSDT': {
                 'long' : 30,
-                'short' : 5,
+                'short' : 30,
             },
             'BNBUSDT': {
                 'long' : 30,
@@ -109,22 +112,22 @@ class MultiTrendFollowV2(bt.Strategy):
             },
             'BCHUSDT': {
                 'long':{
-                    'high': Decimal('1'),
-                    'low': Decimal('1'),
+                    'high': Decimal('10'),
+                    'low': Decimal('5'),
                 },
                 'short': {
-                    'high': Decimal('1'),
-                    'low': Decimal('1'),
+                    'high': Decimal('50'),
+                    'low': Decimal('0'),
                 }
             },
             'EOSUSDT': {
                 'long':{
-                    'high': Decimal('1'),
-                    'low': Decimal('1'),
+                    'high': Decimal('0'),
+                    'low': Decimal('0'),
                 },
                 'short': {
-                    'high': Decimal('1'),
-                    'low': Decimal('1'),
+                    'high': Decimal('0'),
+                    'low': Decimal('0'),
                 }
             },
             'BNBUSDT': {
@@ -143,7 +146,7 @@ class MultiTrendFollowV2(bt.Strategy):
             'BTCUSDT': 30,
             'ETHUSDT': 20,
             'SOLUSDT': 50,
-            'BCHUSDT': 50,
+            'BCHUSDT': 80,
             'EOSUSDT': 50,
             'BNBUSDT': 50
         },
@@ -151,7 +154,7 @@ class MultiTrendFollowV2(bt.Strategy):
             'BTCUSDT': 2.0,
             'ETHUSDT': 2.0,
             'SOLUSDT': 2.0,
-            'BCHUSDT': 2.0,
+            'BCHUSDT': 1.0,
             'EOSUSDT': 2.0,
             'BNBUSDT': 0.5
         },
@@ -203,7 +206,7 @@ class MultiTrendFollowV2(bt.Strategy):
                 'short': Decimal('2.0')
             },
             'BNBUSDT': {
-                'long': Decimal('1.0'),
+                'long': Decimal('2.0'),
                 'short': Decimal('2.0')
             }
         },
@@ -442,21 +445,20 @@ class MultiTrendFollowV2(bt.Strategy):
                             short_qty = equity * Decimal('0.98') / DataUtil.convert_to_decimal(self.closes[i][0])
                         short_qty = int(short_qty / self.p.step_size[name]) * self.p.step_size[name]
                         self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i], size=float(short_qty))
-                    else:
-                        # 롱 손절가 책정
-                        long_stop_price = long_adjust_high_band - long_atr * self.p.atr_constant[name]['long']
-                        long_stop_price = int(long_stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
-                        self.long_stop_prices[i] = long_stop_price
+                    # else:
+                    #     # 롱 손절가 책정
+                    #     long_stop_price = long_adjust_high_band - long_atr * self.p.atr_constant[name]['long']
+                    #     long_stop_price = int(long_stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
+                    #     self.long_stop_prices[i] = long_stop_price
+                    #
+                    #     # 롱 진입 수량 책정
+                    #     equity = DataUtil.convert_to_decimal(self.broker.getvalue())
+                    #     long_qty = equity * (self.p.risk['long'] /  Decimal('100')) / abs(long_adjust_high_band - long_stop_price)
+                    #     if long_qty * long_adjust_high_band >= equity:
+                    #         long_qty = equity * Decimal('0.98') / long_adjust_high_band
+                    #     long_qty = int(long_qty / self.p.step_size[name]) * self.p.step_size[name]
+                    #     self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(long_adjust_high_band), size=float(long_qty))
 
-                        # 롱 진입 수량 책정
-                        equity = DataUtil.convert_to_decimal(self.broker.getvalue())
-                        long_qty = equity * (self.p.risk['long'] / Decimal('100')) / abs(
-                            long_adjust_high_band - long_stop_price)
-                        if long_qty * long_adjust_high_band >= equity:
-                            long_qty = equity * Decimal('0.98') / long_adjust_high_band
-                        long_qty = int(long_qty / self.p.step_size[name]) * self.p.step_size[name]
-                        self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i],
-                                              price=float(long_adjust_high_band), size=float(long_qty))
                 elif current_position_size > 0:
                     if DataUtil.convert_to_decimal(self.closes[i][0]) <= self.long_stop_prices[i]:
                         self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i],
@@ -469,16 +471,76 @@ class MultiTrendFollowV2(bt.Strategy):
                         self.order = self.buy(exectype=bt.Order.Market, data=self.pairs[i], size=float(current_position_size))
                     elif self.closes[i][-1] < self.bb_bot[i][-1] and self.closes[i][0] >= self.bb_bot[i][0]:
                         self.order = self.buy(exectype=bt.Order.Market, data=self.pairs[i], size=float(current_position_size))
+            elif entry_mode == 'BT':
+                current_position_size = self.getposition(self.pairs[i]).size
+                if current_position_size == 0:
+                    if self.closes[i][-1] < self.bb_top[i][-1] and self.closes[i][0] >= self.bb_top[i][0]:
+                        # 롱 손절가 책정
+                        long_stop_price = DataUtil.convert_to_decimal(self.closes[i][0]) - long_atr * self.p.atr_constant[name]['long']
+                        long_stop_price = int(long_stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
+                        self.long_stop_prices[i] = long_stop_price
+
+                        # 롱 진입 수량 책정
+                        equity = DataUtil.convert_to_decimal(self.broker.getvalue())
+                        long_qty = equity * (self.p.risk['long'] / Decimal('100')) / abs(DataUtil.convert_to_decimal(self.closes[i][0]) - long_stop_price)
+                        if long_qty * DataUtil.convert_to_decimal(self.closes[i][0]) >= equity:
+                            long_qty = equity * Decimal('0.98') / DataUtil.convert_to_decimal(self.closes[i][0])
+                        long_qty = int(long_qty / self.p.step_size[name]) * self.p.step_size[name]
+                        self.order = self.buy(exectype=bt.Order.Market, data=self.pairs[i], size=float(long_qty))
+                    else:
+                        short_stop_price = short_adjust_low_band + short_atr * self.p.atr_constant[name]['short']
+                        short_stop_price = int(short_stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
+                        self.short_stop_prices[i] = short_stop_price
+
+                        equity = DataUtil.convert_to_decimal(self.broker.getvalue())
+                        short_qty = equity * (self.p.risk['short'] / Decimal('100')) / abs(short_adjust_low_band - short_stop_price)
+                        if short_qty * short_adjust_low_band >= equity:
+                            short_qty = equity * Decimal('0.98') / short_adjust_low_band
+                        short_qty = int(short_qty / self.p.step_size[name]) * self.p.step_size[name]
+                        self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], size=float(short_qty), price=float(short_adjust_low_band))
+
+                elif current_position_size > 0:
+                    if DataUtil.convert_to_decimal(self.closes[i][0]) <= self.long_stop_prices[i]:
+                        self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i],size=float(current_position_size))
+                    elif self.closes[i][-1] >= self.bb_mid[i][-1] and self.closes[i][0] < self.bb_mid[i][0]:
+                        self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i],size=float(current_position_size))
+                elif current_position_size < 0:
+                    if DataUtil.convert_to_decimal(self.closes[i][0]) >= self.short_stop_prices[i]:
+                        self.order = self.buy(exectype=bt.Order.Market, data=self.pairs[i], size=float(current_position_size))
+                    else:
+                        self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], size=float(current_position_size), stop=short_adjust_high_band)
+            elif entry_mode == 'BN':
+                current_position_size = self.getposition(self.pairs[i]).size
+                if current_position_size == 0:
+                    if self.closes[i][-1] < self.bb_top[i][-1] and self.closes[i][0] >= self.bb_top[i][0]:
+                        # 롱 손절가 책정
+                        long_stop_price = DataUtil.convert_to_decimal(self.closes[i][0]) - long_atr * self.p.atr_constant[name]['long']
+                        long_stop_price = int(long_stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
+                        self.long_stop_prices[i] = long_stop_price
+
+                        # 롱 진입 수량 책정
+                        equity = DataUtil.convert_to_decimal(self.broker.getvalue())
+                        long_qty = equity * (self.p.risk['long'] / Decimal('100')) / abs(DataUtil.convert_to_decimal(self.closes[i][0]) - long_stop_price)
+                        if long_qty * DataUtil.convert_to_decimal(self.closes[i][0]) >= equity:
+                            long_qty = equity * Decimal('0.98') / DataUtil.convert_to_decimal(self.closes[i][0])
+                        long_qty = int(long_qty / self.p.step_size[name]) * self.p.step_size[name]
+                        self.order = self.buy(exectype=bt.Order.Market, data=self.pairs[i], size=float(long_qty))
+                elif current_position_size > 0:
+                    if DataUtil.convert_to_decimal(self.closes[i][0]) <= self.long_stop_prices[i]:
+                        self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i],size=float(current_position_size))
+                    elif self.closes[i][-1] >= self.bb_mid[i][-1] and self.closes[i][0] < self.bb_mid[i][0]:
+                        self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i],size=float(current_position_size))
+
 
 if __name__ == '__main__':
-    # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
-    data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+    data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+    # data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
     # data_path = "/Users/tjgus/Desktop/project/krtrade/backData"
     cerebro = bt.Cerebro()
     cerebro.addstrategy(MultiTrendFollowV2)
 
     cerebro.broker.setcash(13000)
-    cerebro.broker.setcommission(commission=0.0005, leverage=3)
+    cerebro.broker.setcommission(commission=0.0005, leverage=4)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():

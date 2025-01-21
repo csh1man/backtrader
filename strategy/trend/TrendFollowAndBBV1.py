@@ -8,10 +8,10 @@ from decimal import Decimal
 
 pairs = {
     'ETHUSDT': DataUtil.CANDLE_TICK_4HOUR,
-    'BTCUSDT': DataUtil.CANDLE_TICK_4HOUR,
-    'BCHUSDT': DataUtil.CANDLE_TICK_4HOUR,
-    'EOSUSDT': DataUtil.CANDLE_TICK_4HOUR,
-    'BNBUSDT': DataUtil.CANDLE_TICK_4HOUR,
+    # 'BTCUSDT': DataUtil.CANDLE_TICK_4HOUR,
+    # 'BCHUSDT': DataUtil.CANDLE_TICK_4HOUR,
+    # 'EOSUSDT': DataUtil.CANDLE_TICK_4HOUR,
+    # 'BNBUSDT': DataUtil.CANDLE_TICK_4HOUR,
 }
 
 class TrendFollowAndBBV1(bt.Strategy):
@@ -22,7 +22,7 @@ class TrendFollowAndBBV1(bt.Strategy):
         },
         entry_mode={
             'BTCUSDT': 'TB',  # Trend Follow 롱 + BollingerBand 숏
-            'ETHUSDT': 'TB',  # Trend Follow 롱 + BollingerBand 숏
+            'ETHUSDT': 'TT',  # Trend Follow 롱 + BollingerBand 숏
             'SOLUSDT': 'TB',
             'BCHUSDT': 'BT',  # BollingerBand 롱 + Trend Follow 숏
             'EOSUSDT': 'NT',  # Not 롱 + Trend Follow 숏
@@ -36,12 +36,28 @@ class TrendFollowAndBBV1(bt.Strategy):
             'EOSUSDT': 15,
             'BNBUSDT': 30,
         },
+        short_high_band_length={
+            'BTCUSDT': 30,
+            'ETHUSDT': 5,
+            'SOLUSDT': 30,
+            'BCHUSDT': 15,
+            'EOSUSDT': 15,
+            'BNBUSDT': 30,
+        },
         low_band_length={
             'BTCUSDT': 15,
             'ETHUSDT': 15,
             'SOLUSDT': 15,
             'BCHUSDT': 50,
             'EOSUSDT': 30,
+            'BNBUSDT': 30,
+        },
+        short_low_band_length={
+            'BTCUSDT': 30,
+            'ETHUSDT': 20,
+            'SOLUSDT': 30,
+            'BCHUSDT': 15,
+            'EOSUSDT': 15,
             'BNBUSDT': 30,
         },
         band_constant={
@@ -69,7 +85,32 @@ class TrendFollowAndBBV1(bt.Strategy):
                 'high': Decimal('0'),
                 'low': Decimal('0'),
             },
-
+        },
+        short_band_constant={
+            'BTCUSDT': {
+                'high': Decimal('1'),
+                'low': Decimal('1'),
+            },
+            'ETHUSDT': {
+                'high': Decimal('50'),
+                'low': Decimal('0'),
+            },
+            'SOLUSDT': {
+                'high': Decimal('10'),
+                'low': Decimal('5'),
+            },
+            'BCHUSDT': {
+                'high': Decimal('50'),
+                'low': Decimal('0'),
+            },
+            'EOSUSDT': {
+                'high': Decimal('0'),
+                'low': Decimal('0'),
+            },
+            'BNBUSDT': {
+                'high': Decimal('0'),
+                'low': Decimal('0'),
+            },
         },
         bb_length={
             'BTCUSDT': 30,
@@ -120,7 +161,7 @@ class TrendFollowAndBBV1(bt.Strategy):
             },
             'ETHUSDT': {
                 'long': Decimal('1.0'),
-                'short': Decimal('2.0')
+                'short': Decimal('1.0')
             },
             'SOLUSDT': {
                 'long': Decimal('2.0'),
@@ -172,6 +213,8 @@ class TrendFollowAndBBV1(bt.Strategy):
         # 지표 변수
         self.highest = []
         self.lowest = []
+        self.short_highest = []
+        self.short_lowest = []
         self.bb_top = []
         self.bb_mid = []
         self.bb_bot = []
@@ -213,9 +256,15 @@ class TrendFollowAndBBV1(bt.Strategy):
             highest = bt.indicators.Highest(self.highs[i], period=self.p.high_band_length[name])
             self.highest.append(highest)
 
+            short_highest = bt.indicators.Highest(self.highs[i],period=self.p.short_high_band_length[name])
+            self.short_highest.append(short_highest)
+
             # 저가 채널 저장
             lowest = bt.indicators.Lowest(self.lows[i], period=self.p.low_band_length[name])
             self.lowest.append(lowest)
+
+            short_lowest = bt.indicators.Lowest(self.lows[i], period=self.p.short_low_band_length[name])
+            self.short_lowest.append(short_lowest)
 
             # atr 저장
             long_atr = bt.indicators.AverageTrueRange(self.pairs[i], period=self.p.atr_length[name]['long'])
@@ -283,23 +332,69 @@ class TrendFollowAndBBV1(bt.Strategy):
             highest = DataUtil.convert_to_decimal(self.highest[i][0])
             lowest = DataUtil.convert_to_decimal(self.lowest[i][0])
 
+            short_highest = DataUtil.convert_to_decimal(self.short_highest[i][0])
+            short_lowest = DataUtil.convert_to_decimal(self.short_lowest[i][0])
+
             adj_highest = highest - (highest-lowest) * (self.p.band_constant[name]['high'] / Decimal('100'))
             adj_highest = int(adj_highest / self.p.tick_size[name]) * self.p.tick_size[name]
 
+            short_adj_highest = short_highest - (short_highest - short_lowest) * (self.p.short_band_constant[name]['high'] / Decimal('100'))
+            short_adj_highest = int(short_adj_highest / self.p.tick_size[name]) * self.p.tick_size[name]
+
             adj_lowest = lowest + (highest-lowest) * (self.p.band_constant[name]['low'] / Decimal('100'))
             adj_lowest = int(adj_lowest / self.p.tick_size[name]) * self.p.tick_size[name]
+
+            short_adj_lowest = short_lowest + (short_highest - short_lowest) * (self.p.short_band_constant[name]['low'] / Decimal('100'))
+            short_adj_lowest = int(short_adj_lowest / self.p.tick_size[name]) * self.p.tick_size[name]
 
             long_atr = DataUtil.convert_to_decimal(self.long_atr[i][0])
             short_atr = DataUtil.convert_to_decimal(self.short_atr[i][0])
 
             entry_mode = self.p.entry_mode[name]
+            if entry_mode == 'TT':
+                current_position_size = self.getposition(self.pairs[i]).size
+                if current_position_size == 0:
+                    long_stop_price = short_highest - long_atr * self.p.atr_constant[name]['long']
+                    long_stop_price = int(long_stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
+                    self.long_stop_prices[i] = long_stop_price
+
+                    short_stop_price = short_lowest + short_atr * self.p.atr_constant[name]['short']
+                    short_stop_price = int(short_stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
+                    self.short_stop_prices[i] = short_stop_price
+
+                    # 롱 진입 수량 책정
+                    equity = DataUtil.convert_to_decimal(self.broker.getvalue())
+                    long_qty = equity * (self.p.risk['long'] / Decimal('100')) / abs(adj_highest - long_stop_price)
+                    if long_qty * adj_highest >= equity:
+                        long_qty = equity * Decimal('0.98') / adj_highest
+                    long_qty = int(long_qty / self.p.step_size[name]) * self.p.step_size[name]
+                    self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(adj_highest), size=float(long_qty))
+
+                    # 숏 진입 수량 책정
+                    equity = DataUtil.convert_to_decimal(self.broker.getvalue())
+                    short_qty = equity * (self.p.risk['short'] / Decimal('100')) / abs(short_adj_lowest - short_stop_price)
+                    if short_qty * short_adj_lowest >= equity:
+                        short_qty = equity * Decimal('0.98') / short_adj_lowest
+                    short_qty = int(short_qty / self.p.step_size[name]) * self.p.step_size[name]
+                    # self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], price=float(short_adj_lowest), size=float(short_qty))
+                elif current_position_size > 0:
+                    if DataUtil.convert_to_decimal(self.closes[i][0]) <= self.long_stop_prices[i]:
+                        self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i], size=float(current_position_size))
+                    else:
+                        self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], price=float(adj_lowest), size=float(current_position_size))
+                elif current_position_size < 0:
+                    if DataUtil.convert_to_decimal(self.closes[i][0]) >= self.short_stop_prices[i]:
+                        self.order = self.buy(exectype=bt.Order.Market, data=self.pairs[i], size=float(abs(current_position_size)))
+                    else:
+                        self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i],price=float((short_adj_highest)), size=float(abs(current_position_size)))
+
             if entry_mode == 'TB': # 롱 : Trend Follow , 숏 : Bollinger Band
                 current_position_size = self.getposition(self.pairs[i]).size
                 if current_position_size == 0:
                     # 볼린저밴드 하한선을 돌파할 경우
                     if self.closes[i][-1] > self.bb_bot[i][-1] and self.closes[i][0] < self.bb_bot[i][0]:
                         # 손절가 계산
-                        short_stop_price = DataUtil.convert_to_decimal(self.closes[i][0]) + long_atr * self.p.atr_constant[name]['short']
+                        short_stop_price = DataUtil.convert_to_decimal(self.closes[i][0]) + short_atr * self.p.atr_constant[name]['short']
                         short_stop_price = int(short_stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
                         self.short_stop_prices[i] = short_stop_price
 
