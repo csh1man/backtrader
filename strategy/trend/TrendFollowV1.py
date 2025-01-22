@@ -5,59 +5,184 @@ from util.Util import DataUtil
 from decimal import Decimal
 
 pairs = {
-    'ETHUSDT': DataUtil.CANDLE_TICK_4HOUR
+    'BTCUSDT': DataUtil.CANDLE_TICK_4HOUR,
+    'ETHUSDT': DataUtil.CANDLE_TICK_4HOUR,
+    'SOLUSDT': DataUtil.CANDLE_TICK_4HOUR,
+    'BCHUSDT': DataUtil.CANDLE_TICK_4HOUR,
+    'EOSUSDT': DataUtil.CANDLE_TICK_4HOUR
 }
 
+leverage=3
 
 class TrendFollowV1(bt.Strategy):
     params = dict(
         risk={
+            'BTCUSDT':{
+                'long': Decimal('1'),
+                'short': Decimal('1')
+            },
             'ETHUSDT':{
-                'long': Decimal('2'),
-                'short': Decimal('2')
+                'long': Decimal('1'),
+                'short': Decimal('1')
+            },
+            'SOLUSDT':{
+                'long': Decimal('1'),
+                'short': Decimal('1')
+            },
+            'BCHUSDT': {
+                'long': Decimal('1'),
+                'short': Decimal('1')
+            },
+            'EOSUSDT': {
+                'long': Decimal('1'),
+                'short': Decimal('1')
             }
         },
         high_band_length={
+            'BTCUSDT': {
+                'long': 30,
+                'short': 5,
+            },
             'ETHUSDT': {
                 'long': 30,
                 'short': 5,
+            },
+            'SOLUSDT':{
+                'long': 30,
+                'short':15,
+            },
+            'BCHUSDT': {
+                'long': 30,
+                'short': 15
+            },
+            'EOSUSDT': {
+                'long': 30,
+                'short': 15
             }
         },
         low_band_length={
+            'BTCUSDT': {
+                'long': 15,
+                'short': 20,
+            },
             'ETHUSDT': {
                 'long': 15,
                 'short': 20
+            },
+            'SOLUSDT':{
+                'long': 15,
+                'short':30,
+            },
+            'BCHUSDT': {
+                'long': 15,
+                'short': 50
+            },
+            'EOSUSDT': {
+                'long': 15,
+                'short': 30
             }
         },
         high_band_constant={
+            'BTCUSDT':{
+                'long': Decimal('1'),
+                'short': Decimal('1'),
+            },
             'ETHUSDT': {
-                'long': 10,
-                'short': 50,
+                'long': Decimal('10'),
+                'short': Decimal('50'),
+            },
+            'SOLUSDT': {
+                'long': Decimal('10'),
+                'short': Decimal('5'),
+            },
+            'BCHUSDT': {
+                'long': Decimal('10'),
+                'short': Decimal('50'),
+            },
+            'EOSUSDT': {
+                'long': Decimal('10'),
+                'short': Decimal('0'),
             }
         },
         low_band_constant={
+            'BTCUSDT': {
+                'long': Decimal('1'),
+                'short': Decimal('1'),
+            },
             'ETHUSDT': {
-                'long': 5,
-                'short': 5
+                'long': Decimal('5'),
+                'short': Decimal('5')
+            },
+            'SOLUSDT': {
+                'long': Decimal('5'),
+                'short': Decimal('5'),
+            },
+            'BCHUSDT': {
+                'long': Decimal('20'),
+                'short': Decimal('0')
+            },
+            'EOSUSDT': {
+                'long': Decimal('0'),
+                'short': Decimal('0'),
             }
         },
         atr_length={
+            'BTCUSDT': {
+                'long': 10,
+                'short': 10,
+            },
             'ETHUSDT':{
+                'long': 10,
+                'short': 10
+            },
+            'SOLUSDT':{
+                'long': 10,
+                'short': 10
+            },
+            'BCHUSDT': {
+                'long': 10,
+                'short': 10
+            },
+            'EOSUSDT': {
                 'long': 10,
                 'short': 10
             }
         },
         atr_constant={
+            'BTCUSDT': {
+                'long': Decimal('1.0'),
+                'short': Decimal('2.0')
+            },
             'ETHUSDT': {
                 'long': Decimal('1.0'),
+                'short': Decimal('2.0')
+            },
+            'SOLUSDT': {
+                'long': Decimal('1.0'),
+                'short': Decimal('2.0')
+            },
+            'BCHUSDT': {
+                'long': Decimal('2.0'),
+                'short': Decimal('1.0')
+            },
+            'EOSUSDT': {
+                'long': Decimal('2.0'),
                 'short': Decimal('2.0')
             }
         },
         tick_size={
+            'BTCUSDT': Decimal('0.10'),
             'ETHUSDT': Decimal('0.01'),
+            'SOLUSDT': Decimal('0.0100'),
+            'BCHUSDT': Decimal('0.05'),
+            'EOSUSDT': Decimal('0.001'),
         },
         step_size={
+            'BTCUSDT': Decimal('0.001'),
             'ETHUSDT': Decimal('0.01'),
+            'SOLUSDT': Decimal('1'),
+            'BCHUSDT': Decimal('0.01'),
+            'EOSUSDT': Decimal('0.001'),
         }
     )
 
@@ -179,6 +304,8 @@ class TrendFollowV1(bt.Strategy):
         self.my_assets.append(position_value)
 
     def next(self):
+        self.record_asset()
+        equity = DataUtil.convert_to_decimal(self.broker.getvalue())
         for i in range(0, len(self.pairs)):
             name = self.names[i]
             self.cancel_all(target_name=name)
@@ -209,27 +336,28 @@ class TrendFollowV1(bt.Strategy):
 
             current_position_size = self.getposition(self.pairs[i]).size
             if current_position_size == 0:
-                equity = DataUtil.convert_to_decimal(self.broker.getvalue())
+                if name in ['BTCUSDT', 'ETHUSDT', 'BCHUSDT', 'SOLUSDT', 'EOSUSDT']:
+                    long_stop_price = long_adj_high_band - long_atr * self.p.atr_constant[name]['long']
+                    long_stop_price = int(long_stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
+                    self.long_stop_prices[i] = long_stop_price
 
-                long_stop_price = long_adj_high_band - long_atr * self.p.atr_constant[name]['long']
-                long_stop_price = int(long_stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
-                self.long_stop_prices[i] = long_stop_price
+                    long_qty = equity * (self.p.risk[name]['long'] / Decimal('100')) / abs(long_adj_high_band - long_stop_price)
+                    # if long_qty * long_adj_high_band / leverage >= equity:
+                    #     long_qty = equity * Decimal('0.98') / long_adj_high_band
+                    long_qty = int(long_qty / self.p.step_size[name]) * self.p.step_size[name]
+                    if name in ['BTCUSDT', 'ETHUSDT', 'BCHUSDT', 'SOLUSDT']:
+                        self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(long_adj_high_band), size=float(long_qty))
 
-                long_qty = equity * (self.p.risk[name]['long'] / Decimal('100')) / abs(long_adj_high_band - long_stop_price)
-                if long_qty * long_adj_high_band >= equity:
-                    long_qty = equity * Decimal('0.98') / long_adj_high_band
-                long_qty = int(long_qty / self.p.step_size[name]) * self.p.step_size[name]
-                self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(long_adj_high_band), size=float(long_qty))
+                    short_stop_price = short_adj_low_band + short_atr * self.p.atr_constant[name]['short']
+                    short_stop_price = int(short_stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
+                    self.short_stop_prices[i] = short_stop_price
 
-                short_stop_price = short_adj_low_band + short_atr * self.p.atr_constant[name]['short']
-                short_stop_price = int(short_stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
-                self.short_stop_prices[i] = short_stop_price
-
-                short_qty = equity * (self.p.risk[name]['short'] / Decimal('100')) / abs(short_adj_low_band - short_stop_price)
-                if short_qty * short_adj_low_band >= equity:
-                    short_qty = equity * Decimal('0.98') / short_adj_low_band
-                short_qty = int(short_qty / self.p.step_size[name]) * self.p.step_size[name]
-                self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], price=float(short_adj_low_band), size=float(short_qty))
+                    short_qty = equity * (self.p.risk[name]['short'] / Decimal('100')) / abs(short_adj_low_band - short_stop_price)
+                    # if short_qty * short_adj_low_band / leverage >= equity :
+                    #     short_qty = equity * Decimal('0.98') / short_adj_low_band
+                    short_qty = int(short_qty / self.p.step_size[name]) * self.p.step_size[name]
+                    if name in ['ETHUSDT', 'BCHUSDT', 'EOSUSDT']:
+                        self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], price=float(short_adj_low_band), size=float(short_qty))
             elif current_position_size > 0:
                 if before_close >= self.long_stop_prices[i] > current_close:
                     self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i], size=float(current_position_size))
@@ -242,14 +370,14 @@ class TrendFollowV1(bt.Strategy):
                     self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], size=float(abs(current_position_size)), price=float(short_adj_high_band))
 
 if __name__ == '__main__':
-    data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
-    # data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+    # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+    data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
     # data_path = "/Users/tjgus/Desktop/project/krtrade/backData"
     cerebro = bt.Cerebro()
     cerebro.addstrategy(TrendFollowV1)
 
     cerebro.broker.setcash(13000)
-    cerebro.broker.setcommission(commission=0.0005, leverage=4)
+    cerebro.broker.setcommission(commission=0.0005, leverage=leverage)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
@@ -278,3 +406,24 @@ if __name__ == '__main__':
     mdd = qs.stats.max_drawdown(returns)
     print(f" quanstats's my returns MDD : {mdd * 100:.2f} %")
 
+
+    file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+    # file_name = "/Users/tjgus/Desktop/project/krtrade/backData/result/"
+    # file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+    for pair, tick_kind in pairs.items():
+        file_name += pair + "-"
+    file_name += "TrendFollowV1"
+
+    strat = results[0]
+    order_balance_list = strat.order_balance_list
+    df = pd.DataFrame(order_balance_list, columns=["date", "value"])
+    df['date'] = pd.to_datetime(df['date'])
+    df['date'] = df['date'].dt.date
+    df = df.sort_values('value', ascending=True).drop_duplicates('date').sort_index()
+    df['value'] = df['value'].astype('float64')
+    df['value'] = df['value'].pct_change()
+    df['date'] = pd.to_datetime(df['date'])
+    df = df.dropna()
+    df = df.set_index('date')
+    df.index.name = 'date'
+    qs.reports.html(df['value'], output=f"{file_name}.html", download_filename=f"{file_name}.html", title=file_name)
