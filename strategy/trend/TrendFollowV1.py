@@ -40,11 +40,11 @@ class TrendFollowV1(bt.Strategy):
         },
         high_band_length={
             'BTCUSDT': {
-                'long': 30,
+                'long': 40,
                 'short': 5,
             },
             'ETHUSDT': {
-                'long': 30,
+                'long': 40,
                 'short': 5,
             },
             'SOLUSDT':{
@@ -52,7 +52,7 @@ class TrendFollowV1(bt.Strategy):
                 'short':15,
             },
             'BCHUSDT': {
-                'long': 30,
+                'long': 40,
                 'short': 15
             },
             'EOSUSDT': {
@@ -62,7 +62,7 @@ class TrendFollowV1(bt.Strategy):
         },
         low_band_length={
             'BTCUSDT': {
-                'long': 15,
+                'long': 20,
                 'short': 20,
             },
             'ETHUSDT': {
@@ -70,7 +70,7 @@ class TrendFollowV1(bt.Strategy):
                 'short': 20
             },
             'SOLUSDT':{
-                'long': 15,
+                'long': 25,
                 'short':30,
             },
             'BCHUSDT': {
@@ -88,7 +88,7 @@ class TrendFollowV1(bt.Strategy):
                 'short': Decimal('1'),
             },
             'ETHUSDT': {
-                'long': Decimal('10'),
+                'long': Decimal('5'),
                 'short': Decimal('50'),
             },
             'SOLUSDT': {
