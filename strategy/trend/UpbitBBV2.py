@@ -208,8 +208,8 @@ class UpbitBBV2(bt.Strategy):
 
 
 if __name__ == '__main__':
-    # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
-    data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+    data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+    # data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
     # data_path = "/Users/tjgus/Desktop/project/krtrade/backData";
     cerebro = bt.Cerebro()
     cerebro.broker.setcash(10000000) # 초기 시드 설정
@@ -220,7 +220,7 @@ if __name__ == '__main__':
     # 데이터 INSERT
     for pair, tick_kind in pairs.items():
         df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_UPBIT, pair, tick_kind)
-        df = DataUtil.get_candle_data_in_scape(df, "2021-10-01 00:00:00", "2025-01-01 00:00:00")
+        df = DataUtil.get_candle_data_in_scape(df, "2022-01-01", "2026-01-01")
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 
@@ -229,9 +229,9 @@ if __name__ == '__main__':
     results = cerebro.run()
     print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
 
-    # file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+    file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
     # file_name = "/Users/tjgus/Desktop/project/krtrade/backData/result/"
-    file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+    # file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
     for pair, tick_kind in pairs.items():
         file_name += pair + "-"
     file_name += "UpbitBBV2"

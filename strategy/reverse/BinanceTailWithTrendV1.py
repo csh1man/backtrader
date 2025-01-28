@@ -6,18 +6,16 @@ from util.Util import DataUtil
 from decimal import Decimal
 
 pairs = {
+    'BTCUSDT' : DataUtil.CANDLE_TICK_1HOUR,
     'ETHUSDT' : DataUtil.CANDLE_TICK_1HOUR,
     'SOLUSDT':DataUtil.CANDLE_TICK_1HOUR,
-    'BTCUSDT' : DataUtil.CANDLE_TICK_1HOUR,
     '1000PEPEUSDT':DataUtil.CANDLE_TICK_1HOUR,
-    'ORDIUSDT':DataUtil.CANDLE_TICK_1HOUR,
-    'ONDOUSDT':DataUtil.CANDLE_TICK_1HOUR,
-    'TAOUSDT':DataUtil.CANDLE_TICK_1HOUR,
-    'SHIB1000USDT':DataUtil.CANDLE_TICK_1HOUR,
     '1000BONKUSDT':DataUtil.CANDLE_TICK_1HOUR,
+    'WIFUSDT':DataUtil.CANDLE_TICK_1HOUR,
+    '1000SHIBUSDT':DataUtil.CANDLE_TICK_1HOUR,
+    'ONDOUSDT':DataUtil.CANDLE_TICK_1HOUR,
+    'ORDIUSDT':DataUtil.CANDLE_TICK_1HOUR,
 }
-
-leverage=4
 
 class TailStrategyWithTrendV1(bt.Strategy):
     params=dict(
@@ -27,10 +25,10 @@ class TailStrategyWithTrendV1(bt.Strategy):
             'SOLUSDT' : [Decimal('1.0')],
             'DOGEUSDT': [Decimal('2.0'), Decimal('4.0'), Decimal('4.0'), Decimal('8.0'), Decimal('8.0')],
             '1000PEPEUSDT' : [Decimal('2.0'), Decimal('4.0'), Decimal('4.0'), Decimal('8.0'), Decimal('8.0')],
-            'TAOUSDT': [Decimal('2.0'), Decimal('4.0'), Decimal('4.0'), Decimal('8.0'), Decimal('8.0')],
+            'WIFUSDT': [Decimal('2.0'), Decimal('4.0'), Decimal('4.0'), Decimal('8.0'), Decimal('8.0')],
             'ONDOUSDT':[Decimal('2.0'), Decimal('2.0'), Decimal('4.0'), Decimal('4.0'), Decimal('8.0')],
             'ORDIUSDT':[Decimal('2.0'), Decimal('2.0'), Decimal('4.0'), Decimal('4.0'), Decimal('8.0')],
-            'SHIB1000USDT': [Decimal('2.0'), Decimal('4.0'), Decimal('4.0'), Decimal('8.0'), Decimal('8.0')],
+            '1000SHIBUSDT': [Decimal('2.0'), Decimal('4.0'), Decimal('4.0'), Decimal('8.0'), Decimal('8.0')],
             '1000BONKUSDT': [Decimal('2.0'), Decimal('2.0'), Decimal('4.0'), Decimal('4.0'), Decimal('8.0')],
         },
         percent={
@@ -59,8 +57,8 @@ class TailStrategyWithTrendV1(bt.Strategy):
                 'def': [Decimal('3.0'), Decimal('6.0'), Decimal('7.0'), Decimal('10.0'), Decimal('12.0')],
                 'bear': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('12.0'), Decimal('15.0')],
             },
-            'TAOUSDT': {
-                'bull': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('12.0'), Decimal('15.0')],
+            'WIFUSDT': {
+                'bull': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('10.0')],
                 'def': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('12.0'), Decimal('15.0')],
                 'bear': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('12.0'), Decimal('15.0')],
             },
@@ -74,7 +72,7 @@ class TailStrategyWithTrendV1(bt.Strategy):
                 'def': [Decimal('3.0'), Decimal('5.0'), Decimal('7.0'), Decimal('10.0'), Decimal('15.0')],
                 'bear': [Decimal('3.0'), Decimal('5.0'), Decimal('7.0'), Decimal('10.0'), Decimal('15.0')],
             },
-            'SHIB1000USDT': {
+            '1000SHIBUSDT': {
                 'bull': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('10.0')],
                 'def': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('10.0')],
                 'bear': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('12.0'), Decimal('15.0')],
@@ -91,10 +89,10 @@ class TailStrategyWithTrendV1(bt.Strategy):
             'SOLUSDT': 10,
             'DOGEUSDT': 3,
             '1000PEPEUSDT': 3,
-            'TAOUSDT': 3,
+            'WIFUSDT': 3,
             'ONDOUSDT': 3,
             'ORDIUSDT': 3,
-            'SHIB1000USDT': 3,
+            '1000SHIBUSDT': 3,
             '1000BONKUSDT': 3,
         },
         atr_constant={
@@ -103,10 +101,10 @@ class TailStrategyWithTrendV1(bt.Strategy):
             'SOLUSDT': Decimal('2.0'),
             'DOGEUSDT': Decimal('1.0'),
             '1000PEPEUSDT': Decimal('1.0'),
-            'TAOUSDT': Decimal('1.0'),
+            'WIFUSDT': Decimal('1.0'),
             'ONDOUSDT': Decimal('1.0'),
             'ORDIUSDT': Decimal('1.0'),
-            'SHIB1000USDT': Decimal('1.0'),
+            '1000SHIBUSDT': Decimal('1.0'),
             '1000BONKUSDT': Decimal('1.0'),
         },
         bb_length={
@@ -115,10 +113,10 @@ class TailStrategyWithTrendV1(bt.Strategy):
             'SOLUSDT': 80,
             'DOGEUSDT': 3,
             '1000PEPEUSDT': 3,
-            'TAOUSDT': 3,
+            'WIFUSDT': 3,
             'ONDOUSDT': 3,
             'ORDIUSDT': 3,
-            'SHIB1000USDT': 3,
+            '1000SHIBUSDT': 3,
             '1000BONKUSDT': 3,
         },
         bb_mult={
@@ -127,10 +125,10 @@ class TailStrategyWithTrendV1(bt.Strategy):
             'SOLUSDT': 1.0,
             'DOGEUSDT': 1.0,
             '1000PEPEUSDT': 3,
-            'TAOUSDT': 3,
+            'WIFUSDT': 3,
             'ONDOUSDT': 3,
             'ORDIUSDT': 3,
-            'SHIB1000USDT': 3,
+            '1000SHIBUSDT': 3,
             '1000BONKUSDT': 3,
         },
         rsi_length={
@@ -139,10 +137,10 @@ class TailStrategyWithTrendV1(bt.Strategy):
             'SOLUSDT': 3,
             'DOGEUSDT': 3,
             '1000PEPEUSDT': 3,
-            'TAOUSDT': 3,
+            'WIFUSDT': 3,
             'ONDOUSDT': 3,
             'ORDIUSDT': 3,
-            'SHIB1000USDT': 3,
+            '1000SHIBUSDT': 3,
             '1000BONKUSDT': 3,
         },
         rsi_limit={
@@ -150,11 +148,11 @@ class TailStrategyWithTrendV1(bt.Strategy):
             'ETHUSDT': 3,
             'SOLUSDT': 3,
             'DOGEUSDT': 60,
-            '1000PEPEUSDT': 70,
-            'TAOUSDT': 70,
+            '1000PEPEUSDT': 60,
+            'WIFUSDT': 70,
             'ONDOUSDT': 70,
             'ORDIUSDT': 70,
-            'SHIB1000USDT': 65,
+            '1000SHIBUSDT': 60,
             '1000BONKUSDT': 60
         },
         high_band_span={
@@ -163,11 +161,11 @@ class TailStrategyWithTrendV1(bt.Strategy):
             'SOLUSDT': 3,
             'DOGEUSDT': 3,
             '1000PEPEUSDT': 3,
-            'TAOUSDT': 3,
+            'WIFUSDT': 3,
             'ONDOUSDT': 3,
             'ORDIUSDT': 3,
-            'SHIB1000USDT': 3,
-            '1000BONKUSDT': 3,
+            '1000SHIBUSDT': 3,
+            '1000BONKUSDT': 2,
         },
         low_band_span={
             'BTCUSDT': 3,
@@ -175,35 +173,35 @@ class TailStrategyWithTrendV1(bt.Strategy):
             'SOLUSDT': 3,
             'DOGEUSDT': 3,
             '1000PEPEUSDT': 3,
-            'TAOUSDT': 3,
+            'WIFUSDT': 3,
             'ONDOUSDT': 3,
             'ORDIUSDT': 3,
-            'SHIB1000USDT': 3,
-            '1000BONKUSDT': 3,
+            '1000SHIBUSDT': 3,
+            '1000BONKUSDT': 2,
         },
         tick_size={
             'BTCUSDT': Decimal('0.10'),
             'ETHUSDT': Decimal('0.01'),
-            'SOLUSDT': Decimal('0.010'),
+            'SOLUSDT': Decimal('0.0100'),
             'DOGEUSDT': Decimal('0.00001'),
-            '1000PEPEUSDT': Decimal('0.0000010'),
-            'TAOUSDT': Decimal('0.01'),
-            'ONDOUSDT': Decimal('0.0001'),
-            'ORDIUSDT': Decimal('0.001'),
-            'SHIB1000USDT': Decimal('0.000001'),
+            '1000PEPEUSDT': Decimal('0.0000001'),
+            'WIFUSDT': Decimal('0.0001000'),
+            'ONDOUSDT': Decimal('0.0001000'),
+            'ORDIUSDT': Decimal('0.001000'),
+            '1000SHIBUSDT': Decimal('0.000001'),
             '1000BONKUSDT': Decimal('0.0000010')
         },
         step_size={
             'BTCUSDT': Decimal('0.001'),
-            'ETHUSDT': Decimal('0.01'),
-            'SOLUSDT': Decimal('0.1'),
+            'ETHUSDT': Decimal('0.001'),
+            'SOLUSDT': Decimal('1'),
             'DOGEUSDT': Decimal('1'),
-            '1000PEPEUSDT': Decimal('100'),
-            'TAOUSDT': Decimal('0.001'),
-            'ONDOUSDT': Decimal('1'),
-            'ORDIUSDT': Decimal('0.01'),
-            'SHIB1000USDT': Decimal('10'),
-            '1000BONKUSDT': Decimal('100')
+            '1000PEPEUSDT': Decimal('1'),
+            'WIFUSDT': Decimal('0.1'),
+            'ONDOUSDT': Decimal('0.1'),
+            'ORDIUSDT': Decimal('0.1'),
+            '1000SHIBUSDT': Decimal('1'),
+            '1000BONKUSDT': Decimal('1')
         }
     )
     def log(self, txt):
@@ -329,25 +327,25 @@ class TailStrategyWithTrendV1(bt.Strategy):
             if name in ['ETHUSDT', 'SOLUSDT', 'BTCUSDT']:
                 current_position_size = self.getposition(self.pairs[i]).size
                 if current_position_size == 0:
-                    if self.closes[i][-1] < self.bb_top[i][-1] and self.closes[i][0] >= self.bb_top[i][0]:
+                    if self.closes[i][0] >= self.bb_top[i][0]:
                         stop_price = DataUtil.convert_to_decimal(self.closes[i][0]) - DataUtil.convert_to_decimal(self.atrs[i][0]) * self.p.atr_constant[name]
                         stop_price = int(stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
                         self.stop_prices[i] = stop_price
-                        # 추적 손절매용 데이터 업데이트
                         self.entry_prices[i] = DataUtil.convert_to_decimal(self.closes[i][0])
                         self.entry_atrs[i] = DataUtil.convert_to_decimal(self.atrs[i][0])
 
                         equity = DataUtil.convert_to_decimal(self.broker.getvalue())
-                        qty = equity * (self.p.risk[name][0] / Decimal('100')) / abs(DataUtil.convert_to_decimal(self.closes[i][0]) - stop_price)
+                        qty = equity * self.p.risk[name][0] / Decimal('100') / abs(DataUtil.convert_to_decimal(self.closes[i][0]) - stop_price)
                         if qty * DataUtil.convert_to_decimal(self.closes[i][0]) >= equity:
                             qty = equity * Decimal('0.98') / DataUtil.convert_to_decimal(self.closes[i][0])
                         qty = int(qty / self.p.step_size[name]) * self.p.step_size[name]
                         self.order = self.buy(exectype=bt.Order.Market, data=self.pairs[i], size=float(qty))
                 elif current_position_size > 0:
-                    if (DataUtil.convert_to_decimal(self.closes[i][0]) - self.entry_prices[i]) >= self.entry_atrs[i]:
-                        self.stop_prices[i] = self.stop_prices[i] + self.entry_atrs[i] / Decimal('2')
-                        self.entry_prices[i] = DataUtil.convert_to_decimal(self.closes[i][0])
-                        self.entry_atrs[i] = DataUtil.convert_to_decimal(self.atrs[i][0])
+                    # if DataUtil.convert_to_decimal(self.closes[i][0]) > self.entry_prices[i] and \
+                    #         (DataUtil.convert_to_decimal(self.closes[i][0]) - self.entry_prices[i]) >= self.entry_atrs[i]:
+                    #     self.stop_prices[i] = self.stop_prices[i] + self.entry_atrs[i] / Decimal('2')
+                    #     self.entry_prices[i] = DataUtil.convert_to_decimal(self.closes[i][0])
+                    #     self.entry_atrs[i] = DataUtil.convert_to_decimal(self.atrs[i][0])
 
                     if DataUtil.convert_to_decimal(self.closes[i][0]) < self.stop_prices[i]:
                         self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i], size=float(current_position_size))
@@ -410,10 +408,10 @@ if __name__ == '__main__':
     cerebro.addstrategy(TailStrategyWithTrendV1)
 
     cerebro.broker.setcash(13000)
-    cerebro.broker.setcommission(commission=0.0005, leverage=leverage)
+    cerebro.broker.setcommission(commission=0.0005, leverage=3)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BYBIT, pair, tick_kind)
+        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BINANCE, pair, tick_kind)
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 
@@ -443,7 +441,7 @@ if __name__ == '__main__':
     file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
     for pair, tick_kind in pairs.items():
         file_name += pair + "-"
-    file_name += "TailStrategyWithTrendV1-leverage [" + str(leverage) + "]"
+    file_name += "BinanceTailWithTrendV1"
 
     strat = results[0]
     order_balance_list = strat.order_balance_list
