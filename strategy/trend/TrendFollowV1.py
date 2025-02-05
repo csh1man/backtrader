@@ -12,7 +12,7 @@ pairs = {
     'EOSUSDT': DataUtil.CANDLE_TICK_4HOUR
 }
 
-leverage=3
+leverage=4
 
 class TrendFollowV1(bt.Strategy):
     params = dict(
@@ -342,8 +342,8 @@ class TrendFollowV1(bt.Strategy):
                     self.long_stop_prices[i] = long_stop_price
 
                     long_qty = equity * (self.p.risk[name]['long'] / Decimal('100')) / abs(long_adj_high_band - long_stop_price)
-                    # if long_qty * long_adj_high_band / leverage >= equity:
-                    #     long_qty = equity * Decimal('0.98') / long_adj_high_band
+                    if long_qty * long_adj_high_band / leverage >= equity:
+                        long_qty = equity * Decimal('0.98') / long_adj_high_band
                     long_qty = int(long_qty / self.p.step_size[name]) * self.p.step_size[name]
                     if name in ['BTCUSDT', 'ETHUSDT', 'BCHUSDT', 'SOLUSDT']:
                         self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(long_adj_high_band), size=float(long_qty))
