@@ -7,38 +7,41 @@ from util.Util import DataUtil
 from decimal import Decimal
 
 pairs = {
-    # 'ETHUSDT': DataUtil.CANDLE_TICK_4HOUR,
-    # 'SOLUSDT': DataUtil.CANDLE_TICK_4HOUR,
-    # 'BTCUSDT': DataUtil.CANDLE_TICK_4HOUR,
-    # 'BCHUSDT': DataUtil.CANDLE_TICK_4HOUR,
+    'ETHUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    'SOLUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    'BTCUSDT': DataUtil.CANDLE_TICK_1HOUR,
     '1000PEPEUSDT': DataUtil.CANDLE_TICK_1HOUR,
     '1000SHIBUSDT': DataUtil.CANDLE_TICK_1HOUR,
     'ONDOUSDT': DataUtil.CANDLE_TICK_1HOUR,
     'ORDIUSDT': DataUtil.CANDLE_TICK_1HOUR,
     'SUIUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    'TAOUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    'IMXUSDT':DataUtil.CANDLE_TICK_1HOUR,
 }
 
-leverage=3
+leverage=5
 
 class BinanceTailCatchWithTrendFollowV3(bt.Strategy):
     params=dict(
         log=True,
         risks={
-            'ETHUSDT': [Decimal('1.5'), Decimal('1.5')],
-            'BTCUSDT': [Decimal('1.5'), Decimal('1.5')],
-            'SOLUSDT': [Decimal('1.5'), Decimal('1.5')],
+            'ETHUSDT': [Decimal('1.0'), Decimal('2.0')],
+            'BTCUSDT': [Decimal('1.0'), Decimal('1.5')],
+            'SOLUSDT': [Decimal('1.0'), Decimal('1.5')],
             'BCHUSDT': [Decimal('1.5'), Decimal('1.5')],
             '1000PEPEUSDT': [Decimal('2'), Decimal('4'), Decimal('4'), Decimal('4'), Decimal('8')],
             '1000SHIBUSDT': [Decimal('2'), Decimal('4'), Decimal('4'), Decimal('4'), Decimal('8')],
             'ONDOUSDT': [Decimal('2'), Decimal('4'), Decimal('4'), Decimal('4'), Decimal('8')],
             'ORDIUSDT': [Decimal('2'), Decimal('4'), Decimal('4'), Decimal('4'), Decimal('8')],
             'SUIUSDT': [Decimal('2'), Decimal('4'), Decimal('4'), Decimal('4'), Decimal('8')],
+            'TAOUSDT': [Decimal('2'), Decimal('4'), Decimal('4'), Decimal('4'), Decimal('8')],
+            'IMXUSDT': [Decimal('2'), Decimal('4'), Decimal('4'), Decimal('4'), Decimal('8')],
         },
         entry_mode={
           'BTCUSDT': 0,
           'ETHUSDT': 2,
           'SOLUSDT': 0,
-          'BCHUSDT': 2,
+          'BCHUSDT': 0,
         },
         atr_length={
             'BTCUSDT': [10, 10],
@@ -50,78 +53,96 @@ class BinanceTailCatchWithTrendFollowV3(bt.Strategy):
             'ONDOUSDT': [10, 10],
             'ORDIUSDT': [10, 10],
             'SUIUSDT': [10, 10],
+            'TAOUSDT': [10, 10],
+            'IMXUSDT': [10, 10],
         },
         atr_constant={
-            'BTCUSDT': [Decimal('1.0'), Decimal('1.0')],
-            'ETHUSDT': [Decimal('1.0'), Decimal('1.0')],
-            'SOLUSDT': [Decimal('1.0'), Decimal('1.0')],
-            'BCHUSDT': [Decimal('1.0'), Decimal('1.0')],
+            'BTCUSDT': [Decimal('2.0'), Decimal('2.0')],
+            'ETHUSDT': [Decimal('2.0'), Decimal('2.0')],
+            'SOLUSDT': [Decimal('2.0'), Decimal('2.0')],
+            'BCHUSDT': [Decimal('2.0'), Decimal('2.0')],
             '1000PEPEUSDT': [Decimal('1.0'), Decimal('1.0')],
             '1000SHIBUSDT': [Decimal('1.0'), Decimal('1.0')],
             'ONDOUSDT': [Decimal('1.0'), Decimal('1.0')],
             'ORDIUSDT': [Decimal('1.0'), Decimal('1.0')],
             'SUIUSDT': [Decimal('1.0'), Decimal('1.0')],
+            'TAOUSDT': [Decimal('1.0'), Decimal('1.0')],
+            'IMXUSDT': [Decimal('1.0'), Decimal('1.0')],
         },
         high_band_length={
-            'BTCUSDT': [40, 5],
-            'ETHUSDT': [40, 5],
-            'SOLUSDT': [30, 15],
-            'BCHUSDT': [40, 15],
+            'BTCUSDT': [120, 20],
+            'ETHUSDT': [160, 20],
+            'SOLUSDT': [120, 15],
+            'BCHUSDT': [160, 60],
             '1000PEPEUSDT': [40, 15],
             '1000SHIBUSDT': [40, 15],
             'ONDOUSDT': [40, 15],
             'ORDIUSDT': [40, 15],
             'SUIUSDT': [40, 15],
+            'TAOUSDT': [40, 15],
+            'IMXUSDT': [40, 15],
         },
         low_band_length={
-            'BTCUSDT': [20, 20],
-            'ETHUSDT': [15, 20],
-            'SOLUSDT': [25, 30],
-            'BCHUSDT': [15, 50],
+            'BTCUSDT': [60, 80],
+            'ETHUSDT': [80, 80],
+            'SOLUSDT': [80, 30],
+            'BCHUSDT': [80, 200],
             '1000PEPEUSDT': [15, 50],
             '1000SHIBUSDT': [15, 50],
             'ONDOUSDT': [40, 15],
             'ORDIUSDT': [40, 15],
             'SUIUSDT': [40, 15],
+            'TAOUSDT': [40, 15],
+            'IMXUSDT': [40, 15],
         },
         high_band_constant={
-            'BTCUSDT': [Decimal('1'), Decimal('1')],
+            'BTCUSDT': [Decimal('20'), Decimal('1')],
             'ETHUSDT': [Decimal('5'), Decimal('50')],
             'SOLUSDT': [Decimal('10'), Decimal('5')],
             'BCHUSDT': [Decimal('10'), Decimal('50')],
         },
         low_band_constant={
-            'BTCUSDT': [Decimal('1'), Decimal('1')],
+            'BTCUSDT': [Decimal('20'), Decimal('1')],
             'ETHUSDT': [Decimal('5'), Decimal('5')],
-            'SOLUSDT': [Decimal('5'), Decimal('5')],
+            'SOLUSDT': [Decimal('10'), Decimal('5')],
             'BCHUSDT': [Decimal('20'), Decimal('0')],
         },
         percent={
             '1000PEPEUSDT': {
-                'bull' : [Decimal('4.0'), Decimal('8.0'), Decimal('10.0'), Decimal('20.0'), Decimal('25.0')],
-                'def': [Decimal('4.0'), Decimal('8.0'), Decimal('10.0'), Decimal('20.0'), Decimal('25.0')],
-                'bear': [Decimal('4.0'), Decimal('8.0'), Decimal('10.0'), Decimal('20.0'), Decimal('25.0')],
+                'bull' : [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('10.0')],
+                'def': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('12.0'), Decimal('15.0')],
+                'bear': [Decimal('4.0'), Decimal('6.0'), Decimal('10.0'), Decimal('12.0'), Decimal('15.0')],
             },
             '1000SHIBUSDT': {
-                'bull': [Decimal('4.0'), Decimal('8.0'), Decimal('10.0'), Decimal('20.0'), Decimal('25.0')],
-                'def': [Decimal('4.0'), Decimal('8.0'), Decimal('10.0'), Decimal('20.0'), Decimal('25.0')],
-                'bear': [Decimal('4.0'), Decimal('8.0'), Decimal('10.0'), Decimal('20.0'), Decimal('25.0')],
+                'bull' : [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('10.0')],
+                'def': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('12.0'), Decimal('15.0')],
+                'bear': [Decimal('4.0'), Decimal('6.0'), Decimal('10.0'), Decimal('12.0'), Decimal('15.0')],
             },
             'ONDOUSDT': {
-                'bull': [Decimal('4.0'), Decimal('8.0'), Decimal('10.0'), Decimal('20.0'), Decimal('25.0')],
-                'def': [Decimal('4.0'), Decimal('8.0'), Decimal('10.0'), Decimal('20.0'), Decimal('25.0')],
-                'bear': [Decimal('4.0'), Decimal('8.0'), Decimal('10.0'), Decimal('20.0'), Decimal('25.0')],
+                'bull' : [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('10.0')],
+                'def': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('12.0'), Decimal('15.0')],
+                'bear': [Decimal('4.0'), Decimal('6.0'), Decimal('10.0'), Decimal('12.0'), Decimal('15.0')],
             },
             'ORDIUSDT': {
-                'bull': [Decimal('4.0'), Decimal('8.0'), Decimal('10.0'), Decimal('20.0'), Decimal('25.0')],
-                'def': [Decimal('4.0'), Decimal('8.0'), Decimal('10.0'), Decimal('20.0'), Decimal('25.0')],
-                'bear': [Decimal('4.0'), Decimal('8.0'), Decimal('10.0'), Decimal('20.0'), Decimal('25.0')],
+                'bull' : [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('10.0')],
+                'def': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('12.0'), Decimal('15.0')],
+                'bear': [Decimal('4.0'), Decimal('6.0'), Decimal('10.0'), Decimal('12.0'), Decimal('15.0')],
             },
             'SUIUSDT': {
-                'bull': [Decimal('4.0'), Decimal('8.0'), Decimal('10.0'), Decimal('20.0'), Decimal('25.0')],
-                'def': [Decimal('4.0'), Decimal('8.0'), Decimal('10.0'), Decimal('20.0'), Decimal('25.0')],
-                'bear': [Decimal('4.0'), Decimal('8.0'), Decimal('10.0'), Decimal('20.0'), Decimal('25.0')],
+                'bull' : [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('10.0')],
+                'def': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('12.0'), Decimal('15.0')],
+                'bear': [Decimal('4.0'), Decimal('6.0'), Decimal('10.0'), Decimal('12.0'), Decimal('15.0')],
             },
+            'TAOUSDT': {
+                'bull' : [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('10.0')],
+                'def': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('12.0'), Decimal('15.0')],
+                'bear': [Decimal('4.0'), Decimal('6.0'), Decimal('10.0'), Decimal('12.0'), Decimal('15.0')],
+            },
+            'IMXUSDT': {
+                'bull': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('10.0')],
+                'def': [Decimal('3.0'), Decimal('6.0'), Decimal('10.0'), Decimal('12.0'), Decimal('15.0')],
+                'bear': [Decimal('4.0'), Decimal('6.0'), Decimal('10.0'), Decimal('12.0'), Decimal('15.0')],
+            }
         },
         rsi_length={
             'ETHUSDT': 2,
@@ -133,6 +154,8 @@ class BinanceTailCatchWithTrendFollowV3(bt.Strategy):
             'ONDOUSDT': 2,
             'ORDIUSDT': 2,
             'SUIUSDT': 2,
+            'TAOUSDT': 2,
+            'IMXUSDT': 2,
         },
         rsi_limit={
             'ETHUSDT': {
@@ -179,6 +202,16 @@ class BinanceTailCatchWithTrendFollowV3(bt.Strategy):
                 'exit': 70,
                 'bull': 70,
                 'bear': 30,
+            },
+            'TAOUSDT': {
+                'exit': 70,
+                'bull': 70,
+                'bear': 30,
+            },
+            'IMXUSDT': {
+                'exit': 70,
+                'bull': 70,
+                'bear': 30,
             }
         },
         tick_size={
@@ -191,6 +224,8 @@ class BinanceTailCatchWithTrendFollowV3(bt.Strategy):
             'ONDOUSDT': Decimal('0.0001000'),
             'ORDIUSDT': Decimal('0.001000'),
             'SUIUSDT': Decimal('0.000100'),
+            'TAOUSDT': Decimal('0.01'),
+            'IMXUSDT': Decimal('0.0001')
         },
         step_size={
             'BTCUSDT': Decimal('0.001'),
@@ -202,6 +237,8 @@ class BinanceTailCatchWithTrendFollowV3(bt.Strategy):
             'ONDOUSDT': Decimal('0.1'),
             'ORDIUSDT': Decimal('0.1'),
             'SUIUSDT': Decimal('0.1'),
+            'TAOUSDT': Decimal('0.001'),
+            'IMXUSDT': Decimal('1')
         }
     )
 
@@ -367,57 +404,56 @@ class BinanceTailCatchWithTrendFollowV3(bt.Strategy):
                 short_adj_low_band = int(short_adj_low_band / tick_size) * tick_size
 
                 current_position_size = self.getposition(self.pairs[i]).size
-                is_entry_time = self.dates[i].datetime(0).hour % 4 == 1
-                if is_entry_time:
-                    if current_position_size == 0:
-                        long_stop_price = long_adj_high_band - long_atr * self.p.atr_constant[name][0]
-                        long_stop_price = int(long_stop_price / tick_size) * tick_size
-                        self.long_stop_prices[i] = long_stop_price
+                if current_position_size == 0:
+                    long_stop_price = long_adj_high_band - long_atr * self.p.atr_constant[name][0]
+                    long_stop_price = int(long_stop_price / tick_size) * tick_size
+                    self.long_stop_prices[i] = long_stop_price
 
-                        long_qty = equity * (self.p.risks[name][0] / Decimal('100')) / abs(
-                            long_adj_high_band - long_stop_price)
-                        long_qty = int(long_qty / step_size) * step_size
+                    long_qty = equity * (self.p.risks[name][0] / Decimal('100')) / abs(
+                        long_adj_high_band - long_stop_price)
+                    long_qty = int(long_qty / step_size) * step_size
 
-                        short_stop_price = short_adj_low_band + short_atr * self.p.atr_constant[name][1]
-                        short_stop_price = int(short_stop_price / tick_size) * tick_size
-                        self.short_stop_prices[i] = short_stop_price
+                    short_stop_price = short_adj_low_band + short_atr * self.p.atr_constant[name][1]
+                    short_stop_price = int(short_stop_price / tick_size) * tick_size
+                    self.short_stop_prices[i] = short_stop_price
 
-                        short_qty = equity * (self.p.risks[name][1] / Decimal('100')) / abs(
-                            short_adj_low_band - short_stop_price)
-                        short_qty = int(short_qty / step_size) * step_size
+                    short_qty = equity * (self.p.risks[name][1] / Decimal('100')) / abs(
+                        short_adj_low_band - short_stop_price)
+                    short_qty = int(short_qty / step_size) * step_size
 
-                        current_cash = DataUtil.convert_to_decimal(self.broker.get_cash())
-                        if self.p.entry_mode[name] in [0, 2]:
-                            if long_qty * long_adj_high_band / Decimal(leverage) >= current_cash:
-                                long_qty = Decimal(leverage) * current_cash / long_adj_high_band
-                                long_qty = int(long_qty / step_size) * step_size
-                            self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i],
-                                                  price=float(long_adj_high_band),
-                                                  size=float(long_qty))
-                        if self.p.entry_mode[name] in [1, 2]:
-                            if short_qty * short_adj_low_band / Decimal(leverage) >= current_cash:
-                                short_qty = Decimal(leverage) * current_cash / short_adj_low_band
-                                short_qty = int(short_qty / step_size) * step_size
-                            self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i],
-                                                   price=float(short_adj_low_band),
-                                                   size=float(short_qty))
-                    elif current_position_size > 0:
-                        long_stop_price = self.long_stop_prices[i]
-                        if DataUtil.convert_to_decimal(self.closes[i][0]) < long_stop_price:
-                            self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i],
-                                                   size=float(current_position_size))
-                        else:
-                            self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i],
-                                                   price=float(long_adj_low_band), size=float(current_position_size))
-                    elif current_position_size < 0:
-                        short_stop_price = self.short_stop_prices[i]
-                        if DataUtil.convert_to_decimal(
-                                self.closes[i][-1]) < short_stop_price <= DataUtil.convert_to_decimal(self.closes[i][0]):
-                            self.order = self.buy(exectype=bt.Order.Market, data=self.pairs[i],
-                                                  size=float(abs(current_position_size)))
-                        else:
-                            self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i],
-                                                  price=float(short_adj_high_band), size=float(abs(current_position_size)))
+                    current_cash = DataUtil.convert_to_decimal(self.broker.get_cash())
+                    if self.p.entry_mode[name] in [0, 2]:
+                        if long_qty * long_adj_high_band / Decimal(leverage) >= current_cash:
+                            long_qty = Decimal(leverage) * current_cash / long_adj_high_band
+                            long_qty = int(long_qty / step_size) * step_size
+                        self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i],
+                                              price=float(long_adj_high_band),
+                                              size=float(long_qty))
+                    if self.p.entry_mode[name] in [1, 2]:
+                        if short_qty * short_adj_low_band / Decimal(leverage) >= current_cash:
+                            short_qty = Decimal(leverage) * current_cash / short_adj_low_band
+                            short_qty = int(short_qty / step_size) * step_size
+                        self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i],
+                                               price=float(short_adj_low_band),
+                                               size=float(short_qty))
+                elif current_position_size > 0:
+                    long_stop_price = self.long_stop_prices[i]
+                    if DataUtil.convert_to_decimal(self.closes[i][0]) < long_stop_price:
+                        self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i],
+                                               size=float(current_position_size))
+                    else:
+                        self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i],
+                                               price=float(long_adj_low_band), size=float(current_position_size))
+                elif current_position_size < 0:
+                    short_stop_price = self.short_stop_prices[i]
+                    if DataUtil.convert_to_decimal(
+                            self.closes[i][-1]) < short_stop_price <= DataUtil.convert_to_decimal(self.closes[i][0]):
+                        self.order = self.buy(exectype=bt.Order.Market, data=self.pairs[i],
+                                              size=float(abs(current_position_size)))
+                    else:
+                        self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i],
+                                              price=float(short_adj_high_band), size=float(abs(current_position_size)))
+
             else:
                 # 역추세 페어 필드
                 current_position_size = self.getposition(self.pairs[i]).size
@@ -447,8 +483,8 @@ class BinanceTailCatchWithTrendFollowV3(bt.Strategy):
 
 
 if __name__ == '__main__':
-    # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
-    data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+    data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+    # data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
     # data_path = "/Users/tjgus/Desktop/project/krtrade/backData"
     cerebro = bt.Cerebro()
     cerebro.addstrategy(BinanceTailCatchWithTrendFollowV3)
@@ -484,16 +520,16 @@ if __name__ == '__main__':
     print(f" quanstats's my returns MDD : {mdd * 100:.2f} %")
 
 
-    file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+    # file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
     # file_name = "/Users/tjgus/Desktop/project/krtrade/backData/result/"
-    # file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+    file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
     for pair, tick_kind in pairs.items():
         file_name += pair + "-"
     file_name += "BinanceTailCatchWithTrendFollowV3"
 
     strat = results[0]
     order_balance_list = strat.order_balance_list
-    df = pd.DataFrame(order_balance_list, columns=["date", "value"]) 
+    df = pd.DataFrame(order_balance_list, columns=["date", "value"])
     df['date'] = pd.to_datetime(df['date'])
     df['date'] = df['date'].dt.date
     df = df.sort_values('value', ascending=True).drop_duplicates('date').sort_index()
