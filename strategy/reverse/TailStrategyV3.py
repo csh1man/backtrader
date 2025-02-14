@@ -7,7 +7,8 @@ from decimal import Decimal
 pairs = {
     'ONDOUSDT': DataUtil.CANDLE_TICK_1HOUR,
     '1000PEPEUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    '1000SHIBUSDT': DataUtil.CANDLE_TICK_1HOUR
+    '1000SHIBUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    'SEIUSDT': DataUtil.CANDLE_TICK_1HOUR,
 }
 
 class TailStrategyV3(bt.Strategy):
@@ -17,6 +18,7 @@ class TailStrategyV3(bt.Strategy):
             'ONDOUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('4.0'), Decimal('8.0'), Decimal('16.0')],
             '1000PEPEUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('4.0'), Decimal('8.0'), Decimal('16.0')],
             '1000SHIBUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('4.0'), Decimal('8.0'), Decimal('16.0')],
+            'SEIUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('4.0'), Decimal('8.0'), Decimal('16.0')],
         },
         percent={
             'ONDOUSDT': {
@@ -33,17 +35,24 @@ class TailStrategyV3(bt.Strategy):
                 'bull': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('12.0'), Decimal('15.0')],
                 'def': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('12.0'), Decimal('15.0')],
                 'bear': [Decimal('4.0'), Decimal('8.0'), Decimal('12.0'), Decimal('16.0'), Decimal('20.0')]
+            },
+            'SEIUSDT': {
+                'bull': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('12.0'), Decimal('15.0')],
+                'def': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('12.0'), Decimal('15.0')],
+                'bear': [Decimal('4.0'), Decimal('8.0'), Decimal('12.0'), Decimal('16.0'), Decimal('20.0')]
             }
         },
         rsi_length={
             'ONDOUSDT': 3,
             '1000PEPEUSDT': 3,
             '1000SHIBUSDT': 3,
+            'SEIUSDT': 3,
         },
         rsi_limit={
             'ONDOUSDT': 70,
             '1000PEPEUSDT': 70,
             '1000SHIBUSDT': 70,
+            'SEIUSDT': 70,
         },
         check_index={ # 'bull' : 몇개 캔들이전보다 많이 올라서 급락할 가능성이 있는 지, 'bear' : 몇개 캔들이전보다 많이 떨어져서 더이상 떨어지지않을 가능성이 존재하는 건지
             'ONDOUSDT':{
@@ -57,7 +66,11 @@ class TailStrategyV3(bt.Strategy):
             '1000SHIBUSDT': {
                 'bull': 10,
                 'bear': 10
-            }
+            },
+            'SEIUSDT': {
+                'bull': 5,
+                'bear': 5
+            },
         },
         check_percent={ # 'bull' : 얼마나 떨어져서 더이상 떨어지지 않을 지, 'bear': 얼마나 올라서 급락할 가능성이 있는 지
             'ONDOUSDT': {
@@ -71,17 +84,23 @@ class TailStrategyV3(bt.Strategy):
             '1000SHIBUSDT': {
                 'bull': 20,
                 'bear': 5,
+            },
+            'SEIUSDT': {
+                'bull': 5,
+                'bear': 5,
             }
         },
         tick_size={
             'ONDOUSDT': Decimal('0.0001000'),
             '1000PEPEUSDT': Decimal('0.0000001'),
             '1000SHIBUSDT': Decimal('0.000001'),
+            'SEIUSDT': Decimal('0.0001000')
         },
         step_size={
             'ONDOUSDT': Decimal('0.1'),
             '1000PEPEUSDT': Decimal('1'),
             '1000SHIBUSDT': Decimal('1'),
+            'SEIUSDT': Decimal('1'),
         }
     )
 
