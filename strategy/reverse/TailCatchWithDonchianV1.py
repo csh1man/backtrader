@@ -6,51 +6,22 @@ from decimal import Decimal
 
 pairs = {
     'XRPUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    # 'DOGEUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    # 'LTCUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    'DOGEUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    'LTCUSDT': DataUtil.CANDLE_TICK_1HOUR,
     # 'XLMUSDT': DataUtil.CANDLE_TICK_1HOUR,
 }
 
 company = DataUtil.COMPANY_BINANCE
-leverage=4
+leverage=3
 
-class TailStrategyV4(bt.Strategy):
+class TailCatchWithDonchianV1(bt.Strategy):
     params=dict(
         log=True,
         risk={
-            'XRPUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('4.0'), Decimal('8.0'), Decimal('16.0')],
-            'DOGEUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('4.0'), Decimal('8.0'), Decimal('16.0')],
-            'LTCUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('4.0'), Decimal('8.0'), Decimal('16.0')],
-            'XLMUSDT': [Decimal('1.0'), Decimal('2.0'), Decimal('4.0'), Decimal('8.0'), Decimal('16.0')],
-        },
-        percent={
-            'XRPUSDT': {
-                'bull': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('12.0'), Decimal('15.0')],
-                'def': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('12.0'), Decimal('15.0')],
-                'bear': [Decimal('4.0'), Decimal('8.0'), Decimal('12.0'), Decimal('20.0'), Decimal('25.0')]
-            },
-            'DOGEUSDT': {
-                'bull': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('12.0'), Decimal('15.0')],
-                'def': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('12.0'), Decimal('15.0')],
-                'bear': [Decimal('4.0'), Decimal('8.0'), Decimal('12.0'), Decimal('20.0'), Decimal('25.0')]
-            },
-            'LTCUSDT': {
-                'bull': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('12.0'), Decimal('15.0')],
-                'def': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('12.0'), Decimal('15.0')],
-                'bear': [Decimal('4.0'), Decimal('8.0'), Decimal('12.0'), Decimal('20.0'), Decimal('25.0')]
-            },
-            'XLMUSDT': {
-                'bull': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('12.0'), Decimal('15.0')],
-                'def': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('12.0'), Decimal('15.0')],
-                'bear': [Decimal('4.0'), Decimal('8.0'), Decimal('12.0'), Decimal('20.0'), Decimal('25.0')]
-            },
-
-        },
-        exit_percent={
-            'XRPUSDT': Decimal('1.0'),
-            'DOGEUSDT': Decimal('1.0'),
-            'LTCUSDT': Decimal('1.0'),
-            'XLMUSDT': Decimal('1.0'),
+            'XRPUSDT': [Decimal('1'), Decimal('2.0'), Decimal('4.0'), Decimal('8.0'), Decimal('16.0')],
+            'DOGEUSDT': [Decimal('1'), Decimal('2.0'), Decimal('4.0'), Decimal('8.0'), Decimal('16.0')],
+            'LTCUSDT': [Decimal('1'), Decimal('2.0'), Decimal('4.0'), Decimal('8.0'), Decimal('16.0')],
+            'XLMUSDT': [Decimal('1'), Decimal('2.0'), Decimal('4.0'), Decimal('8.0'), Decimal('16.0')],
         },
         rsi_length={
             'XRPUSDT': 3,
@@ -59,45 +30,49 @@ class TailStrategyV4(bt.Strategy):
             'XLMUSDT': 3,
         },
         rsi_limit={
-            'XRPUSDT': 70,
-            'DOGEUSDT': 70,
-            'LTCUSDT': 70,
-            'XLMUSDT': 70,
+            'XRPUSDT': 50,
+            'DOGEUSDT': 50,
+            'LTCUSDT': 50,
+            'XLMUSDT': 50,
         },
-        check_index={ # 'bull' : 몇개 캔들이전보다 많이 올라서 급락할 가능성이 있는 지, 'bear' : 몇개 캔들이전보다 많이 떨어져서 더이상 떨어지지않을 가능성이 존재하는 건지
-            'XRPUSDT':{
-              'bull': 5,
-              'bear': 5
-            },
-            'DOGEUSDT': {
-                'bull': 5,
-                'bear': 5
-            },
-            'LTCUSDT': {
-                'bull': 5,
-                'bear': 5
-            },
-            'XLMUSDT': {
-                'bull': 5,
-                'bear': 5
-            }
+        high_band_length={
+            'XRPUSDT': 20,
+            'DOGEUSDT': 20,
+            'LTCUSDT': 20,
+            'XLMUSDT': 20,
         },
-        check_percent={ # 'bull' : 얼마나 떨어져서 더이상 떨어지지 않을 지, 'bear': 얼마나 올라서 급락할 가능성이 있는 지
+        low_band_length={
+            'XRPUSDT': 20,
+            'DOGEUSDT': 20,
+            'LTCUSDT': 20,
+            'XLMUSDT': 20,
+        },
+        exit_percent={
+            'XRPUSDT': Decimal('1.0'),
+            'DOGEUSDT': Decimal('1.0'),
+            'LTCUSDT': Decimal('1.0'),
+            'XLMUSDT': Decimal('1.0'),
+        },
+        percent={
             'XRPUSDT': {
-                'bull': 5,
-                'bear': 5,
+                'bull': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('10.0')],
+                'def': [Decimal('3.0'), Decimal('5.0'), Decimal('7.0'), Decimal('10.0'), Decimal('15.0')],
+                'bear': [Decimal('4.0'), Decimal('8.0'), Decimal('10.0'), Decimal('20.0'), Decimal('25.0')]
             },
             'DOGEUSDT': {
-                'bull': 5,
-                'bear': 5,
+                'bull': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('10.0')],
+                'def': [Decimal('3.0'), Decimal('5.0'), Decimal('7.0'), Decimal('10.0'), Decimal('15.0')],
+                'bear': [Decimal('4.0'), Decimal('8.0'), Decimal('10.0'), Decimal('20.0'), Decimal('25.0')]
             },
             'LTCUSDT': {
-                'bull': 5,
-                'bear': 5,
+                'bull': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('10.0')],
+                'def': [Decimal('3.0'), Decimal('5.0'), Decimal('7.0'), Decimal('10.0'), Decimal('15.0')],
+                'bear': [Decimal('4.0'), Decimal('8.0'), Decimal('10.0'), Decimal('20.0'), Decimal('25.0')]
             },
             'XLMUSDT': {
-                'bull': 5,
-                'bear': 5,
+                'bull': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('10.0')],
+                'def': [Decimal('3.0'), Decimal('5.0'), Decimal('7.0'), Decimal('10.0'), Decimal('15.0')],
+                'bear': [Decimal('4.0'), Decimal('8.0'), Decimal('10.0'), Decimal('20.0'), Decimal('25.0')]
             },
         },
         tick_size={
@@ -137,10 +112,9 @@ class TailStrategyV4(bt.Strategy):
             }
         }
     )
-
     def log(self, txt):
         if self.p.log:
-            print(f'{txt}')
+            print(f"{txt}")
 
     def __init__(self):
         self.names = []
@@ -151,6 +125,8 @@ class TailStrategyV4(bt.Strategy):
         self.closes = []
         self.dates = []
         self.rsi = []
+        self.high_bands = []
+        self.low_bands = []
 
         self.order = None
         self.date_value = []
@@ -162,6 +138,7 @@ class TailStrategyV4(bt.Strategy):
         self.total_trading_count = 0
         self.winning_trading_count = 0
         self.winning_rate = 0
+
 
         for i in range(0, len(self.datas)):
             self.pairs.append(self.datas[i])
@@ -176,6 +153,14 @@ class TailStrategyV4(bt.Strategy):
             name = self.names[i]
             rsi = bt.indicators.RSI_Safe(self.closes[i], period=self.p.rsi_length[name])
             self.rsi.append(rsi)
+
+            # 숏 고가 채널 저장
+            high_band = bt.indicators.Highest(self.highs[i], period=self.p.high_band_length[name])
+            self.high_bands.append(high_band)
+
+            # 롱 저가 채널 저장
+            low_band = bt.indicators.Lowest(self.lows[i], period=self.p.low_band_length[name])
+            self.low_bands.append(low_band)
 
     def cancel_all(self, target_name=None):
         open_orders = self.broker.get_orders_open()
@@ -228,33 +213,22 @@ class TailStrategyV4(bt.Strategy):
 
         for i in range(0, len(self.pairs)):
             name = self.names[i]
+
             current_position_size = self.getposition(self.pairs[i]).size
             if current_position_size > 0:
-                avg_entry_price = self.getposition(self.pairs[i]).price
-                if self.closes[i][0] >= avg_entry_price and self.rsi[i][0] >= self.p.rsi_limit[name]:
-                    exit_price = DataUtil.convert_to_decimal(self.closes[i][0]) * (Decimal('1') + self.p.exit_percent[name] / Decimal('100'))
+                if self.rsi[i][0] >= self.p.rsi_limit[name]:
+                    exit_price = DataUtil.convert_to_decimal(self.closes[i][0]) * (
+                                Decimal('1') + self.p.exit_percent[name] / Decimal('100'))
                     exit_price = int(exit_price / self.p.tick_size[name][company]) * self.p.tick_size[name][company]
 
-                    self.order = self.sell(exectype=bt.Order.Limit, data=self.pairs[i], size=current_position_size, price=float(exit_price))
+                    self.order = self.sell(exectype=bt.Order.Limit, data=self.pairs[i], size=current_position_size,
+                                           price=float(exit_price))
 
-            bull_check_idx = self.p.check_index[name]['bull']
-            bear_check_idx = self.p.check_index[name]['bear']
-
-            # n개 이전 캔들보다 x% 이상 상승했다면 급락할 가능성이 있으므로 간격을 넓혀야한다.
-            bear_condition = ((self.closes[i][0] > self.closes[i][-bear_check_idx])
-                              and (self.closes[i][0] - self.closes[i][-bear_check_idx]) * 100 / self.closes[i][
-                                  -bear_check_idx] >= self.p.check_percent[name]['bear'])
-
-            # n개 이전 캔들보다 y% 이상 하락했다면 더이상 크게 떨어지지 않을 가능성이 있으므로 간격을 좁힌다.
-            bull_condition = ((self.closes[i][0] < self.closes[i][-bull_check_idx])
-                              and (self.closes[i][-bull_check_idx] - self.closes[i][0]) * 100 / self.closes[i][0] >=
-                              self.p.check_percent[name]['bull'])
 
             percents = self.p.percent[name]['def']
-
-            if bear_condition:
+            if self.closes[i][0] < self.low_bands[i][-1]:
                 percents = self.p.percent[name]['bear']
-            elif bull_condition:
+            elif self.closes[i] >= self.high_bands[i][-1]:
                 percents = self.p.percent[name]['bull']
 
             equity = DataUtil.convert_to_decimal(self.broker.getvalue())
@@ -270,13 +244,12 @@ class TailStrategyV4(bt.Strategy):
                 self.order = self.buy(exectype=bt.Order.Limit, data=self.pairs[i], size=float(qty), price=float(price))
 
 
-
 if __name__ == '__main__':
     # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
     data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
     # data_path = "/Users/tjgus/Desktop/project/krtrade/backData"
     cerebro = bt.Cerebro()
-    cerebro.addstrategy(TailStrategyV4)
+    cerebro.addstrategy(TailCatchWithDonchianV1)
 
     cerebro.broker.setcash(13000)
     cerebro.broker.setcommission(commission=0.001, leverage=leverage)
@@ -313,7 +286,7 @@ if __name__ == '__main__':
     # file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/" + company + "-"
     for pair, tick_kind in pairs.items():
         file_name += pair + "-"
-    file_name += "TailCatchV4"
+    file_name += "TailCatchWithDonchianV1"
 
     strat = results[0]
     order_balance_list = strat.order_balance_list
