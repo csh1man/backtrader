@@ -17,20 +17,20 @@ class TrendFollowV2(bt.Strategy):
     params = dict(
         risk={
             'BTCUSDT':{
-                'long': Decimal('2'),
+                'long': Decimal('1'),
                 'short': Decimal('1')
             },
             'ETHUSDT':{
-                'long': Decimal('2'),
-                'short': Decimal('2')
+                'long': Decimal('1'),
+                'short': Decimal('1')
             },
             'SOLUSDT':{
-                'long': Decimal('2'),
+                'long': Decimal('1'),
                 'short': Decimal('1')
             },
             'BCHUSDT': {
-                'long': Decimal('2'),
-                'short': Decimal('2')
+                'long': Decimal('1'),
+                'short': Decimal('1')
             }
         },
         high_band_length={
@@ -271,8 +271,8 @@ class TrendFollowV2(bt.Strategy):
                     long_qty = equity * (self.p.risk[name]['long'] / Decimal('100')) / abs(long_adj_high_band - long_stop_price)
                     long_qty = int(long_qty / self.p.step_size[name]) * self.p.step_size[name]
 
-                    if name in ['BTCUSDT', 'ETHUSDT', 'BCHUSDT', 'SOLUSDT']:
-                        self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(long_adj_high_band), size=float(long_qty))
+                    # if name in ['BTCUSDT', 'ETHUSDT', 'BCHUSDT', 'SOLUSDT']:
+                    #     self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(long_adj_high_band), size=float(long_qty))
 
                     short_stop_price = short_adj_high_band
                     self.short_stop_prices[i] = short_stop_price
@@ -301,7 +301,7 @@ if __name__ == '__main__':
     cerebro.addstrategy(TrendFollowV2)
 
     cerebro.broker.setcash(13000)
-    cerebro.broker.setcommission(commission=0.002, leverage=leverage)
+    cerebro.broker.setcommission(commission=0.001, leverage=leverage)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
@@ -350,4 +350,5 @@ if __name__ == '__main__':
     df = df.dropna()
     df = df.set_index('date')
     df.index.name = 'date'
+    df.to_csv(f'{file_name}.csv')
     qs.reports.html(df['value'], output=f"{file_name}.html", download_filename=f"{file_name}.html", title=file_name)

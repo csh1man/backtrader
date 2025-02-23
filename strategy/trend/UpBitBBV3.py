@@ -7,7 +7,7 @@ import quantstats as qs
 
 pairs = {
     "KRW-ETH": DataUtil.CANDLE_TICK_4HOUR,
-    "KRW-SOL": DataUtil.CANDLE_TICK_4HOUR,
+    # "KRW-SOL": DataUtil.CANDLE_TICK_4HOUR,
     "KRW-BTC": DataUtil.CANDLE_TICK_4HOUR,
     "KRW-BCH": DataUtil.CANDLE_TICK_4HOUR,
 }
@@ -254,8 +254,8 @@ class UpbitBBV3(bt.Strategy):
 
 
 if __name__ == '__main__':
-    # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
-    data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+    data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+    # data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
     # data_path = "/Users/tjgus/Desktop/project/krtrade/backData";
     cerebro = bt.Cerebro()
     cerebro.broker.setcash(10000000) # 초기 시드 설정
@@ -291,12 +291,12 @@ if __name__ == '__main__':
     mdd = qs.stats.max_drawdown(returns)
     print(f" quanstats's my returns MDD : {mdd * 100:.2f} %")
 
-    # file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+    file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
     # file_name = "/Users/tjgus/Desktop/project/krtrade/backData/result/"
-    file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+    # file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
     for pair, tick_kind in pairs.items():
         file_name += pair + "-"
-    file_name += "UpbitBBV2"
+    file_name += "UpbitBBV3"
 
     strat = results[0]
     order_balance_list = strat.order_balance_list
@@ -310,4 +310,5 @@ if __name__ == '__main__':
     df = df.dropna()
     df = df.set_index('date')
     df.index.name = 'date'
+    df.to_csv(f'{file_name}.csv')
     qs.reports.html(df['value'], output=f"{file_name}.html", download_filename=f"{file_name}.html", title=file_name)
