@@ -7,9 +7,10 @@ from decimal import Decimal
 pairs = {
     'XRPUSDT': DataUtil.CANDLE_TICK_1HOUR,
     'DOGEUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    # 'LINKUSDT': DataUtil.CANDLE_TICK_1HOUR
     # '1000SHIBUSDT': DataUtil.CANDLE_TICK_1HOUR,
     'LTCUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    'XLMUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    # 'XLMUSDT': DataUtil.CANDLE_TICK_1HOUR,
 }
 
 company = DataUtil.COMPANY_BINANCE
@@ -20,10 +21,11 @@ class TailCatchWithDonchianV2(bt.Strategy):
         log=True,
         risk={
             'XRPUSDT': [Decimal('1'), Decimal('2'), Decimal('4.0'), Decimal('8.0'), Decimal('16.0')],
-            'DOGEUSDT': [Decimal('1'), Decimal('2'), Decimal('4.0'), Decimal('4.0'), Decimal('16.0')],
-            'LTCUSDT': [Decimal('1'), Decimal('2'), Decimal('2.0'), Decimal('8.0'), Decimal('8.0')],
+            'DOGEUSDT': [Decimal('1'), Decimal('2'), Decimal('4.0'), Decimal('8.0'), Decimal('16.0')],
+            'LTCUSDT': [Decimal('1'), Decimal('1'), Decimal('2.0'), Decimal('4.0'), Decimal('8.0')],
             'XLMUSDT': [Decimal('1'), Decimal('2'), Decimal('2.0'), Decimal('8.0'), Decimal('8.0')],
-            '1000SHIBUSDT': [Decimal('1'), Decimal('2'), Decimal('2.0'), Decimal('8.0'), Decimal('8.0')],
+            '1000SHIBUSDT': [Decimal('0.5'), Decimal('1'), Decimal('2'), Decimal('4.0'), Decimal('8.0')],
+            'LINKUSDT': [Decimal('1'), Decimal('2'), Decimal('4.0'), Decimal('4.0'), Decimal('8.0')],
         },
         rsi_length={
             'XRPUSDT': 3,
@@ -31,13 +33,15 @@ class TailCatchWithDonchianV2(bt.Strategy):
             'LTCUSDT': 3,
             'XLMUSDT': 3,
             '1000SHIBUSDT': 3,
+            'LINKUSDT': 3,
         },
         rsi_limit={
-            'XRPUSDT': 40,
-            'DOGEUSDT': 40,
-            'LTCUSDT': 40,
+            'XRPUSDT': 50,
+            'DOGEUSDT': 50,
+            'LTCUSDT': 50,
             'XLMUSDT': 40,
-            '1000SHIBUSDT': 40,
+            '1000SHIBUSDT': 50,
+            'LINKUSDT': 40,
         },
         high_band_length={
             'XRPUSDT': {
@@ -60,6 +64,10 @@ class TailCatchWithDonchianV2(bt.Strategy):
                 'entry' : 20,
                 'exit' : 3,
             },
+            'LINKUSDT': {
+                'entry' : 20,
+                'exit' : 3,
+            },
         },
         low_band_length={
             'XRPUSDT': 20,
@@ -67,28 +75,30 @@ class TailCatchWithDonchianV2(bt.Strategy):
             'LTCUSDT': 20,
             'XLMUSDT': 20,
             '1000SHIBUSDT': 20,
+            'LINKUSDT': 20,
         },
         exit_percent={
             'XRPUSDT': Decimal('2'),
             'DOGEUSDT': Decimal('2'),
-            'LTCUSDT': Decimal('1.5'),
+            'LTCUSDT': Decimal('2'),
             'XLMUSDT': Decimal('1.5'),
-            '1000SHIBUSDT': Decimal('1.5'),
+            '1000SHIBUSDT': Decimal('2.0'),
+            'LINKUSDT': Decimal('1.5'),
         },
         percent={
             'XRPUSDT': {
-                'bull': [Decimal('2.0'), Decimal('4.0'), Decimal('8.0'), Decimal('10.0'), Decimal('12.0')],
-                'def': [Decimal('3.0'), Decimal('6.0'), Decimal('12.0'), Decimal('20.0'), Decimal('25.0')],
-                'bear': [Decimal('4.0'), Decimal('8.0'), Decimal('10.0'), Decimal('20.0'), Decimal('25.0')],
+                'bull': [Decimal('2.0'), Decimal('4.0'), Decimal('8.0'), Decimal('15.0'), Decimal('20.0')],
+                'def': [Decimal('4.0'), Decimal('8.0'), Decimal('12.0'), Decimal('20.0'), Decimal('25.0')],
+                'bear': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('12.0'), Decimal('15.0')],
             },
             'DOGEUSDT': {
-                'bull': [Decimal('2.0'), Decimal('4.0'), Decimal('8.0'), Decimal('10.0'), Decimal('12.0')],
-                'def': [Decimal('3.0'), Decimal('6.0'), Decimal('12.0'), Decimal('20.0'), Decimal('25.0')],
+                'bull': [Decimal('2.0'), Decimal('4.0'), Decimal('8.0'), Decimal('15.0'), Decimal('20.0')],
+                'def': [Decimal('4.0'), Decimal('8.0'), Decimal('12.0'), Decimal('20.0'), Decimal('25.0')],
                 'bear': [Decimal('4.0'), Decimal('8.0'), Decimal('10.0'), Decimal('20.0'), Decimal('25.0')],
             },
             'LTCUSDT': {
-                'bull': [Decimal('2.0'), Decimal('4.0'), Decimal('8.0'), Decimal('10.0'), Decimal('12.0')],
-                'def': [Decimal('3.0'), Decimal('6.0'), Decimal('12.0'), Decimal('20.0'), Decimal('25.0')],
+                'bull': [Decimal('4.0'), Decimal('8.0'), Decimal('10.0'), Decimal('20.0'), Decimal('25.0')],
+                'def': [Decimal('4.0'), Decimal('8.0'), Decimal('12.0'), Decimal('20.0'), Decimal('25.0')],
                 'bear': [Decimal('4.0'), Decimal('8.0'), Decimal('10.0'), Decimal('20.0'), Decimal('25.0')],
             },
             'XLMUSDT': {
@@ -97,9 +107,14 @@ class TailCatchWithDonchianV2(bt.Strategy):
                 'bear': [Decimal('4.0'), Decimal('8.0'), Decimal('10.0'), Decimal('20.0'), Decimal('25.0')],
             },
             '1000SHIBUSDT': {
-                'bull': [Decimal('2.0'), Decimal('4.0'), Decimal('8.0'), Decimal('10.0'), Decimal('12.0')],
+                'bull': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('20.0'), Decimal('25.0')],
                 'def': [Decimal('4.0'), Decimal('8.0'), Decimal('12.0'), Decimal('20.0'), Decimal('25.0')],
-                'bear': [Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('20.0'), Decimal('25.0')],
+                'bear': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('20.0'), Decimal('25.0')],
+            },
+            'LINKUSDT': {
+                'bull': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('10.0')],
+                'def': [Decimal('3.0'), Decimal('6.0'), Decimal('12.0'), Decimal('20.0'), Decimal('25.0')],
+                'bear': [Decimal('3.0'), Decimal('6.0'), Decimal('12.0'), Decimal('20.0'), Decimal('25.0')],
             },
         },
         tick_size={
@@ -123,6 +138,10 @@ class TailCatchWithDonchianV2(bt.Strategy):
                 DataUtil.COMPANY_BINANCE: Decimal('0.000001'),
                 DataUtil.COMPANY_BYBIT: Decimal('0.01')
             },
+            'LINKUSDT':{
+                DataUtil.COMPANY_BINANCE: Decimal('0.001'),
+                DataUtil.COMPANY_BYBIT: Decimal('0.001'),
+            }
         },
         step_size={
             'XRPUSDT': {
@@ -145,6 +164,10 @@ class TailCatchWithDonchianV2(bt.Strategy):
                 DataUtil.COMPANY_BINANCE: Decimal('1'),
                 DataUtil.COMPANY_BYBIT: Decimal('0.01')
             },
+            'LINKUSDT':{
+                DataUtil.COMPANY_BINANCE: Decimal('0.01'),
+                DataUtil.COMPANY_BINANCE: Decimal('0.01'),
+            }
         }
     )
     def log(self, txt):
@@ -163,6 +186,10 @@ class TailCatchWithDonchianV2(bt.Strategy):
         self.entry_high_bands = []
         self.entry_low_bands = []
         self.exit_high_bands = []
+
+        self.top_percents = []
+        self.mid_percents = []
+        self.bot_percents = []
 
         self.order = None
         self.date_value = []
@@ -252,7 +279,7 @@ class TailCatchWithDonchianV2(bt.Strategy):
 
         for i in range(0, len(self.pairs)):
             name = self.names[i]
-
+            # self.log(f'{self.dates[i].datetime(0)}')
             current_position_size = self.getposition(self.pairs[i]).size
             if current_position_size > 0:
                 avg_entry_price = self.getposition(self.pairs[i]).price
@@ -265,6 +292,14 @@ class TailCatchWithDonchianV2(bt.Strategy):
                     self.order = self.sell(exectype=bt.Order.Limit, data=self.pairs[i], size=current_position_size,
                                            price=float(exit_price))
 
+            date = self.dates[i].datetime(0)
+            candle_percent = (self.closes[i][0]-self.opens[i][0]) * 100  / self.opens[i][0]
+            if self.closes[i][-1] >= self.entry_high_bands[i][-2]:
+                self.top_percents.append((date, candle_percent))
+            elif self.entry_low_bands[i][-2] <= self.closes[i][-1] < self.entry_high_bands[i][-2]:
+                self.mid_percents.append((date, candle_percent))
+            else:
+                self.bot_percents.append((date, candle_percent))
 
             percents = self.p.percent[name]['def']
             if self.closes[i][0] < self.entry_low_bands[i][-1]:
@@ -284,10 +319,29 @@ class TailCatchWithDonchianV2(bt.Strategy):
 
                 self.order = self.buy(exectype=bt.Order.Limit, data=self.pairs[i], size=float(qty), price=float(price))
 
+    def stop(self):
+        sorted_top_percents = sorted(self.top_percents, key=lambda x: x[1])
+        sorted_mid_percents = sorted(self.mid_percents, key=lambda x: x[1])
+        sorted_bot_percents = sorted(self.bot_percents, key=lambda x: x[1])
+        self.log(f"top percents length : [{len(sorted_top_percents)}]")
+        for key, value in sorted_top_percents[:51]:
+            self.log(f'{key} -> {value}%')
+        self.log("")
+
+        self.log(f"mid percents length : [{len(sorted_mid_percents)}]")
+        for key, value in sorted_mid_percents[:51]:
+            self.log(f'{key} -> {value}%')
+        self.log("")
+
+        self.log(f"bot percents length : [{len(sorted_bot_percents)}]")
+        for key, value in sorted_bot_percents[:51]:
+            self.log(f'{key} -> {value}%')
+
+
 
 if __name__ == '__main__':
-    data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
-    # data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+    # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+    data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
     # data_path = "/Users/tjgus/Desktop/project/krtrade/backData"
     cerebro = bt.Cerebro()
     cerebro.addstrategy(TailCatchWithDonchianV2)
@@ -322,9 +376,9 @@ if __name__ == '__main__':
     mdd = qs.stats.max_drawdown(returns)
     print(f" quanstats's my returns MDD : {mdd * 100:.2f} %")
 
-    # file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+    file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
     # file_name = "/Users/tjgus/Desktop/project/krtrade/backData/result/"
-    file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/" + company + "-"
+    # file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/" + company + "-"
     for pair, tick_kind in pairs.items():
         file_name += pair + "-"
     file_name += "TailCatchWithDonchianV2"

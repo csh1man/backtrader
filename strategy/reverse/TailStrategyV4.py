@@ -84,8 +84,8 @@ class TailStrategyV4(bt.Strategy):
         },
         check_percent={ # 'bull' : 얼마나 떨어져서 더이상 떨어지지 않을 지, 'bear': 얼마나 올라서 급락할 가능성이 있는 지
             'XRPUSDT': {
-                'bull': 5,
-                'bear': 5,
+                'bull': 10,
+                'bear': 10,
             },
             'DOGEUSDT': {
                 'bull': 5,
@@ -231,7 +231,7 @@ class TailStrategyV4(bt.Strategy):
             current_position_size = self.getposition(self.pairs[i]).size
             if current_position_size > 0:
                 avg_entry_price = self.getposition(self.pairs[i]).price
-                if self.closes[i][0] >= avg_entry_price and self.rsi[i][0] >= self.p.rsi_limit[name]:
+                if self.rsi[i][0] >= self.p.rsi_limit[name]:
                     exit_price = DataUtil.convert_to_decimal(self.closes[i][0]) * (Decimal('1') + self.p.exit_percent[name] / Decimal('100'))
                     exit_price = int(exit_price / self.p.tick_size[name][company]) * self.p.tick_size[name][company]
 
