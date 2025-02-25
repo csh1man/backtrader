@@ -66,8 +66,8 @@ class TailStrategyV4(bt.Strategy):
         },
         check_index={ # 'bull' : 몇개 캔들이전보다 많이 올라서 급락할 가능성이 있는 지, 'bear' : 몇개 캔들이전보다 많이 떨어져서 더이상 떨어지지않을 가능성이 존재하는 건지
             'XRPUSDT':{
-              'bull': 5,
-              'bear': 5
+              'bull': 2,
+              'bear': 2
             },
             'DOGEUSDT': {
                 'bull': 5,
@@ -84,8 +84,8 @@ class TailStrategyV4(bt.Strategy):
         },
         check_percent={ # 'bull' : 얼마나 떨어져서 더이상 떨어지지 않을 지, 'bear': 얼마나 올라서 급락할 가능성이 있는 지
             'XRPUSDT': {
-                'bull': 10,
-                'bear': 10,
+                'bull': 5,
+                'bear': 5,
             },
             'DOGEUSDT': {
                 'bull': 5,
@@ -162,6 +162,10 @@ class TailStrategyV4(bt.Strategy):
         self.total_trading_count = 0
         self.winning_trading_count = 0
         self.winning_rate = 0
+
+        self.top_percents = []
+        self.mid_percents = []
+        self.bot_percents = []
 
         for i in range(0, len(self.datas)):
             self.pairs.append(self.datas[i])
@@ -241,35 +245,60 @@ class TailStrategyV4(bt.Strategy):
             bear_check_idx = self.p.check_index[name]['bear']
 
             # n개 이전 캔들보다 x% 이상 상승했다면 급락할 가능성이 있으므로 간격을 넓혀야한다.
-            bear_condition = ((self.closes[i][0] > self.closes[i][-bear_check_idx])
-                              and (self.closes[i][0] - self.closes[i][-bear_check_idx]) * 100 / self.closes[i][
+            bear_condition = ((self.closes[i][-1] > self.closes[i][-1-bear_check_idx])
+                              and (self.closes[i][-1] - self.closes[i][-1-bear_check_idx]) * 100 / self.closes[i][-1
                                   -bear_check_idx] >= self.p.check_percent[name]['bear'])
 
             # n개 이전 캔들보다 y% 이상 하락했다면 더이상 크게 떨어지지 않을 가능성이 있으므로 간격을 좁힌다.
-            bull_condition = ((self.closes[i][0] < self.closes[i][-bull_check_idx])
-                              and (self.closes[i][-bull_check_idx] - self.closes[i][0]) * 100 / self.closes[i][0] >=
+            bull_condition = ((self.closes[i][-1] < self.closes[i][-1-bull_check_idx])
+                              and (self.closes[i][-1-bull_check_idx] - self.closes[i][-1]) * 100 / self.closes[i][-1] >=
                               self.p.check_percent[name]['bull'])
 
-            percents = self.p.percent[name]['def']
-
+            date = self.dates[i].datetime(0)
+            candle_percent = (self.closes[i][0]-self.opens[i][0]) * 100  / self.opens[i][0]
             if bear_condition:
-                percents = self.p.percent[name]['bear']
+                self.top_percents.append((date, candle_percent))
             elif bull_condition:
-                percents = self.p.percent[name]['bull']
+                self.bot_percents.append((date, candle_percent))
+            else:
+                self.mid_percents.append((date, candle_percent))
 
-            equity = DataUtil.convert_to_decimal(self.broker.getvalue())
-            for j in range(0, len(self.p.risk[name])):
-                percent = percents[j]
-                price = DataUtil.convert_to_decimal(self.closes[i][0]) * (Decimal('1') - percent / Decimal('100'))
-                price = int(price / self.p.tick_size[name][company]) * self.p.tick_size[name][company]
+            # percents = self.p.percent[name]['def']
+            #
+            # if bear_condition:
+            #     percents = self.p.percent[name]['bear']
+            # elif bull_condition:
+            #     percents = self.p.percent[name]['bull']
+            #
+            # equity = DataUtil.convert_to_decimal(self.broker.getvalue())
+            # for j in range(0, len(self.p.risk[name])):
+            #     percent = percents[j]
+            #     price = DataUtil.convert_to_decimal(self.closes[i][0]) * (Decimal('1') - percent / Decimal('100'))
+            #     price = int(price / self.p.tick_size[name][company]) * self.p.tick_size[name][company]
+            #
+            #     risk = self.p.risk[name][j]
+            #     qty = equity * risk / Decimal('100') / price
+            #     qty = int(qty / self.p.step_size[name][company]) * self.p.step_size[name][company]
+            #
+            #     self.order = self.buy(exectype=bt.Order.Limit, data=self.pairs[i], size=float(qty), price=float(price))
 
-                risk = self.p.risk[name][j]
-                qty = equity * risk / Decimal('100') / price
-                qty = int(qty / self.p.step_size[name][company]) * self.p.step_size[name][company]
+    def stop(self):
+        sorted_top_percents = sorted(self.top_percents, key=lambda x: x[1])
+        sorted_mid_percents = sorted(self.mid_percents, key=lambda x: x[1])
+        sorted_bot_percents = sorted(self.bot_percents, key=lambda x: x[1])
+        self.log(f"top percents length : [{len(sorted_top_percents)}]")
+        for key, value in sorted_top_percents[:51]:
+            self.log(f'{key} -> {value}%')
+        self.log("")
 
-                self.order = self.buy(exectype=bt.Order.Limit, data=self.pairs[i], size=float(qty), price=float(price))
+        self.log(f"mid percents length : [{len(sorted_mid_percents)}]")
+        for key, value in sorted_mid_percents[:51]:
+            self.log(f'{key} -> {value}%')
+        self.log("")
 
-
+        self.log(f"bot percents length : [{len(sorted_bot_percents)}]")
+        for key, value in sorted_bot_percents[:51]:
+            self.log(f'{key} -> {value}%')
 
 if __name__ == '__main__':
     # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
