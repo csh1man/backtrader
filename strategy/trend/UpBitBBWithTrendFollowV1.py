@@ -8,6 +8,8 @@ import quantstats as qs
 pairs = {
     "KRW-ETH": DataUtil.CANDLE_TICK_4HOUR,
     "KRW-BTC": DataUtil.CANDLE_TICK_4HOUR,
+    "KRW-BCH": DataUtil.CANDLE_TICK_4HOUR,
+    "KRW-SOL": DataUtil.CANDLE_TICK_4HOUR,
 }
 
 
@@ -36,27 +38,39 @@ class UpbitBBWithTrendFollowV1(bt.Strategy):
         log=True,
         risk={
             'KRW-ETH': Decimal('2.0'),
-            'KRW-BTC': Decimal('2.0')
+            'KRW-BTC': Decimal('2.0'),
+            'KRW-BCH': Decimal('2.0'),
+            'KRW-SOL': Decimal('2.0'),
         },
         bb_length={
             'KRW-ETH': 80,
             'KRW-BTC': 50,
+            'KRW-BCH': 80,
+            'KRW-SOL': 30,
         },
         bb_mult={
             'KRW-ETH': 2.0,
             'KRW-BTC': 2.0,
+            'KRW-BCH': 2.0,
+            'KRW-SOL': 2.0,
         },
         high_band_length={
             'KRW-ETH': 50,
             'KRW-BTC': 30,
+            'KRW-BCH': 30,
+            'KRW-SOL': 30,
         },
         low_band_length={
             'KRW-ETH': 20,
             'KRW-BTC': 15,
+            'KRW-BCH': 20,
+            'KRW-SOL': 15,
         },
         low_band_const={
             'KRW-ETH': 55,
             'KRW-BTC': 30,
+            'KRW-BCH': 50,
+            'KRW-SOL': 45,
         },
     )
     def log(self, txt):
