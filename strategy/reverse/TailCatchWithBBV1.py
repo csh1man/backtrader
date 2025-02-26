@@ -7,10 +7,8 @@ from decimal import Decimal
 pairs = {
     'XRPUSDT': DataUtil.CANDLE_TICK_1HOUR,
     'DOGEUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    # 'LINKUSDT': DataUtil.CANDLE_TICK_1HOUR
     '1000SHIBUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    # 'LTCUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    'XLMUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    # 'XLMUSDT': DataUtil.CANDLE_TICK_1HOUR,
 }
 
 company = DataUtil.COMPANY_BINANCE
@@ -20,23 +18,10 @@ class TailCatchWithBBV1(bt.Strategy):
     params=dict(
         log=True,
         risk={
-            # 'XRPUSDT': [Decimal('0.5'), Decimal('1.5'), Decimal('3'), Decimal('5'), Decimal('11')],
-            'XRPUSDT': {
-                'def': [Decimal('1'), Decimal('2'), Decimal('4'), Decimal('8'), Decimal('16')],
-                'bear': [Decimal('0.5'), Decimal('1'), Decimal('2'), Decimal('4'), Decimal('8')],
-            },
-            'DOGEUSDT': {
-                'def': [Decimal('1'), Decimal('2'), Decimal('4'), Decimal('8'), Decimal('16')],
-                'bear': [Decimal('0.5'), Decimal('1'), Decimal('2'), Decimal('4'), Decimal('8')],
-            },
-            'XLMUSDT': {
-                'def': [Decimal('1'), Decimal('2'), Decimal('4'), Decimal('8'), Decimal('16')],
-                'bear': [Decimal('0.5'), Decimal('1'), Decimal('2'), Decimal('4'), Decimal('8')],
-            },
-            '1000SHIBUSDT': {
-                'def': [Decimal('1'), Decimal('2'), Decimal('4'), Decimal('8'), Decimal('16')],
-                'bear': [Decimal('0.5'), Decimal('1'), Decimal('2'), Decimal('4'), Decimal('8')],
-            },
+            'XRPUSDT': [Decimal('1'), Decimal('2'), Decimal('4'), Decimal('8'), Decimal('16')],
+            'DOGEUSDT': [Decimal('1'), Decimal('2'), Decimal('4'), Decimal('8'), Decimal('16')],
+            'XLMUSDT': [Decimal('1'), Decimal('2'), Decimal('4'), Decimal('8'), Decimal('16')],
+            '1000SHIBUSDT': [Decimal('1'), Decimal('2'), Decimal('4'), Decimal('8'), Decimal('16')],
         },
         rsi_length={
             'XRPUSDT': 3,
@@ -71,26 +56,19 @@ class TailCatchWithBBV1(bt.Strategy):
         exit_percent={
             'XRPUSDT': Decimal('2'),
             'DOGEUSDT': Decimal('2'),
-            'LTCUSDT': Decimal('2'),
             'XLMUSDT': Decimal('1.5'),
             '1000SHIBUSDT': Decimal('2.0'),
-            'LINKUSDT': Decimal('1.5'),
         },
         percent={
             'XRPUSDT': {
                 'bull': [Decimal('3.0'), Decimal('6.0'), Decimal('12.0'), Decimal('20.0'), Decimal('25.0')],
-                'def': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('10.0')],
-                'bear': [Decimal('5.0'), Decimal('10.0'), Decimal('20.0'), Decimal('25.0'), Decimal('30.0')],
+                'def': [Decimal('2.0'), Decimal('4.0'), Decimal('8.0'), Decimal('10.0'), Decimal('12.0')],
+                'bear': [Decimal('5.0'), Decimal('10.0'), Decimal('15.0'), Decimal('20.0'), Decimal('25.0')],
             },
             'DOGEUSDT': {
                 'bull': [Decimal('4.0'), Decimal('8.0'), Decimal('16.0'), Decimal('20.0'), Decimal('25.0')],
                 'def': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('10.0')],
-                'bear': [Decimal('5.0'), Decimal('10.0'), Decimal('20.0'), Decimal('25.0'), Decimal('30.0')],
-            },
-            'LTCUSDT': {
-                'bull': [Decimal('2.0'), Decimal('4.0'), Decimal('8.0'), Decimal('16.0'), Decimal('20.0')],
-                'def': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('10.0')],
-                'bear': [Decimal('5.0'), Decimal('10.0'), Decimal('20.0'), Decimal('25.0'), Decimal('30.0')],
+                'bear': [Decimal('5.0'), Decimal('10.0'), Decimal('15.0'), Decimal('20.0'), Decimal('25.0')],
             },
             'XLMUSDT': {
                 'bull': [Decimal('2.0'), Decimal('4.0'), Decimal('8.0'), Decimal('10.0'), Decimal('12.0')],
@@ -101,12 +79,7 @@ class TailCatchWithBBV1(bt.Strategy):
                 'bull': [Decimal('3.0'), Decimal('6.0'), Decimal('12.0'), Decimal('20.0'), Decimal('25.0')],
                 'def': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('10.0')],
                 'bear': [Decimal('5.0'), Decimal('10.0'), Decimal('20.0'), Decimal('25.0'), Decimal('30.0')],
-            },
-            'LINKUSDT': {
-                'bull': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('10.0')],
-                'def': [Decimal('3.0'), Decimal('6.0'), Decimal('12.0'), Decimal('20.0'), Decimal('25.0')],
-                'bear': [Decimal('3.0'), Decimal('6.0'), Decimal('12.0'), Decimal('20.0'), Decimal('25.0')],
-            },
+            }
         },
         tick_size={
             'XRPUSDT': {
@@ -117,10 +90,6 @@ class TailCatchWithBBV1(bt.Strategy):
                 DataUtil.COMPANY_BINANCE: Decimal('0.000010'),
                 DataUtil.COMPANY_BYBIT: Decimal('0.00001')
             },
-            'LTCUSDT': {
-                DataUtil.COMPANY_BINANCE: Decimal('0.01'),
-                DataUtil.COMPANY_BYBIT: Decimal('0.01')
-            },
             'XLMUSDT': {
                 DataUtil.COMPANY_BINANCE: Decimal('0.00001'),
                 DataUtil.COMPANY_BYBIT: Decimal('0.01')
@@ -128,10 +97,6 @@ class TailCatchWithBBV1(bt.Strategy):
             '1000SHIBUSDT': {
                 DataUtil.COMPANY_BINANCE: Decimal('0.000001'),
                 DataUtil.COMPANY_BYBIT: Decimal('0.01')
-            },
-            'LINKUSDT':{
-                DataUtil.COMPANY_BINANCE: Decimal('0.001'),
-                DataUtil.COMPANY_BYBIT: Decimal('0.001'),
             }
         },
         step_size={
@@ -143,10 +108,6 @@ class TailCatchWithBBV1(bt.Strategy):
                 DataUtil.COMPANY_BINANCE: Decimal('1'),
                 DataUtil.COMPANY_BYBIT: Decimal('1')
             },
-            'LTCUSDT': {
-                DataUtil.COMPANY_BINANCE: Decimal('0.001'),
-                DataUtil.COMPANY_BYBIT: Decimal('0.1')
-            },
             'XLMUSDT': {
                 DataUtil.COMPANY_BINANCE: Decimal('1'),
                 DataUtil.COMPANY_BYBIT: Decimal('0.01')
@@ -154,10 +115,6 @@ class TailCatchWithBBV1(bt.Strategy):
             '1000SHIBUSDT': {
                 DataUtil.COMPANY_BINANCE: Decimal('1'),
                 DataUtil.COMPANY_BYBIT: Decimal('0.01')
-            },
-            'LINKUSDT':{
-                DataUtil.COMPANY_BINANCE: Decimal('0.01'),
-                DataUtil.COMPANY_BYBIT: Decimal('0.01'),
             }
         }
     )
@@ -173,6 +130,7 @@ class TailCatchWithBBV1(bt.Strategy):
         self.lows = []
         self.closes = []
         self.dates = []
+
         self.rsi = []
         self.bb_top = []
         self.bb_mid = []
@@ -269,7 +227,6 @@ class TailCatchWithBBV1(bt.Strategy):
             current_position_size = self.getposition(self.pairs[i]).size
             if current_position_size > 0:
                 if self.rsi[i][0] >= self.p.rsi_limit[name]:
-                # if self.closes[i][0] >= self.exit_high_bands[i][-1]:#and self.closes[i][0] >= avg_entry_price:
                     exit_price = DataUtil.convert_to_decimal(self.closes[i][0]) * (
                                 Decimal('1') + self.p.exit_percent[name] / Decimal('100'))
                     exit_price = int(exit_price / self.p.tick_size[name][company]) * self.p.tick_size[name][company]
@@ -278,7 +235,7 @@ class TailCatchWithBBV1(bt.Strategy):
                                            price=float(exit_price))
 
             date = self.dates[i].datetime(0)
-            candle_percent = (self.closes[i][0]-self.opens[i][0]) * 100  / self.opens[i][0]
+            candle_percent = (self.closes[i][0]-self.opens[i][0]) * 100 / self.opens[i][0]
             if self.closes[i][-1] >= self.bb_top[i][-1]:
                 self.top_percents.append((date, candle_percent))
             elif self.bb_bot[i][-1] <= self.closes[i][-1] < self.bb_top[i][-1]:
@@ -286,29 +243,31 @@ class TailCatchWithBBV1(bt.Strategy):
             else:
                 self.bot_percents.append((date, candle_percent))
 
-            risks = self.p.risk[name]['def']
             percents = self.p.percent[name]['def']
-            is_entry = True
+            half_qty = False
             if self.closes[i][-1] >= self.bb_top[i][-1]:
                 percents = self.p.percent[name]['bull']
             elif self.bb_bot[i][-1] <= self.closes[i][-1] < self.bb_top[i][-1]:
                 percents = self.p.percent[name]['def']
             else:
-                risks = self.p.risk[name]['bear']
+                half_qty = True
                 percents = self.p.percent[name]['bear']
 
             equity = DataUtil.convert_to_decimal(self.broker.getvalue())
-            if is_entry:
-                for j in range(0, len(self.p.risk[name])):
-                    percent = percents[j]
-                    price = DataUtil.convert_to_decimal(self.closes[i][0]) * (Decimal('1') - percent / Decimal('100'))
-                    price = int(price / self.p.tick_size[name][company]) * self.p.tick_size[name][company]
+            for j in range(0, len(self.p.risk[name])):
+                percent = percents[j]
+                price = DataUtil.convert_to_decimal(self.closes[i][0]) * (Decimal('1') - percent / Decimal('100'))
+                price = int(price / self.p.tick_size[name][company]) * self.p.tick_size[name][company]
 
-                    risk = risks[j]
-                    qty = equity * risk / Decimal('100') / price
-                    qty = int(qty / self.p.step_size[name][company]) * self.p.step_size[name][company]
+                risk = self.p.risk[name][j]
+                if not half_qty:
+                    risk = risk / Decimal('3')
 
-                    self.order = self.buy(exectype=bt.Order.Limit, data=self.pairs[i], size=float(qty), price=float(price))
+                qty = equity * risk / Decimal('100') / price
+                qty = int(qty / self.p.step_size[name][company]) * self.p.step_size[name][company]
+
+                self.order = self.buy(exectype=bt.Order.Limit, data=self.pairs[i], size=float(qty), price=float(price))
+
 
     def stop(self):
         sorted_top_percents = sorted(self.top_percents, key=lambda x: x[1])
@@ -331,8 +290,8 @@ class TailCatchWithBBV1(bt.Strategy):
 
 
 if __name__ == '__main__':
-    # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
-    data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+    data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+    # data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
     # data_path = "/Users/tjgus/Desktop/project/krtrade/backData"
     cerebro = bt.Cerebro()
     cerebro.addstrategy(TailCatchWithBBV1)
@@ -367,9 +326,9 @@ if __name__ == '__main__':
     mdd = qs.stats.max_drawdown(returns)
     print(f" quanstats's my returns MDD : {mdd * 100:.2f} %")
 
-    file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+    # file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
     # file_name = "/Users/tjgus/Desktop/project/krtrade/backData/result/"
-    # file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/" + company + "-"
+    file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/" + company + "-"
     for pair, tick_kind in pairs.items():
         file_name += pair + "-"
     file_name += "TailCatchWithBBV1"

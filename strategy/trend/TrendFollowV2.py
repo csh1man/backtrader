@@ -294,8 +294,8 @@ class TrendFollowV2(bt.Strategy):
                     self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], size=float(abs(current_position_size)), price=float(short_adj_high_band))
 
 if __name__ == '__main__':
-    # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
-    data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+    data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+    # data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
     # data_path = "/Users/tjgus/Desktop/project/krtrade/backData"
     cerebro = bt.Cerebro()
     cerebro.addstrategy(TrendFollowV2)
@@ -331,9 +331,9 @@ if __name__ == '__main__':
     print(f" quanstats's my returns MDD : {mdd * 100:.2f} %")
 
 
-    file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+    # file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
     # file_name = "/Users/tjgus/Desktop/project/krtrade/backData/result/"
-    # file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+    file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
     for pair, tick_kind in pairs.items():
         file_name += pair + "-"
     file_name += "TrendFollowV2"

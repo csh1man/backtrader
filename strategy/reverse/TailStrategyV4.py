@@ -25,9 +25,9 @@ class TailStrategyV4(bt.Strategy):
         },
         percent={
             'XRPUSDT': {
-                'bull': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('12.0'), Decimal('15.0')],
-                'def': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('12.0'), Decimal('15.0')],
-                'bear': [Decimal('4.0'), Decimal('8.0'), Decimal('12.0'), Decimal('20.0'), Decimal('25.0')]
+                'bull': [Decimal('3.0'), Decimal('5.0'), Decimal('8.0'), Decimal('12.0'), Decimal('15.0')],
+                'def': [Decimal('4.0'), Decimal('8.0'), Decimal('12.0'), Decimal('20.0'), Decimal('25.0')],
+                'bear': [Decimal('3.0'), Decimal('6.0'), Decimal('12.0'), Decimal('20.0'), Decimal('25.0')]
             },
             'DOGEUSDT': {
                 'bull': [Decimal('3.0'), Decimal('6.0'), Decimal('9.0'), Decimal('12.0'), Decimal('15.0')],
@@ -47,7 +47,7 @@ class TailStrategyV4(bt.Strategy):
 
         },
         exit_percent={
-            'XRPUSDT': Decimal('1.0'),
+            'XRPUSDT': Decimal('2.0'),
             'DOGEUSDT': Decimal('1.0'),
             'LTCUSDT': Decimal('1.0'),
             'XLMUSDT': Decimal('1.0'),
@@ -59,7 +59,7 @@ class TailStrategyV4(bt.Strategy):
             'XLMUSDT': 3,
         },
         rsi_limit={
-            'XRPUSDT': 70,
+            'XRPUSDT': 50,
             'DOGEUSDT': 70,
             'LTCUSDT': 70,
             'XLMUSDT': 70,
@@ -245,42 +245,42 @@ class TailStrategyV4(bt.Strategy):
             bear_check_idx = self.p.check_index[name]['bear']
 
             # n개 이전 캔들보다 x% 이상 상승했다면 급락할 가능성이 있으므로 간격을 넓혀야한다.
-            bear_condition = ((self.closes[i][-1] > self.closes[i][-1-bear_check_idx])
-                              and (self.closes[i][-1] - self.closes[i][-1-bear_check_idx]) * 100 / self.closes[i][-1
-                                  -bear_check_idx] >= self.p.check_percent[name]['bear'])
+            bull_condition = ((self.closes[i][-1] > self.closes[i][-1-bull_check_idx])
+                              and (self.closes[i][-1] - self.closes[i][-1-bull_check_idx]) * 100 / self.closes[i][-1
+                                  -bull_check_idx] >= self.p.check_percent[name]['bull'])
 
             # n개 이전 캔들보다 y% 이상 하락했다면 더이상 크게 떨어지지 않을 가능성이 있으므로 간격을 좁힌다.
-            bull_condition = ((self.closes[i][-1] < self.closes[i][-1-bull_check_idx])
-                              and (self.closes[i][-1-bull_check_idx] - self.closes[i][-1]) * 100 / self.closes[i][-1] >=
-                              self.p.check_percent[name]['bull'])
+            bear_condition = ((self.closes[i][-1] < self.closes[i][-1-bear_check_idx])
+                              and (self.closes[i][-1-bear_check_idx] - self.closes[i][-1]) * 100 / self.closes[i][-1] >=
+                              self.p.check_percent[name]['bear'])
 
             date = self.dates[i].datetime(0)
-            candle_percent = (self.closes[i][0]-self.opens[i][0]) * 100  / self.opens[i][0]
-            if bear_condition:
+            candle_percent = (self.closes[i][0]-self.opens[i][0]) * 100 / self.opens[i][0]
+            if bull_condition:
                 self.top_percents.append((date, candle_percent))
-            elif bull_condition:
+            elif bear_condition:
                 self.bot_percents.append((date, candle_percent))
             else:
                 self.mid_percents.append((date, candle_percent))
 
-            # percents = self.p.percent[name]['def']
-            #
-            # if bear_condition:
-            #     percents = self.p.percent[name]['bear']
-            # elif bull_condition:
-            #     percents = self.p.percent[name]['bull']
-            #
-            # equity = DataUtil.convert_to_decimal(self.broker.getvalue())
-            # for j in range(0, len(self.p.risk[name])):
-            #     percent = percents[j]
-            #     price = DataUtil.convert_to_decimal(self.closes[i][0]) * (Decimal('1') - percent / Decimal('100'))
-            #     price = int(price / self.p.tick_size[name][company]) * self.p.tick_size[name][company]
-            #
-            #     risk = self.p.risk[name][j]
-            #     qty = equity * risk / Decimal('100') / price
-            #     qty = int(qty / self.p.step_size[name][company]) * self.p.step_size[name][company]
-            #
-            #     self.order = self.buy(exectype=bt.Order.Limit, data=self.pairs[i], size=float(qty), price=float(price))
+            percents = self.p.percent[name]['def']
+
+            if bull_condition:
+                percents = self.p.percent[name]['bull']
+            elif bear_condition:
+                percents = self.p.percent[name]['bear']
+
+            equity = DataUtil.convert_to_decimal(self.broker.getvalue())
+            for j in range(0, len(self.p.risk[name])):
+                percent = percents[j]
+                price = DataUtil.convert_to_decimal(self.closes[i][0]) * (Decimal('1') - percent / Decimal('100'))
+                price = int(price / self.p.tick_size[name][company]) * self.p.tick_size[name][company]
+
+                risk = self.p.risk[name][j]
+                qty = equity * risk / Decimal('100') / price
+                qty = int(qty / self.p.step_size[name][company]) * self.p.step_size[name][company]
+
+                self.order = self.buy(exectype=bt.Order.Limit, data=self.pairs[i], size=float(qty), price=float(price))
 
     def stop(self):
         sorted_top_percents = sorted(self.top_percents, key=lambda x: x[1])
@@ -301,8 +301,8 @@ class TailStrategyV4(bt.Strategy):
             self.log(f'{key} -> {value}%')
 
 if __name__ == '__main__':
-    # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
-    data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+    data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+    # data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
     # data_path = "/Users/tjgus/Desktop/project/krtrade/backData"
     cerebro = bt.Cerebro()
     cerebro.addstrategy(TailStrategyV4)
@@ -337,9 +337,9 @@ if __name__ == '__main__':
     mdd = qs.stats.max_drawdown(returns)
     print(f" quanstats's my returns MDD : {mdd * 100:.2f} %")
 
-    file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+    # file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
     # file_name = "/Users/tjgus/Desktop/project/krtrade/backData/result/"
-    # file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/" + company + "-"
+    file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/" + company + "-"
     for pair, tick_kind in pairs.items():
         file_name += pair + "-"
     file_name += "TailCatchV4"
