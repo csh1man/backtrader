@@ -6,29 +6,52 @@ from decimal import Decimal
 
 pairs = {
     'ETHUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    'SUIUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    '1000PEPEUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    'XRPUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    # '1000BONKUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    'DOGEUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    'CRVUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    'STXUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    # 'ZECUSDT': DataUtil.CANDLE_TICK_1HOUR,
 }
 
-leverage=4
+company=DataUtil.COMPANY_BINANCE
 
-class TrendFollowV2(bt.Strategy):
+leverage=3
+
+class TrendFollow1H(bt.Strategy):
     params = dict(
         risk={
             'ETHUSDT':{
                 'long': Decimal('2'),
-                'short': Decimal('1')
+                'short': Decimal('2')
             },
-            '1000PEPEUSDT': [Decimal('1'), Decimal('2'), Decimal('4'), Decimal('8'), Decimal('16')],
-            'SUIUSDT': [Decimal('1'), Decimal('2'), Decimal('4'), Decimal('8'), Decimal('16')],
-            '1000BONKUSDT': [Decimal('1'), Decimal('2'), Decimal('4'), Decimal('8'), Decimal('16')],
-            'XRPUSDT': [Decimal('0.1'), Decimal('0.5'), Decimal('1'), Decimal('2'), Decimal('4'), Decimal('8'), Decimal('16')],
-            'DOGEUSDT': [Decimal('0.1'), Decimal('0.5'), Decimal('1'), Decimal('2'), Decimal('4'), Decimal('8'),Decimal('16')],
+            '1000PEPEUSDT': [Decimal('1'), Decimal('2'), Decimal('4'), Decimal('8'), Decimal('16'), Decimal('20')],
+            'SUIUSDT': [Decimal('1'), Decimal('2'), Decimal('4'), Decimal('8'), Decimal('16'), Decimal('20')],
+            'STXUSDT': [Decimal('1'), Decimal('2'), Decimal('4'), Decimal('8'), Decimal('16'), Decimal('20')],
+            '1000BONKUSDT': [Decimal('1'), Decimal('2'), Decimal('4'), Decimal('8'), Decimal('16'), Decimal('20')],
+            'XRPUSDT': [Decimal('0.1'), Decimal('0.5'), Decimal('1'), Decimal('2'), Decimal('4'), Decimal('8'), Decimal('16'), Decimal('20')],
+            'DOGEUSDT': [Decimal('0.1'), Decimal('0.5'), Decimal('1'), Decimal('2'), Decimal('4'), Decimal('8'),Decimal('16'), Decimal('20')],
+            '1000SHIBUSDT': [Decimal('0.1'), Decimal('0.5'), Decimal('1'), Decimal('2'), Decimal('4'), Decimal('8'), Decimal('16'), Decimal('20')],
+            'CRVUSDT': [Decimal('0.1'), Decimal('0.5'), Decimal('1'), Decimal('2'), Decimal('4'), Decimal('8'), Decimal('16'), Decimal('20')],
+            'ZECUSDT': [Decimal('0.1'), Decimal('0.5'), Decimal('1'), Decimal('2'), Decimal('4'), Decimal('8'), Decimal('16'), Decimal('20')],
         },
-        entry_mode={
-          'ETHUSDT' : 2
+        entry_mode={ # 0 : only long, 1 : only short, 2: long and short, 3: counter trend
+            'ETHUSDT': 2,
+            '1000PEPEUSDT': 3,
+            'SUIUSDT': 3,
+            'STXUSDT': 3,
+            '1000BONKUSDT': 3,
+            'XRPUSDT': 3,
+            'DOGEUSDT': 3,
+            '1000SHIBUSDT': 3,
+            'CRVUSDT': 3,
+            'ZECUSDT': 3,
         },
         high_band_length={
             'ETHUSDT': {
-                'long': 200,
+                'long': 230,
                 'short': 30,
             },
             '1000PEPEUSDT': {
@@ -36,6 +59,10 @@ class TrendFollowV2(bt.Strategy):
                 'short': 30,
             },
             'SUIUSDT': {
+                'long': 200,
+                'short': 30,
+            },
+            'STXUSDT': {
                 'long': 200,
                 'short': 30,
             },
@@ -51,10 +78,22 @@ class TrendFollowV2(bt.Strategy):
                 'long': 200,
                 'short': 30,
             },
+            '1000SHIBUSDT': {
+                'long': 200,
+                'short': 30,
+            },
+            'CRVUSDT': {
+                'long': 200,
+                'short': 30,
+            },
+            'ZECUSDT': {
+                'long': 200,
+                'short': 30,
+            },
         },
         low_band_length={
             'ETHUSDT': {
-                'long': 150,
+                'long': 50,
                 'short': 230
             },
             '1000PEPEUSDT': {
@@ -65,6 +104,10 @@ class TrendFollowV2(bt.Strategy):
                 'long': 200,
                 'short': 30,
             },
+            'STXUSDT': {
+                'long': 200,
+                'short': 30,
+            },
             '1000BONKUSDT': {
                 'long': 200,
                 'short': 30,
@@ -77,10 +120,22 @@ class TrendFollowV2(bt.Strategy):
                 'long': 200,
                 'short': 30,
             },
+            '1000SHIBUSDT': {
+                'long': 200,
+                'short': 30,
+            },
+            'CRVUSDT': {
+                'long': 200,
+                'short': 30,
+            },
+            'ZECUSDT': {
+                'long': 200,
+                'short': 30,
+            },
         },
         high_band_constant={
             'ETHUSDT': {
-                'long': -10,
+                'long': -25,
                 'short': 55,
             },
             '1000PEPEUSDT': {
@@ -91,6 +146,10 @@ class TrendFollowV2(bt.Strategy):
                 'long': 200,
                 'short': 30,
             },
+            'STXUSDT': {
+                'long': 200,
+                'short': 30,
+            },
             '1000BONKUSDT': {
                 'long': 200,
                 'short': 30,
@@ -103,10 +162,22 @@ class TrendFollowV2(bt.Strategy):
                 'long': 200,
                 'short': 30,
             },
+            '1000SHIBUSDT': {
+                'long': 200,
+                'short': 30,
+            },
+            'CRVUSDT': {
+                'long': 200,
+                'short': 30,
+            },
+            'ZECUSDT': {
+                'long': 200,
+                'short': 30,
+            },
         },
         low_band_constant={
             'ETHUSDT': {
-                'long': 40,
+                'long': 50,
                 'short': 5
             },
             '1000PEPEUSDT': {
@@ -117,6 +188,10 @@ class TrendFollowV2(bt.Strategy):
                 'long': 200,
                 'short': 30,
             },
+            'STXUSDT': {
+                'long': 200,
+                'short': 30,
+            },
             '1000BONKUSDT': {
                 'long': 200,
                 'short': 30,
@@ -129,11 +204,23 @@ class TrendFollowV2(bt.Strategy):
                 'long': 200,
                 'short': 30,
             },
+            '1000SHIBUSDT': {
+                'long': 200,
+                'short': 30,
+            },
+            'CRVUSDT': {
+                'long': 200,
+                'short': 30,
+            },
+            'ZECUSDT': {
+                'long': 200,
+                'short': 30,
+            },
         },
         ma_length={
           'ETHUSDT': {
-              'long' : [5, 10, 15],
-              'short' : [10, 20, 30]
+              'long': [5, 10, 15],
+              'short': [5, 10, 15]
           },
           '1000PEPEUSDT': {
               'long': [5, 10, 15],
@@ -143,72 +230,144 @@ class TrendFollowV2(bt.Strategy):
               'long': [5, 10, 15],
               'short': [10, 20, 30]
           },
-            
+          'STXUSDT': {
+              'long': [5, 10, 15],
+              'short': [10, 20, 30]
+          },
+          '1000BONKUSDT': {
+              'long': [5, 10, 15],
+              'short': [10, 20, 30]
+          },
+          'XRPUSDT': {
+              'long': [5, 10, 15],
+              'short': [10, 20, 30]
+          },
+          'DOGEUSDT': {
+              'long': [5, 10, 15],
+              'short': [10, 20, 30]
+          },
+          '1000SHIBUSDT': {
+              'long': [5, 10, 15],
+              'short': [10, 20, 30]
+          },
+          'CRVUSDT': {
+              'long': [5, 10, 15],
+              'short': [10, 20, 30]
+          },
+          'ZECUSDT': {
+              'long': [5, 10, 15],
+              'short': [10, 20, 30]
+          },
+        },
+        rsi_length={
+            'ETHUSDT': 3,
+            '1000PEPEUSDT': 3,
+            'SUIUSDT': 3,
+            'STXUSDT': 3,
+            '1000BONKUSDT': 3,
+            'XRPUSDT': 3,
+            'DOGEUSDT': 3,
+            '1000SHIBUSDT': 3,
+            'CRVUSDT': 3,
+            'ZECUSDT': 3,
         },
         rsi_limit={
+            'ETHUSDT': 70,
             '1000PEPEUSDT': 70,
             'SUIUSDT': 70,
+            'STXUSDT': 70,
             '1000BONKUSDT': 70,
             'XRPUSDT': 70,
-            'DOGEUSDT': 70
+            'DOGEUSDT': 70,
+            '1000SHIBUSDT': 70,
+            'CRVUSDT': 70,
+            'ZECUSDT': 70
         },
         bb_length={
+            'ETHUSDT': 30,
             '1000PEPEUSDT': 30,
             'SUIUSDT': 30,
+            'STXUSDT': 30,
             '1000BONKUSDT': 30,
             'XRPUSDT': 30,
-            'DOGEUSDT': 30
+            'DOGEUSDT': 30,
+            '1000SHIBUSDT': 30,
+            'CRVUSDT': 30,
+            'ZECUSDT': 30,
         },
         bb_mult={
+            'ETHUSDT': 0.5,
             '1000PEPEUSDT': 0.5,
             'SUIUSDT': 0.5,
+            'STXUSDT': 0.5,
             '1000BONKUSDT': 0.5,
             'XRPUSDT': 0.5,
             'DOGEUSDT': 0.5,
+            '1000SHIBUSDT': 0.5,
+            'CRVUSDT': 0.5,
+            'ZECUSDT': 0.5,
         },
         exit_percent={
             '1000PEPEUSDT': Decimal('1'),
             'SUIUSDT': Decimal('1'),
+            'STXUSDT': Decimal('1'),
             '1000BONKUSDT': Decimal('1'),
             'XRPUSDT': Decimal('1'),
             'DOGEUSDT': Decimal('1'),
+            '1000SHIBUSDT': Decimal('1'),
+            'CRVUSDT': Decimal('1'),
+            'ZECUSDT': Decimal('1'),
         },
         percent={
             '1000PEPEUSDT': {
-                'bull': [Decimal('3.0'), Decimal('6.0'), Decimal('12.0'), Decimal('15.0'), Decimal('20.0')],
-                'def': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('12')],
-                'bear': [Decimal('3.0'), Decimal('6.0'), Decimal('12.0'), Decimal('15.0'), Decimal('20.0')],
+                'bull': [Decimal('3.0'), Decimal('6.0'), Decimal('12.0'), Decimal('15.0'), Decimal('20.0'), Decimal('30.0')],
+                'def': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('12'), Decimal('30.0')],
+                'bear': [Decimal('3.0'), Decimal('6.0'), Decimal('12.0'), Decimal('15.0'), Decimal('20.0'), Decimal('30.0')],
             },
             'SUIUSDT': {
-                'bull': [Decimal('3.0'), Decimal('6.0'), Decimal('12.0'), Decimal('15.0'), Decimal('20.0')],
-                'def': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('12')],
-                'bear': [Decimal('3.0'), Decimal('6.0'), Decimal('12.0'), Decimal('15.0'), Decimal('20.0')],
+                'bull': [Decimal('3.0'), Decimal('6.0'), Decimal('12.0'), Decimal('15.0'), Decimal('20.0'), Decimal('30.0')],
+                'def': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('12'), Decimal('30.0')],
+                'bear': [Decimal('3.0'), Decimal('6.0'), Decimal('12.0'), Decimal('15.0'), Decimal('20.0'), Decimal('30.0')],
+            },
+            'STXUSDT': {
+                'bull': [Decimal('4.0'), Decimal('5.0'), Decimal('10.0'), Decimal('15.0'), Decimal('20.0'), Decimal('30.0')],
+                'def': [Decimal('4.0'), Decimal('5.0'), Decimal('10.0'), Decimal('15.0'), Decimal('20.0'), Decimal('30.0')],
+                'bear': [Decimal('4.0'), Decimal('5.0'), Decimal('10.0'), Decimal('15.0'), Decimal('20.0'), Decimal('30.0')],
             },
             '1000BONKUSDT': {
-                'bull': [Decimal('3.0'), Decimal('6.0'), Decimal('12.0'), Decimal('15.0'), Decimal('20.0')],
-                'def': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('12')],
-                'bear': [Decimal('3.0'), Decimal('6.0'), Decimal('12.0'), Decimal('15.0'), Decimal('20.0')],
+                'bull': [Decimal('3.0'), Decimal('6.0'), Decimal('12.0'), Decimal('15.0'), Decimal('20.0'), Decimal('30.0')],
+                'def': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('12'), Decimal('30.0')],
+                'bear': [Decimal('3.0'), Decimal('6.0'), Decimal('12.0'), Decimal('15.0'), Decimal('20.0'), Decimal('30.0')],
             },
             'XRPUSDT': {
-                'bull': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('12.0'), Decimal('15'),
-                         Decimal('20.0'), Decimal('25.0')],
-                'def': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('12.0'), Decimal('15'), Decimal('20.0'),
-                        Decimal('25.0')],
-                'bear': [Decimal('5.0'), Decimal('7.0'), Decimal('10.0'), Decimal('15.0'), Decimal('20.0'),
-                         Decimal('25.0'), Decimal('30.0')],
+                'bull': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('12.0'), Decimal('15'), Decimal('20.0'), Decimal('25.0'), Decimal('40.0')],
+                'def': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('12.0'), Decimal('15'), Decimal('20.0'), Decimal('25.0'), Decimal('40.0')],
+                'bear': [Decimal('5.0'), Decimal('7.0'), Decimal('10.0'), Decimal('15.0'), Decimal('20.0'), Decimal('25.0'), Decimal('30.0'), Decimal('40.0')],
             },
             'DOGEUSDT': {
-                'bull': [Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('12'), Decimal('16.0'),
-                         Decimal('20.0'), Decimal('25.0')],
-                'def': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('12.0'), Decimal('15'), Decimal('20.0'),
-                        Decimal('25.0')],
-                'bear': [Decimal('5.0'), Decimal('7.0'), Decimal('10.0'), Decimal('15.0'), Decimal('20.0'),
-                         Decimal('25.0'), Decimal('30.0')],
+                'bull': [Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('12'), Decimal('16.0'), Decimal('20.0'), Decimal('25.0'), Decimal('40.0')],
+                'def': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('12.0'), Decimal('15'), Decimal('20.0'), Decimal('25.0'), Decimal('40.0')],
+                'bear': [Decimal('5.0'), Decimal('7.0'), Decimal('10.0'), Decimal('15.0'), Decimal('20.0'), Decimal('25.0'), Decimal('30.0'), Decimal('40.0')],
+            },
+            '1000SHIBUSDT': {
+                'bull': [Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('12'), Decimal('16.0'), Decimal('20.0'), Decimal('25.0'), Decimal('40.0')],
+                'def': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('12.0'), Decimal('15'), Decimal('20.0'), Decimal('25.0'), Decimal('40.0')],
+                'bear': [Decimal('5.0'), Decimal('7.0'), Decimal('10.0'), Decimal('15.0'), Decimal('20.0'), Decimal('25.0'), Decimal('30.0'), Decimal('40.0')],
+            },
+            'CRVUSDT': {
+                'bull': [Decimal('3.0'), Decimal('5.0'), Decimal('8.0'), Decimal('10'), Decimal('12.0'), Decimal('15.0'), Decimal('20.0'), Decimal('40.0')],
+                'def': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('12.0'), Decimal('15'), Decimal('20.0'), Decimal('25.0'), Decimal('40.0')],
+                'bear': [Decimal('5.0'), Decimal('7.0'), Decimal('10.0'), Decimal('15.0'), Decimal('20.0'), Decimal('25.0'), Decimal('30.0'), Decimal('40.0')],
+            },
+            'ZECUSDT': {
+                'bull': [Decimal('3.0'), Decimal('5.0'), Decimal('8.0'), Decimal('10'), Decimal('12.0'), Decimal('15.0'), Decimal('20.0'), Decimal('40.0')],
+                'def': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('12.0'), Decimal('15'), Decimal('20.0'), Decimal('25.0'), Decimal('40.0')],
+                'bear': [Decimal('5.0'), Decimal('7.0'), Decimal('10.0'), Decimal('15.0'), Decimal('20.0'), Decimal('25.0'), Decimal('30.0'), Decimal('40.0')],
             },
         },
         tick_size={
             'ETHUSDT': {
-                DataUtil.COMPANY_BINANCE : Decimal('0.01'),
+                DataUtil.COMPANY_BINANCE: Decimal('0.01'),
             },
             '1000PEPEUSDT': {
                 DataUtil.COMPANY_BINANCE: Decimal('0.0000001'),
@@ -216,6 +375,10 @@ class TrendFollowV2(bt.Strategy):
             },
             'SUIUSDT': {
                 DataUtil.COMPANY_BINANCE: Decimal('0.000100'),
+                DataUtil.COMPANY_BYBIT: Decimal('0.00010')
+            },
+            'STXUSDT': {
+                DataUtil.COMPANY_BINANCE: Decimal('0.0001000'),
                 DataUtil.COMPANY_BYBIT: Decimal('0.00010')
             },
             '1000BONKUSDT': {
@@ -230,6 +393,16 @@ class TrendFollowV2(bt.Strategy):
                 DataUtil.COMPANY_BINANCE: Decimal('0.000010'),
                 DataUtil.COMPANY_BYBIT: Decimal('0.00001')
             },
+            '1000SHIBUSDT': {
+                DataUtil.COMPANY_BINANCE: Decimal('0.000001'),
+                DataUtil.COMPANY_BYBIT: Decimal('0.01')
+            },
+            "CRVUSDT":{
+                DataUtil.COMPANY_BINANCE: Decimal("0.001")
+            },
+            "ZECUSDT":{
+                DataUtil.COMPANY_BINANCE: Decimal("0.01")
+            }
         },
         step_size={
             'ETHUSDT': {
@@ -241,6 +414,10 @@ class TrendFollowV2(bt.Strategy):
             },
             'SUIUSDT': {
                 DataUtil.COMPANY_BINANCE: Decimal('0.1'),
+                DataUtil.COMPANY_BYBIT: Decimal('10')
+            },
+            'STXUSDT': {
+                DataUtil.COMPANY_BINANCE: Decimal('1'),
                 DataUtil.COMPANY_BYBIT: Decimal('10')
             },
             '1000BONKUSDT': {
@@ -255,6 +432,16 @@ class TrendFollowV2(bt.Strategy):
                 DataUtil.COMPANY_BINANCE: Decimal('1'),
                 DataUtil.COMPANY_BYBIT: Decimal('1')
             },
+            '1000SHIBUSDT': {
+                DataUtil.COMPANY_BINANCE: Decimal('1'),
+                DataUtil.COMPANY_BYBIT: Decimal('0.01')
+            },
+            "CRVUSDT":{
+                DataUtil.COMPANY_BINANCE: Decimal("0.1")
+            },
+            "ZECUSDT":{
+                DataUtil.COMPANY_BINANCE: Decimal("0.001")
+            }
         }
     )
 
@@ -272,6 +459,7 @@ class TrendFollowV2(bt.Strategy):
         self.short_ma = []
         self.mid_ma = []
         self.long_ma = []
+        self.rsi = []
 
         self.long_high_bands = []
         self.long_low_bands = []
@@ -286,6 +474,10 @@ class TrendFollowV2(bt.Strategy):
         self.long_short_ma = []
         self.long_mid_ma = []
         self.long_long_ma = []
+
+        self.bb_top = []
+        self.bb_mid = []
+        self.bb_bot = []
 
         # 자산 기록용 변수 셋팅
         self.order = None
@@ -314,30 +506,42 @@ class TrendFollowV2(bt.Strategy):
             name = self.names[i]
 
             long_high_band = bt.indicators.Highest(self.highs[i], period=self.p.high_band_length[name]['long'])
-            long_low_band = bt.indicators.Lowest(self.lows[i], period=self.p.low_band_length[name]['long'])
             self.long_high_bands.append(long_high_band)
+
+            long_low_band = bt.indicators.Lowest(self.lows[i], period=self.p.low_band_length[name]['long'])
             self.long_low_bands.append(long_low_band)
 
             short_high_band = bt.indicators.Highest(self.highs[i], period=self.p.high_band_length[name]['short'])
-            short_low_band = bt.indicators.Lowest(self.lows[i], period=self.p.low_band_length[name]['short'])
             self.short_high_bands.append(short_high_band)
+
+            short_low_band = bt.indicators.Lowest(self.lows[i], period=self.p.low_band_length[name]['short'])
             self.short_low_bands.append(short_low_band)
 
             short_short_ma = bt.indicators.ExponentialMovingAverage(self.closes[i], period=self.p.ma_length[name]['short'][0])
-            short_mid_ma = bt.indicators.ExponentialMovingAverage(self.closes[i], period=self.p.ma_length[name]['short'][1])
-            short_long_ma = bt.indicators.ExponentialMovingAverage(self.closes[i], period=self.p.ma_length[name]['short'][2])
-
             self.short_short_ma.append(short_short_ma)
+
+            short_mid_ma = bt.indicators.ExponentialMovingAverage(self.closes[i], period=self.p.ma_length[name]['short'][1])
             self.short_mid_ma.append(short_mid_ma)
+
+            short_long_ma = bt.indicators.ExponentialMovingAverage(self.closes[i], period=self.p.ma_length[name]['short'][2])
             self.short_long_ma.append(short_long_ma)
 
             long_short_ma = bt.indicators.ExponentialMovingAverage(self.closes[i], period=self.p.ma_length[name]['long'][0])
-            long_mid_ma = bt.indicators.ExponentialMovingAverage(self.closes[i], period=self.p.ma_length[name]['long'][1])
-            long_long_ma = bt.indicators.ExponentialMovingAverage(self.closes[i], period=self.p.ma_length[name]['long'][2])
-
             self.long_short_ma.append(long_short_ma)
+
+            long_mid_ma = bt.indicators.ExponentialMovingAverage(self.closes[i], period=self.p.ma_length[name]['long'][1])
             self.long_mid_ma.append(long_mid_ma)
+
+            long_long_ma = bt.indicators.ExponentialMovingAverage(self.closes[i], period=self.p.ma_length[name]['long'][2])
             self.long_long_ma.append(long_long_ma)
+
+            rsi = bt.indicators.RSI_Safe(self.closes[i], period=self.p.rsi_length[name])
+            self.rsi.append(rsi)
+
+            bb = bt.indicators.BollingerBands(self.closes[i], period=self.p.bb_length[name], devfactor=self.p.bb_mult[name])
+            self.bb_top.append(bb.lines.top)
+            self.bb_mid.append(bb.lines.mid)
+            self.bb_bot.append(bb.lines.bot)
 
     def cancel_all(self, target_name=None):
         open_orders = self.broker.get_orders_open()
@@ -361,7 +565,6 @@ class TrendFollowV2(bt.Strategy):
                          f' [매도{order.Status[order.status]:^10}] 종목 : {order.data._name} \t'
                          f'수량:{order.size} \t'
                          f'가격:{order.created.price:.4f}\n')
-
 
     def stop(self):
         self.log(f'전체 트레이딩 횟수 : {self.total_trading_count}')
@@ -399,48 +602,84 @@ class TrendFollowV2(bt.Strategy):
             long_low_band = DataUtil.convert_to_decimal(self.long_low_bands[i][0])
 
             long_adj_high_band = long_high_band - (long_high_band-long_low_band) * (self.p.high_band_constant[name]['long'] / Decimal('100'))
+            long_adj_high_band = int(long_adj_high_band / self.p.tick_size[name][company]) * self.p.tick_size[name][company]
+
             long_adj_low_band = long_low_band + (long_high_band-long_low_band) * (self.p.low_band_constant[name]['long'] / Decimal('100'))
+            long_adj_low_band = int(long_adj_low_band / self.p.tick_size[name][company]) * self.p.tick_size[name][company]
 
             short_high_band = DataUtil.convert_to_decimal(self.short_high_bands[i][0])
             short_low_band = DataUtil.convert_to_decimal(self.short_low_bands[i][0])
 
             short_adj_high_band = short_high_band - (short_high_band-short_low_band) * (self.p.high_band_constant[name]['short'] / Decimal('100'))
+            short_adj_high_band = int(short_adj_high_band / self.p.tick_size[name][company]) * self.p.tick_size[name][company]
+
             short_adj_low_band = short_low_band + (short_high_band-short_low_band) * (self.p.low_band_constant[name]['short'] / Decimal('100'))
+            short_adj_low_band = int(short_adj_low_band / self.p.tick_size[name][company]) * self.p.tick_size[name][company]
 
             entry_mode = self.p.entry_mode[name]
             equity = DataUtil.convert_to_decimal(self.broker.getvalue())
             current_position_size = self.getposition(self.pairs[i]).size
-            if current_position_size == 0:
-                if entry_mode in [0, 2]:
-                    long_qty = equity * self.p.risk[name]['long'] / Decimal('100') / abs(long_adj_high_band-long_adj_low_band)
-                    long_qty = int(long_qty / self.p.step_size[name]) * self.p.step_size[name]
-                    if long_qty > 0:
-                        self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(long_adj_high_band), size=float(long_qty))
-                if entry_mode in [1, 2]:
-                    short_qty = equity * self.p.risk[name]['short'] / Decimal('100') / abs(short_adj_low_band-short_adj_high_band)
-                    short_qty = int(short_qty / self.p.step_size[name]) * self.p.step_size[name]
-                    if short_qty > 0:
-                        self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], price=float(short_adj_low_band), size=float(short_qty))
-            elif current_position_size > 0:
-                self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], price=float(long_adj_low_band), size=float(current_position_size))
-            elif current_position_size < 0:
-                self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(short_adj_high_band), size=float(abs(current_position_size)))
+            if entry_mode in [0, 1, 2]:
+                if current_position_size == 0:
+                    if entry_mode in [0, 2]:
+                        long_qty = equity * self.p.risk[name]['long'] / Decimal('100') / abs(long_adj_high_band-long_adj_low_band)
+                        long_qty = int(long_qty / self.p.step_size[name][company]) * self.p.step_size[name][company]
+                        if long_qty > 0:
+                            self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(long_adj_high_band), size=float(long_qty))
+                    if entry_mode in [1, 2]:
+                        short_qty = equity * self.p.risk[name]['short'] / Decimal('100') / abs(short_adj_low_band-short_adj_high_band)
+                        short_qty = int(short_qty / self.p.step_size[name][company]) * self.p.step_size[name][company]
+                        if short_qty > 0:
+                            self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], price=float(short_adj_low_band), size=float(short_qty))
+                elif current_position_size > 0:
+                    self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], price=float(long_adj_low_band), size=float(current_position_size))
+                elif current_position_size < 0:
+                    self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(short_adj_high_band), size=float(abs(current_position_size)))
+            else:
+                if current_position_size > 0:
+                    if self.rsi[i][0] >= self.p.rsi_limit[name]:
+                        exit_price = DataUtil.convert_to_decimal(self.closes[i][0]) * (
+                                Decimal('1') + self.p.exit_percent[name] / Decimal('100'))
+                        exit_price = int(exit_price / self.p.tick_size[name][company]) * self.p.tick_size[name][company]
 
+                        self.order = self.sell(exectype=bt.Order.Limit, data=self.pairs[i], size=current_position_size,
+                                               price=float(exit_price))
+                if self.closes[i][-1] >= self.bb_top[i][-1]:
+                    percents = self.p.percent[name]['bull']
+                elif self.bb_bot[i][-1] <= self.closes[i][-1] < self.bb_top[i][-1]:
+                    percents = self.p.percent[name]['def']
+                else:
+                    percents = self.p.percent[name]['bear']
 
+                equity = DataUtil.convert_to_decimal(self.broker.getvalue())
+                for j in range(0, len(self.p.risk[name])):
+                    percent = percents[j]
+                    price = DataUtil.convert_to_decimal(self.closes[i][0]) * (
+                            Decimal('1') - percent / Decimal('100'))
+                    price = int(price / self.p.tick_size[name][company]) * self.p.tick_size[name][company]
+
+                    risk = self.p.risk[name][j]
+                    qty = equity * risk / Decimal('100') / price
+                    qty = int(qty / self.p.step_size[name][company]) * self.p.step_size[name][company]
+
+                    cash = DataUtil.convert_to_decimal(self.broker.get_cash())
+                    margin = qty * price / Decimal(leverage)
+                    if cash >= margin:
+                        self.order = self.buy(exectype=bt.Order.Limit, data=self.pairs[i], size=float(qty), price=float(price))
 
 if __name__ == '__main__':
-    # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
-    data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+    data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+    # data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
     # data_path = "/Users/tjgus/Desktop/project/krtrade/backData"
     cerebro = bt.Cerebro()
-    cerebro.addstrategy(TrendFollowV2)
+    cerebro.addstrategy(TrendFollow1H)
 
     cerebro.broker.setcash(13000)
     cerebro.broker.setcommission(commission=0.001, leverage=leverage)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BINANCE, pair, tick_kind)
+        df = DataUtil.load_candle_data_as_df(data_path, company, pair, tick_kind)
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 
@@ -465,13 +704,12 @@ if __name__ == '__main__':
     mdd = qs.stats.max_drawdown(returns)
     print(f" quanstats's my returns MDD : {mdd * 100:.2f} %")
 
-
-    file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+    # file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
     # file_name = "/Users/tjgus/Desktop/project/krtrade/backData/result/"
-    # file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+    file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/" + company + "-"
     for pair, tick_kind in pairs.items():
         file_name += pair + "-"
-    file_name += "TrendFollowV2"
+    file_name += "TrendFollow1H"
 
     strat = results[0]
     order_balance_list = strat.order_balance_list
@@ -485,5 +723,15 @@ if __name__ == '__main__':
     df = df.dropna()
     df = df.set_index('date')
     df.index.name = 'date'
+    # print(df['value'])
     df.to_csv(f'{file_name}.csv')
     qs.reports.html(df['value'], output=f"{file_name}.html", download_filename=f"{file_name}.html", title=file_name)
+
+    # 인덱스가 날짜 형식으로 되어 있지 않다면, 'returns.index'를 datetime 형식으로 변환
+    returns.index = pd.to_datetime(returns.index)
+
+    # 2023년 1월 1일 이후의 데이터만 필터링
+    returns = returns[returns.index >= '2023-04-01']
+
+    # 'returns' DataFrame을 HTML로 출력
+    qs.reports.html(returns, output=f'{file_name}_숏_종가 중심.html', title='result')

@@ -7,6 +7,7 @@ from decimal import Decimal
 pairs = {
     'XRPUSDT': DataUtil.CANDLE_TICK_1HOUR,
     'DOGEUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    'CRVUSDT': DataUtil.CANDLE_TICK_1HOUR,
     '1000SHIBUSDT': DataUtil.CANDLE_TICK_1HOUR,
 }
 
@@ -20,31 +21,37 @@ class TailCatchWithBBV2(bt.Strategy):
             'XRPUSDT': [Decimal('0.1'), Decimal('0.5'), Decimal('1'), Decimal('2'), Decimal('4'), Decimal('8'), Decimal('16')],
             'DOGEUSDT': [Decimal('0.1'), Decimal('0.5'), Decimal('1'), Decimal('2'), Decimal('4'), Decimal('8'), Decimal('16')],
             '1000SHIBUSDT': [Decimal('0.1'), Decimal('0.5'), Decimal('1'), Decimal('2'), Decimal('4'), Decimal('8'), Decimal('16')],
+            'CRVUSDT': [Decimal('0.1'), Decimal('0.5'), Decimal('1'), Decimal('2'), Decimal('4'), Decimal('8'),Decimal('16')],
         },
         r_length={
-            'XRPUSDT': 14,
-            'DOGEUSDT': 14,
-            '1000SHIBUSDT': 14,
+            'XRPUSDT': 3,
+            'DOGEUSDT': 3,
+            '1000SHIBUSDT': 3,
+            'CRVUSDT': 3,
         },
         r_limit={
-            'XRPUSDT': -20,
-            'DOGEUSDT': -20,
-            '1000SHIBUSDT': -20,
+            'XRPUSDT': -50,
+            'DOGEUSDT': -50,
+            '1000SHIBUSDT': -50,
+            'CRVUSDT': -50,
         },
         bb_length={
             'XRPUSDT': 30,
             'DOGEUSDT': 30,
             '1000SHIBUSDT': 30,
+            'CRVUSDT': 30,
         },
         bb_mult={
             'XRPUSDT': 0.5,
             'DOGEUSDT': 0.5,
             '1000SHIBUSDT': 0.5,
+            'CRVUSDT': 0.5,
         },
         exit_percent={
-            'XRPUSDT': Decimal('3'),
-            'DOGEUSDT': Decimal('3'),
-            '1000SHIBUSDT': Decimal('3'),
+            'XRPUSDT': Decimal('2'),
+            'DOGEUSDT': Decimal('2'),
+            '1000SHIBUSDT': Decimal('2'),
+            'CRVUSDT': Decimal('2'),
         },
         percent={
             'XRPUSDT': {
@@ -61,7 +68,12 @@ class TailCatchWithBBV2(bt.Strategy):
                 'bull': [Decimal('4.0'), Decimal('6.0'), Decimal('8.0'), Decimal('12'), Decimal('16.0'), Decimal('20.0'), Decimal('25.0')],
                 'def': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('12.0'), Decimal('15'), Decimal('20.0'), Decimal('25.0')],
                 'bear': [Decimal('5.0'), Decimal('7.0'), Decimal('10.0'), Decimal('15.0'), Decimal('20.0'), Decimal('25.0'), Decimal('30.0')],
-            }
+            },
+            'CRVUSDT': {
+                'bull': [Decimal('3.0'), Decimal('5.0'), Decimal('8.0'), Decimal('10'), Decimal('12.0'), Decimal('15.0'), Decimal('20.0')],
+                'def': [Decimal('2.0'), Decimal('4.0'), Decimal('6.0'), Decimal('12.0'), Decimal('15'), Decimal('20.0'), Decimal('25.0')],
+                'bear': [Decimal('5.0'), Decimal('7.0'), Decimal('10.0'), Decimal('15.0'), Decimal('20.0'), Decimal('25.0'), Decimal('30.0')],
+            },
         },
         tick_size={
             'XRPUSDT': {
@@ -75,6 +87,9 @@ class TailCatchWithBBV2(bt.Strategy):
             '1000SHIBUSDT': {
                 DataUtil.COMPANY_BINANCE: Decimal('0.000001'),
                 DataUtil.COMPANY_BYBIT: Decimal('0.01')
+            },
+            "CRVUSDT":{
+                DataUtil.COMPANY_BINANCE: Decimal("0.001")
             }
         },
         step_size={
@@ -89,6 +104,9 @@ class TailCatchWithBBV2(bt.Strategy):
             '1000SHIBUSDT': {
                 DataUtil.COMPANY_BINANCE: Decimal('1'),
                 DataUtil.COMPANY_BYBIT: Decimal('0.01')
+            },
+            "CRVUSDT":{
+                DataUtil.COMPANY_BINANCE: Decimal("0.1")
             }
         }
     )
@@ -238,8 +256,9 @@ class TailCatchWithBBV2(bt.Strategy):
                     risk = self.p.risk[name][j]
                     qty = equity * risk / Decimal('100') / price
                     qty = int(qty / self.p.step_size[name][company]) * self.p.step_size[name][company]
-
-                    self.order = self.buy(exectype=bt.Order.Limit, data=self.pairs[i], size=float(qty), price=float(price))
+                    cash = DataUtil.convert_to_decimal(self.broker.get_cash())
+                    if cash >= qty * price / Decimal(leverage):
+                        self.order = self.buy(exectype=bt.Order.Limit, data=self.pairs[i], size=float(qty), price=float(price))
 
     def stop(self):
         sorted_top_percents = sorted(self.top_percents, key=lambda x: x[1])
