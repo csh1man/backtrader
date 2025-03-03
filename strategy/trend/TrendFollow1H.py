@@ -624,12 +624,12 @@ class TrendFollow1H(bt.Strategy):
                     if entry_mode in [0, 2]:
                         long_qty = equity * self.p.risk[name]['long'] / Decimal('100') / abs(long_adj_high_band-long_adj_low_band)
                         long_qty = int(long_qty / self.p.step_size[name][company]) * self.p.step_size[name][company]
-                        if long_qty > 0:
+                        if long_qty > 0 and self.long_short_ma[i][0] >= self.long_mid_ma[i][0] >= self.long_long_ma[i][0]:
                             self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(long_adj_high_band), size=float(long_qty))
                     if entry_mode in [1, 2]:
                         short_qty = equity * self.p.risk[name]['short'] / Decimal('100') / abs(short_adj_low_band-short_adj_high_band)
                         short_qty = int(short_qty / self.p.step_size[name][company]) * self.p.step_size[name][company]
-                        if short_qty > 0:
+                        if short_qty > 0 and self.short_short_ma[i][0] <= self.short_mid_ma[i][0] <= self.short_long_ma[i][0]:
                             self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], price=float(short_adj_low_band), size=float(short_qty))
                 elif current_position_size > 0:
                     self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], price=float(long_adj_low_band), size=float(current_position_size))
@@ -644,9 +644,9 @@ class TrendFollow1H(bt.Strategy):
 
                         self.order = self.sell(exectype=bt.Order.Limit, data=self.pairs[i], size=current_position_size,
                                                price=float(exit_price))
-                if self.closes[i][-1] >= self.bb_top[i][-1]:
+                if self.closes[i][0] >= self.bb_top[i][0]:
                     percents = self.p.percent[name]['bull']
-                elif self.bb_bot[i][-1] <= self.closes[i][-1] < self.bb_top[i][-1]:
+                elif self.bb_bot[i][0] <= self.closes[i][0] < self.bb_top[i][0]:
                     percents = self.p.percent[name]['def']
                 else:
                     percents = self.p.percent[name]['bear']
@@ -657,7 +657,6 @@ class TrendFollow1H(bt.Strategy):
                     price = DataUtil.convert_to_decimal(self.closes[i][0]) * (
                             Decimal('1') - percent / Decimal('100'))
                     price = int(price / self.p.tick_size[name][company]) * self.p.tick_size[name][company]
-
                     risk = self.p.risk[name][j]
                     qty = equity * risk / Decimal('100') / price
                     qty = int(qty / self.p.step_size[name][company]) * self.p.step_size[name][company]
