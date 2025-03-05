@@ -11,7 +11,7 @@ pairs = {
     "KRW-BCH": DataUtil.CANDLE_TICK_4HOUR,
     "KRW-XRP": DataUtil.CANDLE_TICK_4HOUR,
     "KRW-DOGE": DataUtil.CANDLE_TICK_4HOUR,
-    # "KRW-SOL": DataUtil.CANDLE_TICK_4HOUR,
+    "KRW-SOL": DataUtil.CANDLE_TICK_4HOUR,
 }
 
 
@@ -39,10 +39,10 @@ class UpbitBBWithTrendFollowV1(bt.Strategy):
     params=dict(
         log=True,
         risk={
-            'KRW-ETH': Decimal('2.0'),
-            'KRW-BTC': Decimal('2.0'),
-            'KRW-BCH': Decimal('2.0'),
-            'KRW-SOL': Decimal('2.0'),
+            'KRW-ETH': Decimal('1.0'),
+            'KRW-BTC': Decimal('1.0'),
+            'KRW-BCH': Decimal('1.0'),
+            'KRW-SOL': Decimal('1.0'),
             'KRW-XRP': Decimal('1.0'),
             'KRW-DOGE': Decimal('1.0'),
         },
@@ -79,7 +79,15 @@ class UpbitBBWithTrendFollowV1(bt.Strategy):
             'KRW-DOGE': 20,
         },
         low_band_const={
-            'KRW-ETH': 55,
+            'KRW-ETH': 60,
+            'KRW-BTC': 30,
+            'KRW-BCH': 50,
+            'KRW-SOL': 45,
+            'KRW-XRP': 20,
+            'KRW-DOGE': 20,
+        },
+        low_band_const2={
+            'KRW-ETH': 50,
             'KRW-BTC': 30,
             'KRW-BCH': 50,
             'KRW-SOL': 45,
@@ -108,6 +116,7 @@ class UpbitBBWithTrendFollowV1(bt.Strategy):
         self.bb_bot = []
         self.adj_high_bands = []
         self.adj_low_bands = []
+        self.adj_low_bands2 = []
         self.stop_price = []
 
         # 자산 추적용 변수 할당
@@ -145,7 +154,9 @@ class UpbitBBWithTrendFollowV1(bt.Strategy):
             low_band = bt.indicators.Lowest(self.lows[i], period=self.p.low_band_length[name])
 
             adj_low_band = low_band + (high_band - low_band) * (self.p.low_band_const[name] / 100)
+            adj_low_band2 = low_band + (high_band - low_band) * (self.p.low_band_const2[name] / 100)
             self.adj_low_bands.append(adj_low_band)
+            self.adj_low_bands2.append(adj_low_band2)
 
     # 거래내역 추적
     def notify_order(self, order):
@@ -219,13 +230,13 @@ class UpbitBBWithTrendFollowV1(bt.Strategy):
                 elif self.closes[i][0] < self.bb_mid[i][0]:
                     self.order = self.sell(data=self.pairs[i], size=current_position_size)
                     self.stop_price[i] = Decimal('-1')
-                elif DataUtil.convert_to_decimal(self.closes[i][0]) <  DataUtil.convert_to_decimal(self.adj_low_bands[i][-1]):
+                elif DataUtil.convert_to_decimal(self.closes[i][0]) <  DataUtil.convert_to_decimal(self.adj_low_bands2[i][-1]):
                     self.order = self.sell(data=self.pairs[i], size=current_position_size)
                     self.stop_price[i] = Decimal('-1')
 
 if __name__ == '__main__':
-    data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
-    # data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+    # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+    data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
     # data_path = "/Users/tjgus/Desktop/project/krtrade/backData";
     cerebro = bt.Cerebro()
     cerebro.broker.setcash(50000000) # 초기 시드 설정
@@ -261,9 +272,9 @@ if __name__ == '__main__':
     mdd = qs.stats.max_drawdown(returns)
     print(f" quanstats's my returns MDD : {mdd * 100:.2f} %")
 
-    file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+    # file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
     # file_name = "/Users/tjgus/Desktop/project/krtrade/backData/result/"
-    # file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+    file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
     for pair, tick_kind in pairs.items():
         file_name += pair + "-"
     file_name += "UpbitBBWithTrendFollowV1"

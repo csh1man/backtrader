@@ -6,13 +6,14 @@ from decimal import Decimal
 
 pairs = {
     'ETHUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    'SUIUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    '1000PEPEUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    'XRPUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    # 'TRXUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    # 'SUIUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    # '1000PEPEUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    # 'XRPUSDT': DataUtil.CANDLE_TICK_1HOUR,
     # '1000BONKUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    'DOGEUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    'CRVUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    'STXUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    # 'DOGEUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    # 'CRVUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    # 'STXUSDT': DataUtil.CANDLE_TICK_1HOUR,
     # 'ZECUSDT': DataUtil.CANDLE_TICK_1HOUR,
 }
 
@@ -24,6 +25,10 @@ class TrendFollow1H(bt.Strategy):
     params = dict(
         risk={
             'ETHUSDT':{
+                'long': Decimal('2'),
+                'short': Decimal('2')
+            },
+            'TRXUSDT': {
                 'long': Decimal('2'),
                 'short': Decimal('2')
             },
@@ -39,6 +44,7 @@ class TrendFollow1H(bt.Strategy):
         },
         entry_mode={ # 0 : only long, 1 : only short, 2: long and short, 3: counter trend
             'ETHUSDT': 2,
+            'TRXUSDT': 1,
             '1000PEPEUSDT': 3,
             'SUIUSDT': 3,
             'STXUSDT': 3,
@@ -53,6 +59,10 @@ class TrendFollow1H(bt.Strategy):
             'ETHUSDT': {
                 'long': 230,
                 'short': 30,
+            },
+            'TRXUSDT': {
+                'long': 230,
+                'short': 20,
             },
             '1000PEPEUSDT': {
                 'long': 200,
@@ -96,6 +106,10 @@ class TrendFollow1H(bt.Strategy):
                 'long': 50,
                 'short': 230
             },
+            'TRXUSDT': {
+                'long': 50,
+                'short': 230,
+            },
             '1000PEPEUSDT': {
                 'long': 200,
                 'short': 30,
@@ -137,6 +151,10 @@ class TrendFollow1H(bt.Strategy):
             'ETHUSDT': {
                 'long': -25,
                 'short': 55,
+            },
+            'TRXUSDT': {
+                'long': -25,
+                'short': 60,
             },
             '1000PEPEUSDT': {
                 'long': 200,
@@ -180,6 +198,10 @@ class TrendFollow1H(bt.Strategy):
                 'long': 50,
                 'short': 5
             },
+            'TRXUSDT': {
+                'long': 50,
+                'short': 5,
+            },
             '1000PEPEUSDT': {
                 'long': 200,
                 'short': 30,
@@ -222,6 +244,10 @@ class TrendFollow1H(bt.Strategy):
               'long': [5, 10, 15],
               'short': [5, 10, 15]
           },
+          'TRXUSDT': {
+              'long': [5, 10, 15],
+              'short': [5, 10, 15]
+          },
           '1000PEPEUSDT': {
               'long': [5, 10, 15],
               'short': [10, 20, 30]
@@ -261,6 +287,7 @@ class TrendFollow1H(bt.Strategy):
         },
         rsi_length={
             'ETHUSDT': 3,
+            'TRXUSDT': 3,
             '1000PEPEUSDT': 3,
             'SUIUSDT': 3,
             'STXUSDT': 3,
@@ -273,6 +300,7 @@ class TrendFollow1H(bt.Strategy):
         },
         rsi_limit={
             'ETHUSDT': 70,
+            'TRXUSDT': 70,
             '1000PEPEUSDT': 70,
             'SUIUSDT': 70,
             'STXUSDT': 70,
@@ -285,6 +313,7 @@ class TrendFollow1H(bt.Strategy):
         },
         bb_length={
             'ETHUSDT': 30,
+            'TRXUSDT': 30,
             '1000PEPEUSDT': 30,
             'SUIUSDT': 30,
             'STXUSDT': 30,
@@ -297,6 +326,7 @@ class TrendFollow1H(bt.Strategy):
         },
         bb_mult={
             'ETHUSDT': 0.5,
+            'TRXUSDT': 0.5,
             '1000PEPEUSDT': 0.5,
             'SUIUSDT': 0.5,
             'STXUSDT': 0.5,
@@ -369,6 +399,9 @@ class TrendFollow1H(bt.Strategy):
             'ETHUSDT': {
                 DataUtil.COMPANY_BINANCE: Decimal('0.01'),
             },
+            'TRXUSDT': {
+                DataUtil.COMPANY_BINANCE: Decimal('0.00001'),
+            },
             '1000PEPEUSDT': {
                 DataUtil.COMPANY_BINANCE: Decimal('0.0000001'),
                 DataUtil.COMPANY_BYBIT: Decimal('0.0000010')
@@ -407,6 +440,9 @@ class TrendFollow1H(bt.Strategy):
         step_size={
             'ETHUSDT': {
                 DataUtil.COMPANY_BINANCE: Decimal('0.001'),
+            },
+            'TRXUSDT': {
+                DataUtil.COMPANY_BINANCE: Decimal('1'),
             },
             '1000PEPEUSDT': {
                 DataUtil.COMPANY_BINANCE: Decimal('1'),
@@ -667,8 +703,8 @@ class TrendFollow1H(bt.Strategy):
                         self.order = self.buy(exectype=bt.Order.Limit, data=self.pairs[i], size=float(qty), price=float(price))
 
 if __name__ == '__main__':
-    data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
-    # data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+    # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+    data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
     # data_path = "/Users/tjgus/Desktop/project/krtrade/backData"
     cerebro = bt.Cerebro()
     cerebro.addstrategy(TrendFollow1H)
@@ -703,9 +739,9 @@ if __name__ == '__main__':
     mdd = qs.stats.max_drawdown(returns)
     print(f" quanstats's my returns MDD : {mdd * 100:.2f} %")
 
-    # file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+    file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
     # file_name = "/Users/tjgus/Desktop/project/krtrade/backData/result/"
-    file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/" + company + "-"
+    # file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/" + company + "-"
     for pair, tick_kind in pairs.items():
         file_name += pair + "-"
     file_name += "TrendFollow1H"
@@ -730,7 +766,7 @@ if __name__ == '__main__':
     returns.index = pd.to_datetime(returns.index)
 
     # 2023년 1월 1일 이후의 데이터만 필터링
-    returns = returns[returns.index >= '2023-04-01']
+    # returns = returns[returns.index >= '2023-04-01']
 
     # 'returns' DataFrame을 HTML로 출력
     qs.reports.html(returns, output=f'{file_name}_숏_종가 중심.html', title='result')
