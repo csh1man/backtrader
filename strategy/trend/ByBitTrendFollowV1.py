@@ -10,75 +10,103 @@ pairs = {
     'SOLUSDT': DataUtil.CANDLE_TICK_4HOUR,
 }
 
-leverage=4
+leverage=3
 
 class ByBitTrendFollowV1(bt.Strategy):
     params = dict(
         entry_mode={ # 0 : only long, 1 : only short, 2 : long and short
-            'BTCUSDT': 0,
+            'BTCUSDT': 2,
             'ETHUSDT': 2,
             'SOLUSDT': 0,
         },
         risk={
             'BTCUSDT':{
-                'long': Decimal('2'),
-                'short': Decimal('1')
+                'long': Decimal('1.5'),
+                'short': Decimal('1.5')
             },
-            'ETHUSDT':{
-                'long': Decimal('2'),
-                'short': Decimal('1')
+            'ETHUSDT': {
+                'long': Decimal('1.5'),
+                'short': Decimal('1.5')
             },
             'SOLUSDT':{
-                'long': Decimal('2'),
-                'short': Decimal('1')
-            },
+                'long': Decimal('1.5'),
+                'short': Decimal('2')
+            }
         },
         high_band_length={
             'BTCUSDT': {
-                'long': 50,
-                'short': 60,
+                'long': 45,
+                'short': 15,
             },
             'ETHUSDT': {
                 'long': 40,
                 'short': 15,
             },
-            'SOLUSDT':{
-                'long': 40,
-                'short':15,
+            'SOLUSDT': {
+                'long': 55,
+                'short': 30,
             },
         },
         low_band_length={
             'BTCUSDT': {
-                'long': 15,
-                'short': 20,
+                'long': 25,
+                'short': 50,
             },
             'ETHUSDT': {
                 'long': 20,
-                'short': 45
+                'short': 45,
             },
-            'SOLUSDT':{
+            'SOLUSDT': {
                 'long': 15,
-                'short':30,
+                'short': 50,
+            },
+        },
+        low_band_length2={
+            'BTCUSDT': {
+                'long': 20,
+                'short': 50,
+            },
+            'ETHUSDT': {
+                'long': 20,
+                'short': 45,
+            },
+            'SOLUSDT': {
+                'long': 15,
+                'short': 50,
             },
         },
         high_band_constant={
             'BTCUSDT':{
-                'long': 20,
-                'short': 1,
+                'long': 5,
+                'short': 60,
             },
             'ETHUSDT': {
                 'long': 10,
-                'short': 50,
+                'short': 55,
             },
             'SOLUSDT': {
                 'long': 20,
-                'short': 5,
+                'short': 60,
             },
         },
         low_band_constant={
             'BTCUSDT': {
                 'long': 50,
-                'short': 1,
+                'short': 10,
+            },
+            'ETHUSDT': {
+                'long': 60,
+                'short': 5,
+            },
+            'SOLUSDT': {
+                'long': 35,
+                'short': 10,
+            },
+        },
+        low_band_constant2={
+            'BTCUSDT': {
+                'long': 50,
+                'short': 10,
             },
             'ETHUSDT': {
                 'long': 60,
@@ -86,7 +114,49 @@ class ByBitTrendFollowV1(bt.Strategy):
             },
             'SOLUSDT': {
                 'long': 25,
-                'short': 5,
+                'short': 10,
+            },
+        },
+        rsi_length={
+            'BTCUSDT':{
+                'long': 2,
+                'short': 14,
+            },
+            'ETHUSDT': {
+                'long': 3,
+                'short': 3,
+            },
+            'SOLUSDT': {
+                'long': 3,
+                'short': 14,
+            },
+        },
+        rsi_limit={
+            'BTCUSDT':{
+                'long': 70,
+                'short': 50,
+            },
+            'ETHUSDT': {
+                'long': 0,
+                'short': 30,
+            },
+            'SOLUSDT': {
+                'long': 30,
+                'short': 50,
+            },
+        },
+        ma_length={
+            'BTCUSDT': {
+                'long': 100,
+                'short': [160, 200]
+            },
+            'ETHUSDT': {
+                'long': 200,
+                'short': [120, 150],
+            },
+            'SOLUSDT': {
+                'long': 200,
+                'short': [160, 200]
             },
         },
         tick_size={
@@ -112,12 +182,24 @@ class ByBitTrendFollowV1(bt.Strategy):
         self.lows = []
         self.closes = []
         self.dates = []
-
+        
+        # 롱 채널 변수 설정
         self.adj_long_high_bands = []
         self.adj_long_low_bands = []
-
+        self.adj_long_low_bands2 = []
+        
+        # 숏 채널 변수 설정 
         self.adj_short_high_bands = []
         self.adj_short_low_bands = []
+        
+        # RSI 변수 설정
+        self.long_rsi = []
+        self.short_rsi = []
+
+        # 이평선 변수 설정
+        self.long_ma = []
+        self.short_ma1 = []
+        self.short_ma2 = []
 
         # 자산 기록용 변수 셋팅
         self.order = None
@@ -147,12 +229,16 @@ class ByBitTrendFollowV1(bt.Strategy):
 
             long_high_band = bt.indicators.Highest(self.highs[i], period=self.p.high_band_length[name]['long'])
             long_low_band = bt.indicators.Lowest(self.lows[i], period=self.p.low_band_length[name]['long'])
+            long_low_band2 = bt.indicators.Lowest(self.lows[i], period=self.p.low_band_length2[name]['long'])
 
             adj_long_high_band = long_high_band - (long_high_band-long_low_band) * (self.p.high_band_constant[name]['long'] / 100)
             self.adj_long_high_bands.append(adj_long_high_band)
 
             adj_long_low_band = long_low_band + (long_high_band-long_low_band) * (self.p.low_band_constant[name]['long'] / 100)
             self.adj_long_low_bands.append(adj_long_low_band)
+
+            adj_long_low_band2 = long_low_band2 + (long_high_band - long_low_band2) * (self.p.low_band_constant2[name]['long'] / 100)
+            self.adj_long_low_bands2.append(adj_long_low_band2)
 
             short_high_band = bt.indicators.Highest(self.highs[i], period=self.p.high_band_length[name]['short'])
             short_low_band = bt.indicators.Lowest(self.lows[i], period=self.p.low_band_length[name]['short'])
@@ -162,6 +248,21 @@ class ByBitTrendFollowV1(bt.Strategy):
 
             adj_short_low_band = short_low_band + (short_high_band-short_low_band) * (self.p.low_band_constant[name]['short'] / 100)
             self.adj_short_low_bands.append(adj_short_low_band)
+
+            long_rsi = bt.indicators.RSI_Safe(self.closes[i], period=self.p.rsi_length[name]['long'])
+            self.long_rsi.append(long_rsi)
+
+            short_rsi = bt.indicators.RSI_Safe(self.closes[i], period=self.p.rsi_length[name]['short'])
+            self.short_rsi.append(short_rsi)
+
+            long_ma = bt.indicators.ExponentialMovingAverage(self.closes[i], period=self.p.ma_length[name]['long'])
+            self.long_ma.append(long_ma)
+
+            short_ma1 = bt.indicators.ExponentialMovingAverage(self.closes[i], period=self.p.ma_length[name]['short'][0])
+            self.short_ma1.append(short_ma1)
+
+            short_ma2 = bt.indicators.ExponentialMovingAverage(self.closes[i], period=self.p.ma_length[name]['short'][1])
+            self.short_ma2.append(short_ma2)
 
     def cancel_all(self, target_name=None):
         open_orders = self.broker.get_orders_open()
@@ -225,11 +326,15 @@ class ByBitTrendFollowV1(bt.Strategy):
 
             adj_long_high_band = DataUtil.convert_to_decimal(self.adj_long_high_bands[i][0])
             adj_long_low_band = DataUtil.convert_to_decimal(self.adj_long_low_bands[i][0])
+            adj_long_low_band2 = DataUtil.convert_to_decimal(self.adj_long_low_bands2[i][0])
+
             adj_short_high_band = DataUtil.convert_to_decimal(self.adj_short_high_bands[i][0])
             adj_short_low_band = DataUtil.convert_to_decimal(self.adj_short_low_bands[i][0])
 
             adj_long_high_band = int(adj_long_high_band / tick_size) * tick_size
             adj_long_low_band = int(adj_long_low_band / tick_size) * tick_size
+            adj_long_low_band2 = int(adj_long_low_band2 / tick_size) * tick_size
+
             adj_short_high_band = int(adj_short_high_band / tick_size) * tick_size
             adj_short_low_band = int(adj_short_low_band / tick_size) * tick_size
 
@@ -246,20 +351,38 @@ class ByBitTrendFollowV1(bt.Strategy):
                 short_qty = int(short_qty / step_size) * step_size
 
                 if entry_mode in [0, 2]: # long position 진입
-                    self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(adj_long_high_band), size=float(long_qty))
+                    '''
+                    [롱 진입 조건 분석]
+                        1. rsi(n) >= rsi limit
+                            - RSI 값이 특정 제한값보다 크다 : 일시적 상승장을 의미
+                        2. 종가 >= 이평선
+                            - 장기 추세가 상승장에 들어섰다는 것을 의미
+                        
+                        -> 즉, 현재 일시적으로 상승 추세에 있으면서 장기적으로도 상승 추세에 있을 때만 지정가 주문을 넣는다.
+                    '''
+                    if self.long_rsi[i][0] >= self.p.rsi_limit[name]['long'] and self.closes[i][0] >= self.long_ma[i][0]:
+                        self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(adj_long_high_band), size=float(long_qty))
 
                 if entry_mode in [1, 2]: # short position 진입
-                    self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], price=float(adj_short_low_band), size=float(short_qty))
+                    '''
+                    [숏 진입 조건 분석]
+                        1. 중기 이평선 <= 장기 이평선
+                            - 중,장기 이평선이 역배열이라는 것은 장기적으로 하락추세에 있다는 것을 뜻한다.
+                        
+                        -> 즉, 장기적으로 하락 추세에 있을 경우에만 지정가 주문을 넣는다.
+                    '''
+                    if self.short_ma1[i][0] <= self.short_ma2[i][0]:
+                        self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], price=float(adj_short_low_band), size=float(short_qty))
 
             elif current_position_size > 0:
-                self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], size=float(current_position_size), price=float(adj_long_low_band))
+                self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], size=float(current_position_size), price=float(adj_long_low_band2))
             elif current_position_size < 0:
                 self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], size=float(abs(current_position_size)), price=float(adj_short_high_band))
 
 
 if __name__ == '__main__':
-    # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
-    data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+    data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+    # data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
     # data_path = "/Users/tjgus/Desktop/project/krtrade/backData"
     cerebro = bt.Cerebro()
     cerebro.addstrategy(ByBitTrendFollowV1)
@@ -295,9 +418,9 @@ if __name__ == '__main__':
     print(f" quanstats's my returns MDD : {mdd * 100:.2f} %")
 
 
-    file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+    # file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
     # file_name = "/Users/tjgus/Desktop/project/krtrade/backData/result/"
-    # file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+    file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
     for pair, tick_kind in pairs.items():
         file_name += pair + "-"
     file_name += "ByBitTrendFollowV1"
@@ -317,5 +440,5 @@ if __name__ == '__main__':
     df.to_csv(f'{file_name}.csv')
     qs.reports.html(df['value'], output=f"{file_name}.html", download_filename=f"{file_name}.html", title=file_name)
 
-    returns = returns[returns.index >= '2020-09-01']
+    returns = returns[returns.index >= '2021-11-01']
     qs.reports.html(returns, output=f'{file_name}_종가 중심.html', title='result')

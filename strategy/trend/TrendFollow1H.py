@@ -7,13 +7,13 @@ from decimal import Decimal
 pairs = {
     'ETHUSDT': DataUtil.CANDLE_TICK_1HOUR,
     # 'TRXUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    # 'SUIUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    # '1000PEPEUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    # 'XRPUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    'SUIUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    '1000PEPEUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    'XRPUSDT': DataUtil.CANDLE_TICK_1HOUR,
     # '1000BONKUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    # 'DOGEUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    # 'CRVUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    # 'STXUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    'DOGEUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    'CRVUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    'STXUSDT': DataUtil.CANDLE_TICK_1HOUR,
     # 'ZECUSDT': DataUtil.CANDLE_TICK_1HOUR,
 }
 
@@ -703,8 +703,8 @@ class TrendFollow1H(bt.Strategy):
                         self.order = self.buy(exectype=bt.Order.Limit, data=self.pairs[i], size=float(qty), price=float(price))
 
 if __name__ == '__main__':
-    # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
-    data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+    data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+    # data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
     # data_path = "/Users/tjgus/Desktop/project/krtrade/backData"
     cerebro = bt.Cerebro()
     cerebro.addstrategy(TrendFollow1H)
@@ -739,9 +739,9 @@ if __name__ == '__main__':
     mdd = qs.stats.max_drawdown(returns)
     print(f" quanstats's my returns MDD : {mdd * 100:.2f} %")
 
-    file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+    # file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
     # file_name = "/Users/tjgus/Desktop/project/krtrade/backData/result/"
-    # file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/" + company + "-"
+    file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/" + company + "-"
     for pair, tick_kind in pairs.items():
         file_name += pair + "-"
     file_name += "TrendFollow1H"
@@ -766,7 +766,7 @@ if __name__ == '__main__':
     returns.index = pd.to_datetime(returns.index)
 
     # 2023년 1월 1일 이후의 데이터만 필터링
-    # returns = returns[returns.index >= '2023-04-01']
+    returns = returns[returns.index >= '2023-05-01']
 
     # 'returns' DataFrame을 HTML로 출력
     qs.reports.html(returns, output=f'{file_name}_숏_종가 중심.html', title='result')
