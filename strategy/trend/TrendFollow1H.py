@@ -299,17 +299,17 @@ class TrendFollow1H(bt.Strategy):
             'ZECUSDT': 3,
         },
         rsi_limit={
-            'ETHUSDT': 50,
-            'TRXUSDT': 50,
-            '1000PEPEUSDT': 50,
-            'SUIUSDT': 50,
-            'STXUSDT': 50,
-            '1000BONKUSDT': 50,
-            'XRPUSDT': 50,
-            'DOGEUSDT': 50,
-            '1000SHIBUSDT': 50,
-            'CRVUSDT': 50,
-            'ZECUSDT': 50
+            'ETHUSDT': 70,
+            'TRXUSDT': 70,
+            '1000PEPEUSDT': 70,
+            'SUIUSDT': 70,
+            'STXUSDT': 70,
+            '1000BONKUSDT': 70,
+            'XRPUSDT': 70,
+            'DOGEUSDT': 70,
+            '1000SHIBUSDT': 70,
+            'CRVUSDT': 70,
+            'ZECUSDT': 70
         },
         bb_length={
             'ETHUSDT': 30,
