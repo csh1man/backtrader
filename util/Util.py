@@ -38,6 +38,11 @@ class FileUtil:
         with open(file_path, 'r') as file:
             return json.load(file)
 
+    @staticmethod
+    def load_account_config(file_path):
+        with open(file_path, 'r') as file:
+            return json.load(file)
+
 
 class DataUtil:
     """
