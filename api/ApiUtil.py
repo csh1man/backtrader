@@ -16,6 +16,20 @@ class FileUtil:
         with open(file_path, 'w') as json_file:
             json.dump(data, json_file, indent=4)
 
+    @staticmethod
+    def read_json_file(file_path: str):
+        try:
+            # JSON 파일 열기
+            with open(file_path, 'r') as file:
+                data = json.load(file)
+            return data
+        except FileNotFoundError:
+            print(f"File {file_path} not found.")
+        except json.JSONDecodeError:
+            print(f"Error decoding JSON from the file {file_path}.")
+        except Exception as e:
+            print(f"An error occurred: {e}")
+
 class TimeUtil:
     CANDLE_TIMEFRAME_1MINUTES = "1m"
     CANDLE_TIMEFRAME_5MINUTES = "5m"
