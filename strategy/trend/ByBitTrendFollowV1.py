@@ -1,16 +1,35 @@
 import backtrader as bt
 import pandas as pd
 import quantstats as qs
-from util.Util import DataUtil
+from util.Util import DataUtils
+from api.ApiUtil import DataUtil
+from api.Api import Common, Download
 from decimal import Decimal
 
+config_file_path = "C:\\Users\\KOSCOM\\Desktop\\각종자료\\개인자료\\krInvestment\\config.json"
+
+download_dir_path ="C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+# download_dir_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+# download_dir_path = "/Users/tjgus/Desktop/project/krtrade/backData"
+
+result_file_path = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+# file_name = "/Users/tjgus/Desktop/project/krtrade/backData/result/"
+# file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+
+result_file_prefix = "ByBitTrendFollowV1"
+
 pairs = {
-    'BTCUSDT': DataUtil.CANDLE_TICK_4HOUR,
-    'ETHUSDT': DataUtil.CANDLE_TICK_4HOUR,
-    'SOLUSDT': DataUtil.CANDLE_TICK_4HOUR,
+    'BTCUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    'ETHUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    'SOLUSDT': DataUtils.CANDLE_TICK_4HOUR,
 }
 
+
+exchange = DataUtil.BYBIT
 leverage=3
+
+common = Common(config_file_path)
+download = Download(config_file_path, download_dir_path)
 
 class ByBitTrendFollowV1(bt.Strategy):
     params = dict(
@@ -160,14 +179,14 @@ class ByBitTrendFollowV1(bt.Strategy):
             },
         },
         tick_size={
-            'BTCUSDT': Decimal('0.10'),
-            'ETHUSDT': Decimal('0.01'),
-            'SOLUSDT': Decimal('0.010'),
+            'BTCUSDT': common.fetch_tick_size(exchange, 'BTCUSDT'), #Decimal('0.10'),
+            'ETHUSDT': common.fetch_tick_size(exchange, 'ETHUSDT'), #Decimal('0.01'),
+            'SOLUSDT': common.fetch_tick_size(exchange, 'SOLUSDT'), #Decimal('0.010'),
         },
         step_size={
-            'BTCUSDT': Decimal('0.001'),
-            'ETHUSDT': Decimal('0.01'),
-            'SOLUSDT': Decimal('0.1'),
+            'BTCUSDT': common.fetch_step_size(exchange, "BTCUSDT"),#Decimal('0.001'),
+            'ETHUSDT': common.fetch_step_size(exchange, "ETHUSDT"),#Decimal('0.01'),
+            'SOLUSDT': common.fetch_step_size(exchange, "SOLUSDT"),#Decimal('0.1'),
         }
     )
 
@@ -317,19 +336,19 @@ class ByBitTrendFollowV1(bt.Strategy):
             name = self.names[i]
             self.cancel_all(target_name=name)
 
-        equity = DataUtil.convert_to_decimal(self.broker.getvalue())
+        equity = DataUtils.convert_to_decimal(self.broker.getvalue())
         for i in range(0, len(self.pairs)):
             name = self.names[i]
 
             tick_size = self.p.tick_size[name]
             step_size = self.p.tick_size[name]
 
-            adj_long_high_band = DataUtil.convert_to_decimal(self.adj_long_high_bands[i][0])
-            adj_long_low_band = DataUtil.convert_to_decimal(self.adj_long_low_bands[i][0])
-            adj_long_low_band2 = DataUtil.convert_to_decimal(self.adj_long_low_bands2[i][0])
+            adj_long_high_band = DataUtils.convert_to_decimal(self.adj_long_high_bands[i][0])
+            adj_long_low_band = DataUtils.convert_to_decimal(self.adj_long_low_bands[i][0])
+            adj_long_low_band2 = DataUtils.convert_to_decimal(self.adj_long_low_bands2[i][0])
 
-            adj_short_high_band = DataUtil.convert_to_decimal(self.adj_short_high_bands[i][0])
-            adj_short_low_band = DataUtil.convert_to_decimal(self.adj_short_low_bands[i][0])
+            adj_short_high_band = DataUtils.convert_to_decimal(self.adj_short_high_bands[i][0])
+            adj_short_low_band = DataUtils.convert_to_decimal(self.adj_short_low_bands[i][0])
 
             adj_long_high_band = int(adj_long_high_band / tick_size) * tick_size
             adj_long_low_band = int(adj_long_low_band / tick_size) * tick_size
@@ -381,9 +400,6 @@ class ByBitTrendFollowV1(bt.Strategy):
 
 
 if __name__ == '__main__':
-    data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
-    # data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
-    # data_path = "/Users/tjgus/Desktop/project/krtrade/backData"
     cerebro = bt.Cerebro()
     cerebro.addstrategy(ByBitTrendFollowV1)
 
@@ -392,7 +408,8 @@ if __name__ == '__main__':
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BYBIT, pair, tick_kind)
+        download.download_candles(exchange, pair, tick_kind)
+        df = DataUtils.load_candle_data_as_df(download_dir_path, DataUtils.COMPANY_BYBIT, pair, tick_kind)
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 
@@ -417,13 +434,9 @@ if __name__ == '__main__':
     mdd = qs.stats.max_drawdown(returns)
     print(f" quanstats's my returns MDD : {mdd * 100:.2f} %")
 
-
-    # file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
-    # file_name = "/Users/tjgus/Desktop/project/krtrade/backData/result/"
-    file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+    file_name = result_file_path + result_file_prefix
     for pair, tick_kind in pairs.items():
         file_name += pair + "-"
-    file_name += "ByBitTrendFollowV1"
 
     strat = results[0]
     order_balance_list = strat.order_balance_list

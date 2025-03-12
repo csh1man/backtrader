@@ -2,19 +2,19 @@ import backtrader as bt
 import pandas as pd
 import quantstats as qs
 import math
-from util.Util import DataUtil
+from util.Util import DataUtils
 from decimal import Decimal
 
 pairs = {
-    'BTCUSDT' : DataUtil.CANDLE_TICK_1HOUR,
-    'ETHUSDT' : DataUtil.CANDLE_TICK_1HOUR,
-    'SOLUSDT':DataUtil.CANDLE_TICK_1HOUR,
-    '1000PEPEUSDT':DataUtil.CANDLE_TICK_1HOUR,
-    '1000BONKUSDT':DataUtil.CANDLE_TICK_1HOUR,
-    'WIFUSDT':DataUtil.CANDLE_TICK_1HOUR,
-    '1000SHIBUSDT':DataUtil.CANDLE_TICK_1HOUR,
-    'ONDOUSDT':DataUtil.CANDLE_TICK_1HOUR,
-    'ORDIUSDT':DataUtil.CANDLE_TICK_1HOUR,
+    'BTCUSDT' : DataUtils.CANDLE_TICK_1HOUR,
+    'ETHUSDT' : DataUtils.CANDLE_TICK_1HOUR,
+    'SOLUSDT':DataUtils.CANDLE_TICK_1HOUR,
+    '1000PEPEUSDT':DataUtils.CANDLE_TICK_1HOUR,
+    '1000BONKUSDT':DataUtils.CANDLE_TICK_1HOUR,
+    'WIFUSDT':DataUtils.CANDLE_TICK_1HOUR,
+    '1000SHIBUSDT':DataUtils.CANDLE_TICK_1HOUR,
+    'ONDOUSDT':DataUtils.CANDLE_TICK_1HOUR,
+    'ORDIUSDT':DataUtils.CANDLE_TICK_1HOUR,
 }
 
 class TailStrategyWithTrendV1(bt.Strategy):
@@ -328,16 +328,16 @@ class TailStrategyWithTrendV1(bt.Strategy):
                 current_position_size = self.getposition(self.pairs[i]).size
                 if current_position_size == 0:
                     if self.closes[i][0] >= self.bb_top[i][0]:
-                        stop_price = DataUtil.convert_to_decimal(self.closes[i][0]) - DataUtil.convert_to_decimal(self.atrs[i][0]) * self.p.atr_constant[name]
+                        stop_price = DataUtils.convert_to_decimal(self.closes[i][0]) - DataUtils.convert_to_decimal(self.atrs[i][0]) * self.p.atr_constant[name]
                         stop_price = int(stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
                         self.stop_prices[i] = stop_price
-                        self.entry_prices[i] = DataUtil.convert_to_decimal(self.closes[i][0])
-                        self.entry_atrs[i] = DataUtil.convert_to_decimal(self.atrs[i][0])
+                        self.entry_prices[i] = DataUtils.convert_to_decimal(self.closes[i][0])
+                        self.entry_atrs[i] = DataUtils.convert_to_decimal(self.atrs[i][0])
 
-                        equity = DataUtil.convert_to_decimal(self.broker.getvalue())
-                        qty = equity * self.p.risk[name][0] / Decimal('100') / abs(DataUtil.convert_to_decimal(self.closes[i][0]) - stop_price)
-                        if qty * DataUtil.convert_to_decimal(self.closes[i][0]) >= equity:
-                            qty = equity * Decimal('0.98') / DataUtil.convert_to_decimal(self.closes[i][0])
+                        equity = DataUtils.convert_to_decimal(self.broker.getvalue())
+                        qty = equity * self.p.risk[name][0] / Decimal('100') / abs(DataUtils.convert_to_decimal(self.closes[i][0]) - stop_price)
+                        if qty * DataUtils.convert_to_decimal(self.closes[i][0]) >= equity:
+                            qty = equity * Decimal('0.98') / DataUtils.convert_to_decimal(self.closes[i][0])
                         qty = int(qty / self.p.step_size[name]) * self.p.step_size[name]
                         self.order = self.buy(exectype=bt.Order.Market, data=self.pairs[i], size=float(qty))
                 elif current_position_size > 0:
@@ -347,7 +347,7 @@ class TailStrategyWithTrendV1(bt.Strategy):
                     #     self.entry_prices[i] = DataUtil.convert_to_decimal(self.closes[i][0])
                     #     self.entry_atrs[i] = DataUtil.convert_to_decimal(self.atrs[i][0])
 
-                    if DataUtil.convert_to_decimal(self.closes[i][0]) < self.stop_prices[i]:
+                    if DataUtils.convert_to_decimal(self.closes[i][0]) < self.stop_prices[i]:
                         self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i], size=float(current_position_size))
                     elif self.closes[i][0] < self.bb_mid[i][0]:
                         self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i], size=float(current_position_size))
@@ -370,7 +370,7 @@ class TailStrategyWithTrendV1(bt.Strategy):
                 prices = []
                 for j in range(0, len(self.p.percent[name][entry_mode])):
                     percent = self.p.percent[name][entry_mode][j]
-                    price = DataUtil.convert_to_decimal(self.closes[i][0]) * (Decimal('1') - percent / Decimal('100'))
+                    price = DataUtils.convert_to_decimal(self.closes[i][0]) * (Decimal('1') - percent / Decimal('100'))
                     price = int(price / tick_size) * tick_size
                     prices.append(price)
 
@@ -382,7 +382,7 @@ class TailStrategyWithTrendV1(bt.Strategy):
                         self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i],
                                                size=float(current_position_size))
 
-                equity = DataUtil.convert_to_decimal(self.broker.getvalue())
+                equity = DataUtils.convert_to_decimal(self.broker.getvalue())
                 qtys = []
                 for j in range(0, len(prices)):
                     price = prices[j]
@@ -411,7 +411,7 @@ if __name__ == '__main__':
     cerebro.broker.setcommission(commission=0.0005, leverage=3)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BINANCE, pair, tick_kind)
+        df = DataUtils.load_candle_data_as_df(data_path, DataUtils.COMPANY_BINANCE, pair, tick_kind)
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 

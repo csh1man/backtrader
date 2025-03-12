@@ -4,7 +4,7 @@ import math
 import pandas as pd
 import quantstats as qs
 import backtrader as bt
-from util.Util import DataUtil
+from util.Util import DataUtils
 from repository.Repository import DB
 from indicator.Indicators import Indicator
 
@@ -23,7 +23,7 @@ class TutorialStrategy(bt.Strategy):
 
     def __init__(self):
         self.db = DB()
-        self.size_info = self.db.get_currency_info(DataUtil.COMPANY_BYBIT, "BTCUSDT")
+        self.size_info = self.db.get_currency_info(DataUtils.COMPANY_BYBIT, "BTCUSDT")
         self.open = self.datas[0].open
         self.high = self.datas[0].high
         self.low = self.datas[0].low
@@ -112,10 +112,10 @@ if __name__ == '__main__':
     DB.init_connection_pool(config_path)
 
     # backtesting할 데이터 추출
-    df = DataUtil.load_candle_data_as_df(DataUtil.CANDLE_DATA_DIR_PATH, DataUtil.COMPANY_BYBIT,
-                                         "BTCUSDT", DataUtil.CANDLE_TICK_1DAY)
+    df = DataUtils.load_candle_data_as_df(DataUtils.CANDLE_DATA_DIR_PATH, DataUtils.COMPANY_BYBIT,
+                                         "BTCUSDT", DataUtils.CANDLE_TICK_1DAY)
 
-    df = DataUtil.get_candle_data_in_scape(df, "2020-05-01", "2023-09-30")
+    df = DataUtils.get_candle_data_in_scape(df, "2020-05-01", "2023-09-30")
     # 특정 날짜 만큼만 추출
     data = bt.feeds.PandasData(dataname=df, datetime='datetime')
 

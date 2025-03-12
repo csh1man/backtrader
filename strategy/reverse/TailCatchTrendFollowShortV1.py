@@ -3,17 +3,17 @@ import backtrader as bt
 import pandas as pd
 import quantstats as qs
 import math
-from util.Util import DataUtil
+from util.Util import DataUtils
 from decimal import Decimal
 
 pairs = {
-    'ETHUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    '1000PEPEUSDT':DataUtil.CANDLE_TICK_1HOUR,
-    'WIFUSDT':DataUtil.CANDLE_TICK_1HOUR,
-    'SHIB1000USDT':DataUtil.CANDLE_TICK_1HOUR,
-    'ONDOUSDT':DataUtil.CANDLE_TICK_1HOUR,
-    'ORDIUSDT':DataUtil.CANDLE_TICK_1HOUR,
-    '1000BONKUSDT':DataUtil.CANDLE_TICK_1HOUR,
+    'ETHUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    '1000PEPEUSDT':DataUtils.CANDLE_TICK_1HOUR,
+    'WIFUSDT':DataUtils.CANDLE_TICK_1HOUR,
+    'SHIB1000USDT':DataUtils.CANDLE_TICK_1HOUR,
+    'ONDOUSDT':DataUtils.CANDLE_TICK_1HOUR,
+    'ORDIUSDT':DataUtils.CANDLE_TICK_1HOUR,
+    '1000BONKUSDT':DataUtils.CANDLE_TICK_1HOUR,
 }
 
 class TailCatchTrendFollowShortV1(bt.Strategy):
@@ -255,15 +255,15 @@ class TailCatchTrendFollowShortV1(bt.Strategy):
             name = self.names[i]
             self.cancel_all(name)
             if name in ['ETHUSDT']:
-                adjust_high_band = DataUtil.convert_to_decimal(self.high_bands[i][0]) - (DataUtil.convert_to_decimal(self.high_bands[i][0]) - DataUtil.convert_to_decimal(self.low_bands[i][0])) * (self.p.high_band_constant[name] / Decimal('100'))
-                adjust_low_band = DataUtil.convert_to_decimal(self.low_bands[i][0]) + (DataUtil.convert_to_decimal(self.high_bands[i][0]) - DataUtil.convert_to_decimal(self.low_bands[i][0])) * (self.p.low_band_constant[name] / Decimal('100'))
+                adjust_high_band = DataUtils.convert_to_decimal(self.high_bands[i][0]) - (DataUtils.convert_to_decimal(self.high_bands[i][0]) - DataUtils.convert_to_decimal(self.low_bands[i][0])) * (self.p.high_band_constant[name] / Decimal('100'))
+                adjust_low_band = DataUtils.convert_to_decimal(self.low_bands[i][0]) + (DataUtils.convert_to_decimal(self.high_bands[i][0]) - DataUtils.convert_to_decimal(self.low_bands[i][0])) * (self.p.low_band_constant[name] / Decimal('100'))
                 adjust_high_band = int(adjust_high_band / self.p.tick_size[name]) * self.p.tick_size[name]
                 adjust_low_band = int(adjust_low_band / self.p.tick_size[name]) * self.p.tick_size[name]
 
                 current_position_size = self.getposition(self.pairs[i]).size
                 if current_position_size == 0:
-                    equity = DataUtil.convert_to_decimal(self.broker.getvalue())
-                    stop_price = adjust_low_band + DataUtil.convert_to_decimal(self.atrs[i][0]) * self.p.atr_constant[name]
+                    equity = DataUtils.convert_to_decimal(self.broker.getvalue())
+                    stop_price = adjust_low_band + DataUtils.convert_to_decimal(self.atrs[i][0]) * self.p.atr_constant[name]
                     stop_price = int(stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
                     self.stop_prices[i] = stop_price
 
@@ -274,7 +274,7 @@ class TailCatchTrendFollowShortV1(bt.Strategy):
                     qty = int(qty  / self.p.step_size[name]) * self.p.step_size[name]
                     self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], size=float(qty), price=float(adjust_low_band))
                 if current_position_size < 0:
-                    if DataUtil.convert_to_decimal(self.closes[i][0]) >= self.stop_prices[i]:
+                    if DataUtils.convert_to_decimal(self.closes[i][0]) >= self.stop_prices[i]:
                         self.order = self.buy(exectype=bt.Order.Market, data=self.pairs[i], size=abs(current_position_size))
                     else:
                         self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], size=abs(current_position_size), price=float(adjust_high_band))
@@ -295,7 +295,7 @@ class TailCatchTrendFollowShortV1(bt.Strategy):
                 prices = []
                 for j in range(0, len(self.p.percent[name][entry_mode])):
                     percent = self.p.percent[name][entry_mode][j]
-                    price = DataUtil.convert_to_decimal(self.closes[i][0]) * (Decimal('1') - percent / Decimal('100'))
+                    price = DataUtils.convert_to_decimal(self.closes[i][0]) * (Decimal('1') - percent / Decimal('100'))
                     price = int(price / tick_size) * tick_size
                     prices.append(price)
 
@@ -307,7 +307,7 @@ class TailCatchTrendFollowShortV1(bt.Strategy):
                         self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i],
                                                size=float(current_position_size))
 
-                equity = DataUtil.convert_to_decimal(self.broker.getvalue())
+                equity = DataUtils.convert_to_decimal(self.broker.getvalue())
                 qtys = []
                 for j in range(0, len(prices)):
                     price = prices[j]
@@ -337,7 +337,7 @@ if __name__ == '__main__':
     cerebro.broker.setcommission(commission=0.0005, leverage=5)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BYBIT, pair, tick_kind)
+        df = DataUtils.load_candle_data_as_df(data_path, DataUtils.COMPANY_BYBIT, pair, tick_kind)
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 

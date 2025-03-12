@@ -1,5 +1,5 @@
 import backtrader as bt
-from util.Util import DataUtil
+from util.Util import DataUtils
 from decimal import Decimal, ROUND_HALF_UP
 import quantstats as qs
 import pandas as pd
@@ -7,12 +7,12 @@ import matplotlib.pyplot as plt
 import pyfolio as pf
 from indicator.Indicators import Indicator
 pairs = {
-    'BTCUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    'BTCUSDT': DataUtils.CANDLE_TICK_1HOUR,
     # '1000BONKUSDT': DataUtil.CANDLE_TICK_30M,
     # '1000PEPEUSDT': DataUtil.CANDLE_TICK_30M,
-    'SOLUSDT': DataUtil.CANDLE_TICK_30M,
-    'DOGEUSDT': DataUtil.CANDLE_TICK_30M,
-    'XRPUSDT': DataUtil.CANDLE_TICK_30M,
+    'SOLUSDT': DataUtils.CANDLE_TICK_30M,
+    'DOGEUSDT': DataUtils.CANDLE_TICK_30M,
+    'XRPUSDT': DataUtils.CANDLE_TICK_30M,
     # 'SEIUSDT': DataUtil.CANDLE_TICK_30M,
     # 'TIAUSDT': DataUtil.CANDLE_TICK_30M,
 }
@@ -267,7 +267,7 @@ if __name__ == '__main__':
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')  # 결과 분석기 추가
 
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BYBIT, pair, tick_kind)
+        df = DataUtils.load_candle_data_as_df(data_path, DataUtils.COMPANY_BYBIT, pair, tick_kind)
         # df = DataUtil.get_candle_data_in_scape(df, start_date, end_date)
         # df = df[(df['datetime'] >= start_date) & (df['datetime'] <= end_date)]
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')

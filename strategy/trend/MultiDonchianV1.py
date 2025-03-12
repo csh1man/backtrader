@@ -1,16 +1,16 @@
 import backtrader as bt
 import pandas as pd
 import quantstats as qs
-from util.Util import DataUtil
+from util.Util import DataUtils
 from decimal import Decimal
 import math
 
 pairs = {
-    'BTCUSDT' : DataUtil.CANDLE_TICK_4HOUR,
-    'ETHUSDT' : DataUtil.CANDLE_TICK_4HOUR,
-    'BCHUSDT' : DataUtil.CANDLE_TICK_4HOUR,
-    'SOLUSDT' : DataUtil.CANDLE_TICK_4HOUR,
-    'BNBUSDT' : DataUtil.CANDLE_TICK_4HOUR,
+    'BTCUSDT' : DataUtils.CANDLE_TICK_4HOUR,
+    'ETHUSDT' : DataUtils.CANDLE_TICK_4HOUR,
+    'BCHUSDT' : DataUtils.CANDLE_TICK_4HOUR,
+    'SOLUSDT' : DataUtils.CANDLE_TICK_4HOUR,
+    'BNBUSDT' : DataUtils.CANDLE_TICK_4HOUR,
 }
 
 class MultiDonchian(bt.Strategy):
@@ -238,11 +238,11 @@ class MultiDonchian(bt.Strategy):
                 leverage = self.p.leverage[name]['long']
             else:
                 leverage = self.p.leverage[name]['short']
-            close = DataUtil.convert_to_decimal(self.closes[i][0])
-            before_close = DataUtil.convert_to_decimal(self.closes[i][-1])
-            atr = DataUtil.convert_to_decimal(self.atrs[i][0])
-            highest = DataUtil.convert_to_decimal(self.highest[i][0])
-            lowest = DataUtil.convert_to_decimal(self.lowest[i][0])
+            close = DataUtils.convert_to_decimal(self.closes[i][0])
+            before_close = DataUtils.convert_to_decimal(self.closes[i][-1])
+            atr = DataUtils.convert_to_decimal(self.atrs[i][0])
+            highest = DataUtils.convert_to_decimal(self.highest[i][0])
+            lowest = DataUtils.convert_to_decimal(self.lowest[i][0])
             current_position_size = self.getposition(self.pairs[i]).size
 
             # 진입 포지션이 없을 경우
@@ -254,13 +254,13 @@ class MultiDonchian(bt.Strategy):
                     self.long_stop_prices[i] = stop_price
 
                     # 수량 계산
-                    qty = DataUtil.convert_to_decimal(self.broker.get_cash()) * self.p.risk[name]['long'][self.entry_modes[name]] / Decimal('100') / abs(highest - stop_price)
+                    qty = DataUtils.convert_to_decimal(self.broker.get_cash()) * self.p.risk[name]['long'][self.entry_modes[name]] / Decimal('100') / abs(highest - stop_price)
                     qty = int(qty / self.p.step_size[name]) * self.p.step_size[name]
 
                     # 계산된 수량에 대해서 진입하는데 필요한 자산이 레버리지 * 현재 자산보다 크면 진입이 되지 않는다.
                     # 따라서 현재 자산의 98% x 레버리지 만큼 진입한다.
-                    if qty * highest >= leverage * DataUtil.convert_to_decimal(self.broker.get_cash()):
-                        qty = leverage * DataUtil.convert_to_decimal(self.broker.get_cash()) * Decimal('0.98') / highest
+                    if qty * highest >= leverage * DataUtils.convert_to_decimal(self.broker.get_cash()):
+                        qty = leverage * DataUtils.convert_to_decimal(self.broker.get_cash()) * Decimal('0.98') / highest
                         qty = int(qty / self.p.step_size[name]) * self.p.step_size[name]
 
                     # 지정가 주문 체결
@@ -271,14 +271,14 @@ class MultiDonchian(bt.Strategy):
                     self.long_stop_prices[i] = stop_price
 
                     # 수량 계산
-                    qty = DataUtil.convert_to_decimal(self.broker.get_cash()) * self.p.risk[name]['short'][
+                    qty = DataUtils.convert_to_decimal(self.broker.get_cash()) * self.p.risk[name]['short'][
                         self.entry_modes[name]] / Decimal('100') / abs(lowest - stop_price)
                     qty = int(qty / self.p.step_size[name]) * self.p.step_size[name]
 
                     # 계산된 수량에 대해서 진입하는데 필요한 자산이 레버리지 * 현재 자산보다 크면 진입이 되지 않는다.
                     # 따라서 현재 자산의 98% x 레버리지 만큼 진입한다.
-                    if qty * lowest >= leverage * DataUtil.convert_to_decimal(self.broker.get_cash()):
-                        qty = leverage * DataUtil.convert_to_decimal(self.broker.get_cash()) * Decimal('0.98') / lowest
+                    if qty * lowest >= leverage * DataUtils.convert_to_decimal(self.broker.get_cash()):
+                        qty = leverage * DataUtils.convert_to_decimal(self.broker.get_cash()) * Decimal('0.98') / lowest
                         qty = int(qty / self.p.step_size[name]) * self.p.step_size[name]
                     # 지정가 주문 체결
                     self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], price=float(lowest),
@@ -311,7 +311,7 @@ if __name__ == '__main__':
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BINANCE, pair, tick_kind)
+        df = DataUtils.load_candle_data_as_df(data_path, DataUtils.COMPANY_BINANCE, pair, tick_kind)
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 

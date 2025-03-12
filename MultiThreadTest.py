@@ -2,7 +2,7 @@ import argparse
 import backtrader as bt
 import pandas as pd
 import quantstats as qs
-from util.Util import DataUtil
+from util.Util import DataUtils
 from decimal import Decimal
 
 pairs = {
@@ -179,11 +179,11 @@ class MultiAtrConstantV3(bt.Strategy):
 
             prices = []
             for j in range(0, len(constants)):
-                price = DataUtil.convert_to_decimal(self.closes[i][0]) - DataUtil.convert_to_decimal(self.atrs[i][0]) * constants[j]
+                price = DataUtils.convert_to_decimal(self.closes[i][0]) - DataUtils.convert_to_decimal(self.atrs[i][0]) * constants[j]
                 price = int(price / self.p.tick_size[name]) * self.p.tick_size[name]
                 prices.append(price)
 
-            equity = DataUtil.convert_to_decimal(self.broker.getcash())
+            equity = DataUtils.convert_to_decimal(self.broker.getcash())
             for j in range(0, len(prices)):
                 if prices[j] == Decimal('0'):
                     continue
@@ -194,7 +194,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process some integers.")
     parser.add_argument('input', type=str, help='An input string')
     args = parser.parse_args()
-    pairs[args.input] = DataUtil.CANDLE_TICK_30M
+    pairs[args.input] = DataUtils.CANDLE_TICK_30M
 
     data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
 
@@ -207,7 +207,7 @@ if __name__ == "__main__":
 
     # data loading
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BYBIT, pair, tick_kind)
+        df = DataUtils.load_candle_data_as_df(data_path, DataUtils.COMPANY_BYBIT, pair, tick_kind)
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 

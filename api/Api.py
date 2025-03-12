@@ -50,10 +50,176 @@ class ApiBase:
         return response
 
 
-class Bybit(ApiBase):
+class ByBit(ApiBase):
     def __init__(self, file_path):
         super().__init__(file_path, 'bybit', "https://api.bybit.com")
+        self.exchange_info = self.fetch_exchange_info()
 
+    def fetch_exchange_info(self):
+        url = self.base_url + "/v5/market/instruments-info"
+        params = {
+            "category": "linear",
+            'limit': 1000,
+        }
+        response = self.send_request(0, None, params, url)
+        if response.status_code == 200:
+            exchange_info = response.json()
+            return exchange_info['result']['list']
+
+        return None
+
+    def fetch_tick_size(self, symbol: str):
+        for info in self.exchange_info:
+            if symbol == info['symbol']:
+                return Decimal(info['priceFilter']['tickSize'])
+        return None
+
+    def fetch_step_size(self, symbol: str):
+        for info in self.exchange_info:
+            if symbol == info['symbol']:
+                return Decimal(info['lotSizeFilter']['qtyStep'])
+        return None
+
+    def fetch_candle_sticks(self, symbol: str, timeframe: str, count: int):
+        url = self.base_url + "/v5/market/kline"
+        if count > 1000:
+            count = 1000
+
+        params = {
+            "category": "linear",
+            "symbol": symbol,
+            "interval": TimeUtil.get_timeframe(DataUtil.BYBIT, timeframe),
+            "limit": count
+        }
+
+        response = self.send_request(0, None, params, url)
+        if response.status_code == 200:
+            candles = response.json()['result']['list']
+
+            returns = []
+            for candle in candles:
+                candle_time = TimeUtil.timestamp_to_candle_time(str(candle[0]), timeframe, True)
+
+                # JSON 데이터 만들기
+                candle_data = {
+                    "exchange": DataUtil.BYBIT,
+                    "candle_time": candle_time,
+                    "open": candle[1],
+                    "high": candle[2],
+                    "low": candle[3],
+                    "close": candle[4],
+                    "volume": candle[5]
+                }
+                returns.append(candle_data)
+            return list(reversed(returns))
+        return None
+
+    def fetch_candle_sticks_with_start_time(self, symbol: str, timeframe: str, start: str, count: int):
+        url = self.base_url + "/v5/market/kline"
+        if count > 1000:
+            count = 1000
+        to = TimeUtil.add_times(start, timeframe, count)
+        params = {
+            "category": "linear",
+            "symbol": symbol,
+            "interval": TimeUtil.get_timeframe(DataUtil.BYBIT, timeframe),
+            "start": TimeUtil.str_to_timestamp(start, True),
+            "end": TimeUtil.str_to_timestamp(to, True), # endTime 캔들은 미포함
+            "limit": count
+        }
+
+        response = self.send_request(0, None, params, url)
+        if response.status_code == 200:
+            candles = response.json()['result']['list']
+
+            returns = []
+            for candle in reversed(candles):
+                candle_time = TimeUtil.timestamp_to_candle_time(str(candle[0]), timeframe, True)
+
+                # JSON 데이터 만들기
+                candle_data = {
+                    "exchange": DataUtil.BINANCE,
+                    "candle_time": candle_time,
+                    "open": candle[1],
+                    "high": candle[2],
+                    "low": candle[3],
+                    "close": candle[4],
+                    "volume": candle[5]
+                }
+                returns.append(candle_data)
+
+            return list(reversed(returns))
+
+    def fetch_candle_sticks_with_end_time(self, symbol: str, timeframe: str, to: str, count: int):
+        url = self.base_url + "/v5/market/kline"
+        if count > 1000:
+            count = 1000
+
+        to = TimeUtil.add_times(to, timeframe, 1)
+        start = TimeUtil.minus_times(to, timeframe, count)
+
+        params = {
+            "category": "linear",
+            "symbol": symbol,
+            "interval": TimeUtil.get_timeframe(DataUtil.BYBIT, timeframe),
+            "start": TimeUtil.str_to_timestamp(start, True),
+            "end": TimeUtil.str_to_timestamp(to, True), # endTime 캔들은 미포함
+            "limit": count
+        }
+
+        response = self.send_request(0, None, params, url)
+        if response.status_code == 200:
+            candles = response.json()['result']['list']
+
+            returns = []
+            for candle in reversed(candles):
+                candle_time = TimeUtil.timestamp_to_candle_time(str(candle[0]), timeframe, True)
+
+                # JSON 데이터 만들기
+                candle_data = {
+                    "exchange": DataUtil.BINANCE,
+                    "candle_time": candle_time,
+                    "open": candle[1],
+                    "high": candle[2],
+                    "low": candle[3],
+                    "close": candle[4],
+                    "volume": candle[5]
+                }
+                returns.append(candle_data)
+
+            return list(reversed(returns))
+
+    def fetch_all_candles_from_start(self, symbol: str, timeframe: str, start: str):
+        total_candles = []
+        while True:
+            candles = self.fetch_candle_sticks_with_start_time(symbol, timeframe, start, 980)
+            if not candles or len(candles) == 0:
+                print(f'[{symbol}] no more candle data to download.')
+                break
+            print(f'{symbol} download done : {candles[-1]["candle_time"]} ~ {candles[0]["candle_time"]}')
+            total_candles.extend(reversed(candles))
+
+            start = TimeUtil.add_times(candles[0]['candle_time'], timeframe, 1)
+            TimeUtil.delay(0.8)
+
+        return reversed(total_candles)
+
+    def fetch_all_candles(self, symbol: str, timeframe: str):
+        total_candles = []
+        end_time = TimeUtil.get_current_time_yyyy_mm_dd_hh_mm_ss(True)
+        while True:
+            candles = self.fetch_candle_sticks_with_end_time(symbol, timeframe, end_time, 980)
+            if not candles or candles[0]['candle_time'] == candles[-1]['candle_time']:
+                print(f"[{symbol}] no more candle data to download.")
+                break
+
+            print(f'{symbol} download done : {candles[-1]["candle_time"]} ~ {candles[0]["candle_time"]}')
+            total_candles.extend(candles)
+
+            end_time = TimeUtil.minus_times(candles[-1]['candle_time'], timeframe, 1)
+            TimeUtil.delay(0.8)
+
+        return total_candles
 
 class Binance(ApiBase):
     def __init__(self, file_path: str):
@@ -124,7 +290,6 @@ class Binance(ApiBase):
         if count > 500:
             count = 500
         to = TimeUtil.add_times(start, timeframe, count)
-        print(f'download {start} ~ {to}')
         params = {
             "symbol": symbol,
             "interval": TimeUtil.get_timeframe(DataUtil.BINANCE, timeframe),
@@ -227,36 +392,50 @@ class Binance(ApiBase):
 
 class Common:
     def __init__(self, config_file_path):
-        self.bybit = Bybit(config_file_path)
+        self.bybit = ByBit(config_file_path)
         self.binance = Binance(config_file_path)
 
     def fetch_step_size(self, exchange, symbol):
         if exchange == DataUtil.BINANCE:
             return self.binance.fetch_tick_size(symbol)
+        elif exchange == DataUtil.BYBIT:
+            return self.bybit.fetch_tick_size(symbol)
 
     def fetch_tick_size(self, exchange, symbol):
         if exchange == DataUtil.BINANCE:
             return self.binance.fetch_step_size(symbol)
+        elif exchange == DataUtil.BYBIT:
+            return self.bybit.fetch_step_size(symbol)
 
     def fetch_candle_sticks(self, exchange: str, symbol: str, timeframe: str, count: int):
         if exchange == DataUtil.BINANCE:
             return self.binance.fetch_candle_sticks(symbol, timeframe, count)
+        elif exchange == DataUtil.BYBIT:
+            return self.bybit.fetch_candle_sticks(symbol, timeframe, count)
 
     def fetch_candle_sticks_with_start_time(self, exchange: str, symbol: str, timeframe: str, start: str, count: int):
         if exchange == DataUtil.BINANCE:
             return self.binance.fetch_candle_sticks_with_start_time(symbol, timeframe, start, count)
+        elif exchange == DataUtil.BYBIT:
+            return self.bybit.fetch_candle_sticks_with_start_time(symbol, timeframe, start, count)
 
     def fetch_candle_sticks_with_end_time(self, exchange: str, symbol: str, timeframe: str, to: str, count: int):
         if exchange == DataUtil.BINANCE:
             return self.binance.fetch_candle_sticks_with_end_time(symbol, timeframe, to, count)
+        elif exchange == DataUtil.BYBIT:
+            return self.bybit.fetch_candle_sticks_with_end_time(symbol, timeframe, to, count)
 
     def fetch_all_candles_from_start(self, exchange: str, symbol: str, timeframe: str, start: str):
         if exchange == DataUtil.BINANCE:
             return self.binance.fetch_all_candles_from_start(symbol, timeframe, start)
+        elif exchange == DataUtil.BYBIT:
+            return self.bybit.fetch_all_candles_from_start(symbol, timeframe, start)
 
     def fetch_all_candles(self, exchange: str, symbol: str, timeframe: str):
         if exchange == DataUtil.BINANCE:
             return self.binance.fetch_all_candles(symbol, timeframe)
+        elif exchange == DataUtil.BYBIT:
+            return self.bybit.fetch_all_candles(symbol, timeframe)
 
 class Download:
     def __init__(self, config_file_path, download_dir_path):
@@ -305,8 +484,6 @@ class Download:
                 }
             json_data[timeframe] = new_json
             FileUtil.write_json_file(download_file_path, json_data)
-
-
 
     def download_all_candles(self, exchange, symbol, timeframe):
         total_candles = self.common.fetch_all_candles(exchange, symbol, timeframe)

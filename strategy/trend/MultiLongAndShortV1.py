@@ -1,14 +1,14 @@
 import backtrader as bt
 import pandas as pd
 import quantstats as qs
-from util.Util import DataUtil
+from util.Util import DataUtils
 from decimal import Decimal
 import math
 
 pairs = {
     # 'ETHUSDT': DataUtil.CANDLE_TICK_4HOUR,
     # 'BTCUSDT' : DataUtil.CANDLE_TICK_4HOUR,
-    'BCHUSDT' : DataUtil.CANDLE_TICK_4HOUR,
+    'BCHUSDT' : DataUtils.CANDLE_TICK_4HOUR,
     # 'BNBUSDT': DataUtil.CANDLE_TICK_4HOUR,
 }
 
@@ -318,33 +318,33 @@ class MultiLongAndShortV1(bt.Strategy):
             # 진입 포지션이 없을 경우
             if current_position_size == 0:
                 if entry_mode == 2:
-                    long_atr = int(DataUtil.convert_to_decimal(self.long_atrs[i][0]) / self.p.tick_size[name]) * self.p.tick_size[name]
-                    short_atr = int(DataUtil.convert_to_decimal(self.short_atrs[i][0]) / self.p.tick_size[name]) * self.p.tick_size[name]
+                    long_atr = int(DataUtils.convert_to_decimal(self.long_atrs[i][0]) / self.p.tick_size[name]) * self.p.tick_size[name]
+                    short_atr = int(DataUtils.convert_to_decimal(self.short_atrs[i][0]) / self.p.tick_size[name]) * self.p.tick_size[name]
                     if self.closes[i][-1] < self.short_lowest[i][-2] and self.closes[i][0] > self.short_lowest[i][-1]:
                         short_risk = self.p.risks[name]['short'][0]
                         if self.p.is_cut[name]['short']:
                             short_risk = self.p.risks[name]['short'][1]
 
-                        short_stop_price = DataUtil.convert_to_decimal(self.closes[i][0]) + short_atr * \
+                        short_stop_price = DataUtils.convert_to_decimal(self.closes[i][0]) + short_atr * \
                                            self.p.atr['constant'][name]['short']
                         short_stop_price = int(short_stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
                         self.short_stop_prices[i] = short_stop_price
 
-                        short_qty = DataUtil.convert_to_decimal(self.broker.get_cash()) * short_risk / Decimal('100')
-                        short_qty = short_qty / abs((DataUtil.convert_to_decimal(self.closes[i][0])) - short_stop_price)
+                        short_qty = DataUtils.convert_to_decimal(self.broker.get_cash()) * short_risk / Decimal('100')
+                        short_qty = short_qty / abs((DataUtils.convert_to_decimal(self.closes[i][0])) - short_stop_price)
                         short_qty = int(short_qty / self.p.step_size[name]) * self.p.step_size[name]
 
-                        if short_qty * DataUtil.convert_to_decimal(
-                                self.closes[i][0]) >= short_leverage * DataUtil.convert_to_decimal(
+                        if short_qty * DataUtils.convert_to_decimal(
+                                self.closes[i][0]) >= short_leverage * DataUtils.convert_to_decimal(
                                 self.broker.get_cash()):
-                            short_qty = short_leverage * DataUtil.convert_to_decimal(self.broker.get_cash()) * Decimal(
-                                '0.98') / DataUtil.convert_to_decimal(self.closes[i][0])
+                            short_qty = short_leverage * DataUtils.convert_to_decimal(self.broker.get_cash()) * Decimal(
+                                '0.98') / DataUtils.convert_to_decimal(self.closes[i][0])
                             short_qty = int(short_qty / self.p.step_size[name]) * self.p.step_size[name]
 
                         # 시장가 주문 진입
                         self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i], size=float(short_qty))
                     else:
-                        long_stop_price = DataUtil.convert_to_decimal(
+                        long_stop_price = DataUtils.convert_to_decimal(
                             self.long_highest[i][0]) - long_atr * self.p.atr['constant'][name]['long']
                         long_stop_price = int(long_stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
                         self.long_stop_prices[i] = long_stop_price
@@ -353,22 +353,22 @@ class MultiLongAndShortV1(bt.Strategy):
                         if self.p.is_cut[name]['long']:
                             long_risk = self.p.risks[name]['long'][1]
 
-                        long_qty = DataUtil.convert_to_decimal(self.broker.get_cash()) * long_risk / Decimal('100')
+                        long_qty = DataUtils.convert_to_decimal(self.broker.get_cash()) * long_risk / Decimal('100')
                         long_qty = long_qty / abs(
-                            DataUtil.convert_to_decimal(self.long_highest[i][0]) - long_stop_price)
+                            DataUtils.convert_to_decimal(self.long_highest[i][0]) - long_stop_price)
                         long_qty = int(long_qty / self.p.step_size[name]) * self.p.step_size[name]
 
-                        if long_qty * DataUtil.convert_to_decimal(
-                                self.long_highest[i][0]) >= long_leverage * DataUtil.convert_to_decimal(
+                        if long_qty * DataUtils.convert_to_decimal(
+                                self.long_highest[i][0]) >= long_leverage * DataUtils.convert_to_decimal(
                                 self.broker.get_cash()):
-                            long_qty = long_leverage * DataUtil.convert_to_decimal(self.broker.get_cash()) * Decimal(
-                                '0.98') / DataUtil.convert_to_decimal(self.long_highest[i][0])
+                            long_qty = long_leverage * DataUtils.convert_to_decimal(self.broker.get_cash()) * Decimal(
+                                '0.98') / DataUtils.convert_to_decimal(self.long_highest[i][0])
                         self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i],
                                               price=float(self.long_highest[i][0]), size=float(long_qty))
 
                 elif entry_mode == 0:  # 롱만 진입
-                    long_stop_price = DataUtil.convert_to_decimal(
-                        self.long_highest[i][0]) - DataUtil.convert_to_decimal(self.long_atrs[i][0]) * \
+                    long_stop_price = DataUtils.convert_to_decimal(
+                        self.long_highest[i][0]) - DataUtils.convert_to_decimal(self.long_atrs[i][0]) * \
                                       self.p.atr['constant'][name]['long']
                     long_stop_price = int(long_stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
                     self.long_stop_prices[i] = long_stop_price
@@ -377,15 +377,15 @@ class MultiLongAndShortV1(bt.Strategy):
                     if self.p.is_cut[name]['long']:
                         long_risk = self.p.risks[name]['long'][1]
 
-                    long_qty = DataUtil.convert_to_decimal(self.broker.get_cash()) * long_risk / Decimal('100')
-                    long_qty = long_qty / abs(DataUtil.convert_to_decimal(self.long_highest[i][0]) - long_stop_price)
+                    long_qty = DataUtils.convert_to_decimal(self.broker.get_cash()) * long_risk / Decimal('100')
+                    long_qty = long_qty / abs(DataUtils.convert_to_decimal(self.long_highest[i][0]) - long_stop_price)
                     long_qty = int(long_qty / self.p.step_size[name]) * self.p.step_size[name]
 
-                    if long_qty * DataUtil.convert_to_decimal(
-                            self.long_highest[i][0]) >= long_leverage * DataUtil.convert_to_decimal(
+                    if long_qty * DataUtils.convert_to_decimal(
+                            self.long_highest[i][0]) >= long_leverage * DataUtils.convert_to_decimal(
                         self.broker.get_cash()):
-                        long_qty = long_leverage * DataUtil.convert_to_decimal(self.broker.get_cash()) * Decimal(
-                            '0.98') / DataUtil.convert_to_decimal(self.long_highest[i][0])
+                        long_qty = long_leverage * DataUtils.convert_to_decimal(self.broker.get_cash()) * Decimal(
+                            '0.98') / DataUtils.convert_to_decimal(self.long_highest[i][0])
                     self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i],
                                           price=float(self.long_highest[i][0]), size=float(long_qty))
                 elif entry_mode == 1:
@@ -425,9 +425,9 @@ class MultiLongAndShortV1(bt.Strategy):
                     #             qty = int(qty / self.p.step_size[name]) * self.p.step_size[name]
                     #         self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(self.long_highest[i][0]),
                     #                               size=float(qty))
-                    short_stop_price = DataUtil.convert_to_decimal(
+                    short_stop_price = DataUtils.convert_to_decimal(
                         self.short_lowest[i][0]) \
-                                       + DataUtil.convert_to_decimal(self.short_atrs[i][0]) * \
+                                       + DataUtils.convert_to_decimal(self.short_atrs[i][0]) * \
                                        self.p.atr['constant'][name]['short']
                     short_stop_price = int(short_stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
                     self.short_stop_prices[i] = short_stop_price
@@ -436,13 +436,13 @@ class MultiLongAndShortV1(bt.Strategy):
                     if self.p.is_cut[name]['short']:
                         short_risk = self.p.risks[name]['short'][1]
 
-                    short_qty = DataUtil.convert_to_decimal(self.broker.get_cash()) * short_risk / Decimal('100')
-                    short_qty = short_qty / abs(DataUtil.convert_to_decimal(self.short_lowest[i][0]) - short_stop_price)
-                    if short_qty * DataUtil.convert_to_decimal(
-                            self.short_lowest[i][0]) >= short_leverage * DataUtil.convert_to_decimal(
+                    short_qty = DataUtils.convert_to_decimal(self.broker.get_cash()) * short_risk / Decimal('100')
+                    short_qty = short_qty / abs(DataUtils.convert_to_decimal(self.short_lowest[i][0]) - short_stop_price)
+                    if short_qty * DataUtils.convert_to_decimal(
+                            self.short_lowest[i][0]) >= short_leverage * DataUtils.convert_to_decimal(
                         self.broker.get_cash()):
-                        short_qty = short_leverage * DataUtil.convert_to_decimal(self.broker.get_cash()) * Decimal(
-                            '0.98') / DataUtil.convert_to_decimal(self.short_lowest[i][0])
+                        short_qty = short_leverage * DataUtils.convert_to_decimal(self.broker.get_cash()) * Decimal(
+                            '0.98') / DataUtils.convert_to_decimal(self.short_lowest[i][0])
                     short_qty = int(short_qty / self.p.step_size[name]) * self.p.step_size[name]
                     self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i],
                                            price=float(self.short_lowest[i][0]), size=float(short_qty))
@@ -481,7 +481,7 @@ if __name__ == '__main__':
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BINANCE, pair, tick_kind)
+        df = DataUtils.load_candle_data_as_df(data_path, DataUtils.COMPANY_BINANCE, pair, tick_kind)
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 

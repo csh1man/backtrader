@@ -1,14 +1,14 @@
 import backtrader as bt
-from util.Util import DataUtil
+from util.Util import DataUtils
 from decimal import Decimal, ROUND_HALF_UP
 from indicator.Indicators import Indicator
 import pandas as pd
 import quantstats as qs
 
 pairs = {
-    "KRW-ETH": DataUtil.CANDLE_TICK_4HOUR,
-    "KRW-BCH": DataUtil.CANDLE_TICK_4HOUR,
-    "KRW-BTC": DataUtil.CANDLE_TICK_4HOUR,
+    "KRW-ETH": DataUtils.CANDLE_TICK_4HOUR,
+    "KRW-BCH": DataUtils.CANDLE_TICK_4HOUR,
+    "KRW-BTC": DataUtils.CANDLE_TICK_4HOUR,
     # "KRW-SOL": DataUtil.CANDLE_TICK_4HOUR
 }
 
@@ -219,8 +219,8 @@ if __name__ == '__main__':
 
     # 데이터 INSERT
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_UPBIT, pair, tick_kind)
-        df = DataUtil.get_candle_data_in_scape(df, "2022-01-01", "2026-01-01")
+        df = DataUtils.load_candle_data_as_df(data_path, DataUtils.COMPANY_UPBIT, pair, tick_kind)
+        df = DataUtils.get_candle_data_in_scape(df, "2022-01-01", "2026-01-01")
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 

@@ -1,17 +1,17 @@
 import backtrader as bt
-from util.Util import DataUtil
+from util.Util import DataUtils
 from decimal import Decimal, ROUND_HALF_UP
 from indicator.Indicators import Indicator
 import pandas as pd
 import quantstats as qs
 
 pairs = {
-    "KRW-ETH": DataUtil.CANDLE_TICK_4HOUR,
-    "KRW-BTC": DataUtil.CANDLE_TICK_4HOUR,
-    "KRW-BCH": DataUtil.CANDLE_TICK_4HOUR,
-    "KRW-XRP": DataUtil.CANDLE_TICK_4HOUR,
-    "KRW-DOGE": DataUtil.CANDLE_TICK_4HOUR,
-    "KRW-SOL": DataUtil.CANDLE_TICK_4HOUR,
+    "KRW-ETH": DataUtils.CANDLE_TICK_4HOUR,
+    "KRW-BTC": DataUtils.CANDLE_TICK_4HOUR,
+    "KRW-BCH": DataUtils.CANDLE_TICK_4HOUR,
+    "KRW-XRP": DataUtils.CANDLE_TICK_4HOUR,
+    "KRW-DOGE": DataUtils.CANDLE_TICK_4HOUR,
+    "KRW-SOL": DataUtils.CANDLE_TICK_4HOUR,
 }
 
 
@@ -212,11 +212,11 @@ class UpbitBBWithTrendFollowV1(bt.Strategy):
             current_position_size = self.getposition(pair).size
             if current_position_size == 0:
                 if self.closes[i][-1] < self.bb_top[i][-1] and self.closes[i][0] >= self.bb_top[i][0]:
-                    stop_price = DataUtil.convert_to_decimal(self.adj_low_bands[i][0])
+                    stop_price = DataUtils.convert_to_decimal(self.adj_low_bands[i][0])
                     stop_price = int(stop_price / tick_size) * tick_size
 
-                    qty = DataUtil.convert_to_decimal(self.broker.getvalue()) * self.p.risk[name] / Decimal('100')
-                    qty = qty / abs(DataUtil.convert_to_decimal(self.closes[i][0]) - stop_price)
+                    qty = DataUtils.convert_to_decimal(self.broker.getvalue()) * self.p.risk[name] / Decimal('100')
+                    qty = qty / abs(DataUtils.convert_to_decimal(self.closes[i][0]) - stop_price)
                     if qty * Decimal(str(self.closes[i][0])) >= Decimal(str(self.broker.getcash())):
                         qty = Decimal(str(self.broker.getcash())) * Decimal('0.98') / Decimal(str(self.closes[i][0]))
                     qty = qty.quantize(Decimal('0.00000001'), rounding=ROUND_HALF_UP)
@@ -230,7 +230,7 @@ class UpbitBBWithTrendFollowV1(bt.Strategy):
                 elif self.closes[i][0] < self.bb_mid[i][0]:
                     self.order = self.sell(data=self.pairs[i], size=current_position_size)
                     self.stop_price[i] = Decimal('-1')
-                elif DataUtil.convert_to_decimal(self.closes[i][0]) <  DataUtil.convert_to_decimal(self.adj_low_bands2[i][-1]):
+                elif DataUtils.convert_to_decimal(self.closes[i][0]) <  DataUtils.convert_to_decimal(self.adj_low_bands2[i][-1]):
                     self.order = self.sell(data=self.pairs[i], size=current_position_size)
                     self.stop_price[i] = Decimal('-1')
 
@@ -246,7 +246,7 @@ if __name__ == '__main__':
 
     # 데이터 INSERT
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_UPBIT, pair, tick_kind)
+        df = DataUtils.load_candle_data_as_df(data_path, DataUtils.COMPANY_UPBIT, pair, tick_kind)
         # df = DataUtil.get_candle_data_in_scape(df, "2022-01-01", "2026-01-01")
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)

@@ -1,12 +1,12 @@
 import backtrader as bt
 import pandas as pd
 import quantstats as qs
-from util.Util import DataUtil
+from util.Util import DataUtils
 from decimal import Decimal
 
 pairs = {
-    'KRW-BTC' : DataUtil.CANDLE_TICK_30M,
-    'KRW-PEPE': DataUtil.CANDLE_TICK_30M,
+    'KRW-BTC' : DataUtils.CANDLE_TICK_30M,
+    'KRW-PEPE': DataUtils.CANDLE_TICK_30M,
 }
 
 
@@ -168,12 +168,12 @@ class BithumbAtrDCAV1(bt.Strategy):
                 constants = self.p.bear_constants[name]
             prices = []
             for j in range(0, len(constants)):
-                price = DataUtil.convert_to_decimal(self.closes[i][0]) - constants[j] * DataUtil.convert_to_decimal(self.atrs[i][0])
-                price = int(price / DataUtil.get_bithumb_tick_size(price)) * DataUtil.get_bithumb_tick_size(price)
+                price = DataUtils.convert_to_decimal(self.closes[i][0]) - constants[j] * DataUtils.convert_to_decimal(self.atrs[i][0])
+                price = int(price / DataUtils.get_bithumb_tick_size(price)) * DataUtils.get_bithumb_tick_size(price)
                 prices.append(price)
 
             current_position_size = self.getposition(self.pairs[i]).size
-            equity = DataUtil.convert_to_decimal(self.broker.get_cash())
+            equity = DataUtils.convert_to_decimal(self.broker.get_cash())
             if current_position_size == 0:
                 for j in range(0, len(prices)):
                     qty = equity * self.p.risks[j] / Decimal('100') / prices[j]
@@ -189,7 +189,7 @@ class BithumbAtrDCAV1(bt.Strategy):
                 if self.rsis[i][0] < self.p.rsi_low:
                     target_percent += self.p.add_exit_percent[name]
 
-                entry_avg_price = DataUtil.convert_to_decimal(self.getposition(self.pairs[i]).price)
+                entry_avg_price = DataUtils.convert_to_decimal(self.getposition(self.pairs[i]).price)
                 target_price = entry_avg_price * (1+target_percent / Decimal('100'))
                 self.order = self.sell(exectype=bt.Order.Limit, data=self.pairs[i], price=float(target_price), size=current_position_size)
 
@@ -206,7 +206,7 @@ if __name__ == '__main__':
 
     # data loading
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BITHUMB, pair, tick_kind)
+        df = DataUtils.load_candle_data_as_df(data_path, DataUtils.COMPANY_BITHUMB, pair, tick_kind)
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 

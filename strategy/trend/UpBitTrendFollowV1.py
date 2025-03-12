@@ -3,16 +3,16 @@ import backtrader as bt
 import pandas as pd
 import quantstats as qs
 import math
-from util.Util import DataUtil
+from util.Util import DataUtils
 from decimal import Decimal, ROUND_HALF_UP
 
 pairs = {
-    "KRW-ETH": DataUtil.CANDLE_TICK_4HOUR,
-    "KRW-BTC": DataUtil.CANDLE_TICK_4HOUR,
-    "KRW-BCH": DataUtil.CANDLE_TICK_4HOUR,
-    "KRW-SOL": DataUtil.CANDLE_TICK_4HOUR,
-    "KRW-XRP": DataUtil.CANDLE_TICK_4HOUR,
-    "KRW-DOGE": DataUtil.CANDLE_TICK_4HOUR
+    "KRW-ETH": DataUtils.CANDLE_TICK_4HOUR,
+    "KRW-BTC": DataUtils.CANDLE_TICK_4HOUR,
+    "KRW-BCH": DataUtils.CANDLE_TICK_4HOUR,
+    "KRW-SOL": DataUtils.CANDLE_TICK_4HOUR,
+    "KRW-XRP": DataUtils.CANDLE_TICK_4HOUR,
+    "KRW-DOGE": DataUtils.CANDLE_TICK_4HOUR
 }
 
 def get_tick_size(price):
@@ -182,35 +182,35 @@ class UpBitTrendFollowV1(bt.Strategy):
         self.record_asset()
         for i in range(0, len(self.pairs)):
             name = self.names[i]
-            before_high_band = DataUtil.convert_to_decimal(self.high_bands[i][-1])
-            before_low_band = DataUtil.convert_to_decimal(self.low_bands[i][-1])
+            before_high_band = DataUtils.convert_to_decimal(self.high_bands[i][-1])
+            before_low_band = DataUtils.convert_to_decimal(self.low_bands[i][-1])
             before_adj_high_band = before_high_band - (before_high_band - before_low_band) * (self.p.high_band_constant[name] / Decimal('100'))
             before_adj_low_band = before_low_band + (before_high_band - before_low_band) * (self.p.low_band_constant[name] / Decimal('100'))
 
-            two_before_high_band = DataUtil.convert_to_decimal(self.high_bands[i][-2])
-            two_before_low_band = DataUtil.convert_to_decimal(self.low_bands[i][-2])
+            two_before_high_band = DataUtils.convert_to_decimal(self.high_bands[i][-2])
+            two_before_low_band = DataUtils.convert_to_decimal(self.low_bands[i][-2])
             two_before_adj_high_band = two_before_high_band - (two_before_high_band - two_before_low_band) * (self.p.high_band_constant[name] / Decimal('100'))
             two_before_adj_low_band = two_before_low_band + (two_before_high_band - two_before_low_band) * (self.p.low_band_constant[name] / Decimal('100'))
 
-            before_close = DataUtil.convert_to_decimal(self.closes[i][-1])
-            current_close = DataUtil.convert_to_decimal(self.closes[i][0])
+            before_close = DataUtils.convert_to_decimal(self.closes[i][-1])
+            current_close = DataUtils.convert_to_decimal(self.closes[i][0])
 
             entry_position_size = self.getposition(self.pairs[i]).size
             if entry_position_size == 0:
                 if not math.isnan(two_before_adj_low_band) and not math.isnan(two_before_adj_high_band) and  not math.isnan(before_adj_high_band) and not math.isnan(before_adj_low_band):
                     if before_close < two_before_adj_high_band and current_close >= before_adj_high_band:
-                        stop_price = current_close - DataUtil.convert_to_decimal(self.atrs[i][0]) * self.p.atr_constant
+                        stop_price = current_close - DataUtils.convert_to_decimal(self.atrs[i][0]) * self.p.atr_constant
                         stop_price = int(stop_price / get_tick_size(self.closes[i][0])) * get_tick_size(self.closes[i][0])
                         self.stop_price[i] = stop_price
 
-                        cash = DataUtil.convert_to_decimal(self.broker.get_cash())
+                        cash = DataUtils.convert_to_decimal(self.broker.get_cash())
                         qty = cash * (self.p.risk / Decimal('100')) / abs(current_close-stop_price)
                         if qty * current_close >= cash:
                             qty = cash * Decimal('0.98') / current_close
                         qty.quantize(Decimal('0.000001'), rounding=ROUND_HALF_UP)
                         self.order = self.buy(exectype=bt.Order.Market, data=self.pairs[i], size=float(qty))
                         self.entry_price[i] = current_close
-                        self.entry_atr[i] = DataUtil.convert_to_decimal(self.atrs[i][0])
+                        self.entry_atr[i] = DataUtils.convert_to_decimal(self.atrs[i][0])
 
             elif entry_position_size > 0:
                 stop_price = self.stop_price[i]
@@ -223,7 +223,7 @@ class UpBitTrendFollowV1(bt.Strategy):
                     stop_price = stop_price + (self.entry_atr[i] / Decimal('2'))
                     self.stop_price[i] = stop_price
                     self.entry_price[i] = current_close
-                    self.entry_atr[i] = DataUtil.convert_to_decimal(self.atrs[i][0])
+                    self.entry_atr[i] = DataUtils.convert_to_decimal(self.atrs[i][0])
 
 
 if __name__ == '__main__':
@@ -238,8 +238,8 @@ if __name__ == '__main__':
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_UPBIT, pair, tick_kind)
-        df = DataUtil.get_candle_data_in_scape(df, "2022-01-01", "2026-01-01")
+        df = DataUtils.load_candle_data_as_df(data_path, DataUtils.COMPANY_UPBIT, pair, tick_kind)
+        df = DataUtils.get_candle_data_in_scape(df, "2022-01-01", "2026-01-01")
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 

@@ -3,19 +3,19 @@ import pandas as pd
 import quantstats as qs
 import math
 
-from util.Util import DataUtil
+from util.Util import DataUtils
 from decimal import Decimal
 
 pairs = {
-    'ETHUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    'SOLUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    'BTCUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    '1000PEPEUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    'SHIB1000USDT': DataUtil.CANDLE_TICK_1HOUR,
-    'ONDOUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    'ORDIUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    'SUIUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    'TAOUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    'ETHUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    'SOLUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    'BTCUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    '1000PEPEUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    'SHIB1000USDT': DataUtils.CANDLE_TICK_1HOUR,
+    'ONDOUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    'ORDIUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    'SUIUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    'TAOUSDT': DataUtils.CANDLE_TICK_1HOUR,
 }
 
 leverage=4
@@ -348,7 +348,7 @@ class ByBitTailCatchWithTrendFollowV3(bt.Strategy):
             name = self.names[i]
             self.cancel_all(target_name=name)
 
-        equity = DataUtil.convert_to_decimal(self.broker.getvalue())
+        equity = DataUtils.convert_to_decimal(self.broker.getvalue())
         for i in range(0, len(self.pairs)):
             name = self.names[i]
 
@@ -356,9 +356,9 @@ class ByBitTailCatchWithTrendFollowV3(bt.Strategy):
             step_size = self.p.step_size[name]
 
             if name in ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BCHUSDT']:
-                long_atr = DataUtil.convert_to_decimal(self.long_atrs[i][0])
-                long_high_band = DataUtil.convert_to_decimal(self.long_high_bands[i][0])
-                long_low_band = DataUtil.convert_to_decimal(self.long_low_bands[i][0])
+                long_atr = DataUtils.convert_to_decimal(self.long_atrs[i][0])
+                long_high_band = DataUtils.convert_to_decimal(self.long_high_bands[i][0])
+                long_low_band = DataUtils.convert_to_decimal(self.long_low_bands[i][0])
                 long_high_band_constant = self.p.high_band_constant[name][0]
                 long_low_band_constant = self.p.low_band_constant[name][0]
 
@@ -370,9 +370,9 @@ class ByBitTailCatchWithTrendFollowV3(bt.Strategy):
                     '100')
                 long_adj_low_band = int(long_adj_low_band / tick_size) * tick_size
 
-                short_atr = DataUtil.convert_to_decimal(self.short_atrs[i][0])
-                short_high_band = DataUtil.convert_to_decimal(self.short_high_bands[i][0])
-                short_low_band = DataUtil.convert_to_decimal(self.short_low_bands[i][0])
+                short_atr = DataUtils.convert_to_decimal(self.short_atrs[i][0])
+                short_high_band = DataUtils.convert_to_decimal(self.short_high_bands[i][0])
+                short_low_band = DataUtils.convert_to_decimal(self.short_low_bands[i][0])
                 short_high_band_constant = self.p.high_band_constant[name][1]
                 short_low_band_constant = self.p.low_band_constant[name][1]
 
@@ -402,7 +402,7 @@ class ByBitTailCatchWithTrendFollowV3(bt.Strategy):
                         short_adj_low_band - short_stop_price)
                     short_qty = int(short_qty / step_size) * step_size
 
-                    current_cash = DataUtil.convert_to_decimal(self.broker.get_cash())
+                    current_cash = DataUtils.convert_to_decimal(self.broker.get_cash())
                     if self.p.entry_mode[name] in [0, 2]:
                         if long_qty * long_adj_high_band / Decimal(leverage) >= current_cash:
                             long_qty = Decimal(leverage) * current_cash / long_adj_high_band
@@ -419,7 +419,7 @@ class ByBitTailCatchWithTrendFollowV3(bt.Strategy):
                                                size=float(short_qty))
                 elif current_position_size > 0:
                     long_stop_price = self.long_stop_prices[i]
-                    if DataUtil.convert_to_decimal(self.closes[i][0]) < long_stop_price:
+                    if DataUtils.convert_to_decimal(self.closes[i][0]) < long_stop_price:
                         self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i],
                                                size=float(current_position_size))
                     else:
@@ -427,8 +427,8 @@ class ByBitTailCatchWithTrendFollowV3(bt.Strategy):
                                                price=float(long_adj_low_band), size=float(current_position_size))
                 elif current_position_size < 0:
                     short_stop_price = self.short_stop_prices[i]
-                    if DataUtil.convert_to_decimal(
-                            self.closes[i][-1]) < short_stop_price <= DataUtil.convert_to_decimal(self.closes[i][0]):
+                    if DataUtils.convert_to_decimal(
+                            self.closes[i][-1]) < short_stop_price <= DataUtils.convert_to_decimal(self.closes[i][0]):
                         self.order = self.buy(exectype=bt.Order.Market, data=self.pairs[i],
                                               size=float(abs(current_position_size)))
                     else:
@@ -449,15 +449,15 @@ class ByBitTailCatchWithTrendFollowV3(bt.Strategy):
                 elif self.rsi[i][0] < self.p.rsi_limit[name]['bear']:
                     percents = self.p.percent[name]['bear']
 
-                equity = DataUtil.convert_to_decimal(self.broker.getvalue())
+                equity = DataUtils.convert_to_decimal(self.broker.getvalue())
                 for j in range(0, len(percents)):
                     risk = self.p.risks[name][j]
                     percent = percents[j]
-                    price = DataUtil.convert_to_decimal(self.closes[i][0]) * (Decimal('1') - percent / Decimal('100'))
+                    price = DataUtils.convert_to_decimal(self.closes[i][0]) * (Decimal('1') - percent / Decimal('100'))
                     price = int(price / tick_size) * tick_size
                     qty = equity * risk / Decimal('100') / price
                     qty = int(qty / step_size) * step_size
-                    if DataUtil.convert_to_decimal(self.broker.get_cash()) >= qty * price / Decimal(leverage) :
+                    if DataUtils.convert_to_decimal(self.broker.get_cash()) >= qty * price / Decimal(leverage) :
                         self.order = self.buy(exectype=bt.Order.Limit, data=self.pairs[i], price=float(price), size=float(qty))
 
 
@@ -475,7 +475,7 @@ if __name__ == '__main__':
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BYBIT, pair, tick_kind)
+        df = DataUtils.load_candle_data_as_df(data_path, DataUtils.COMPANY_BYBIT, pair, tick_kind)
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 

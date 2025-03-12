@@ -1,11 +1,11 @@
 import backtrader as bt
 import pandas as pd
 import quantstats as qs
-from util.Util import DataUtil
+from util.Util import DataUtils
 from decimal import Decimal
 
 pairs = {
-    'ETHUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    'ETHUSDT': DataUtils.CANDLE_TICK_1HOUR,
     # 'TRXUSDT': DataUtil.CANDLE_TICK_1HOUR,
     # 'SUIUSDT': DataUtil.CANDLE_TICK_1HOUR,
     # '1000PEPEUSDT': DataUtil.CANDLE_TICK_1HOUR,
@@ -17,7 +17,7 @@ pairs = {
     # 'ZECUSDT': DataUtil.CANDLE_TICK_1HOUR,
 }
 
-company=DataUtil.COMPANY_BINANCE
+company=DataUtils.COMPANY_BINANCE
 
 leverage=3
 
@@ -397,86 +397,86 @@ class TrendFollow1H(bt.Strategy):
         },
         tick_size={
             'ETHUSDT': {
-                DataUtil.COMPANY_BINANCE: Decimal('0.01'),
+                DataUtils.COMPANY_BINANCE: Decimal('0.01'),
             },
             'TRXUSDT': {
-                DataUtil.COMPANY_BINANCE: Decimal('0.00001'),
+                DataUtils.COMPANY_BINANCE: Decimal('0.00001'),
             },
             '1000PEPEUSDT': {
-                DataUtil.COMPANY_BINANCE: Decimal('0.0000001'),
-                DataUtil.COMPANY_BYBIT: Decimal('0.0000010')
+                DataUtils.COMPANY_BINANCE: Decimal('0.0000001'),
+                DataUtils.COMPANY_BYBIT: Decimal('0.0000010')
             },
             'SUIUSDT': {
-                DataUtil.COMPANY_BINANCE: Decimal('0.000100'),
-                DataUtil.COMPANY_BYBIT: Decimal('0.00010')
+                DataUtils.COMPANY_BINANCE: Decimal('0.000100'),
+                DataUtils.COMPANY_BYBIT: Decimal('0.00010')
             },
             'STXUSDT': {
-                DataUtil.COMPANY_BINANCE: Decimal('0.0001000'),
-                DataUtil.COMPANY_BYBIT: Decimal('0.00010')
+                DataUtils.COMPANY_BINANCE: Decimal('0.0001000'),
+                DataUtils.COMPANY_BYBIT: Decimal('0.00010')
             },
             '1000BONKUSDT': {
-                DataUtil.COMPANY_BINANCE: Decimal('0.0000010'),
-                DataUtil.COMPANY_BYBIT: Decimal('0.00010')
+                DataUtils.COMPANY_BINANCE: Decimal('0.0000010'),
+                DataUtils.COMPANY_BYBIT: Decimal('0.00010')
             },
             'XRPUSDT': {
-                DataUtil.COMPANY_BINANCE: Decimal('0.0001'),
-                DataUtil.COMPANY_BYBIT: Decimal('0.0001')
+                DataUtils.COMPANY_BINANCE: Decimal('0.0001'),
+                DataUtils.COMPANY_BYBIT: Decimal('0.0001')
             },
             'DOGEUSDT': {
-                DataUtil.COMPANY_BINANCE: Decimal('0.000010'),
-                DataUtil.COMPANY_BYBIT: Decimal('0.00001')
+                DataUtils.COMPANY_BINANCE: Decimal('0.000010'),
+                DataUtils.COMPANY_BYBIT: Decimal('0.00001')
             },
             '1000SHIBUSDT': {
-                DataUtil.COMPANY_BINANCE: Decimal('0.000001'),
-                DataUtil.COMPANY_BYBIT: Decimal('0.01')
+                DataUtils.COMPANY_BINANCE: Decimal('0.000001'),
+                DataUtils.COMPANY_BYBIT: Decimal('0.01')
             },
             "CRVUSDT":{
-                DataUtil.COMPANY_BINANCE: Decimal("0.001")
+                DataUtils.COMPANY_BINANCE: Decimal("0.001")
             },
             "ZECUSDT":{
-                DataUtil.COMPANY_BINANCE: Decimal("0.01")
+                DataUtils.COMPANY_BINANCE: Decimal("0.01")
             }
         },
         step_size={
             'ETHUSDT': {
-                DataUtil.COMPANY_BINANCE: Decimal('0.001'),
+                DataUtils.COMPANY_BINANCE: Decimal('0.001'),
             },
             'TRXUSDT': {
-                DataUtil.COMPANY_BINANCE: Decimal('1'),
+                DataUtils.COMPANY_BINANCE: Decimal('1'),
             },
             '1000PEPEUSDT': {
-                DataUtil.COMPANY_BINANCE: Decimal('1'),
-                DataUtil.COMPANY_BYBIT: Decimal('100')
+                DataUtils.COMPANY_BINANCE: Decimal('1'),
+                DataUtils.COMPANY_BYBIT: Decimal('100')
             },
             'SUIUSDT': {
-                DataUtil.COMPANY_BINANCE: Decimal('0.1'),
-                DataUtil.COMPANY_BYBIT: Decimal('10')
+                DataUtils.COMPANY_BINANCE: Decimal('0.1'),
+                DataUtils.COMPANY_BYBIT: Decimal('10')
             },
             'STXUSDT': {
-                DataUtil.COMPANY_BINANCE: Decimal('1'),
-                DataUtil.COMPANY_BYBIT: Decimal('10')
+                DataUtils.COMPANY_BINANCE: Decimal('1'),
+                DataUtils.COMPANY_BYBIT: Decimal('10')
             },
             '1000BONKUSDT': {
-                DataUtil.COMPANY_BINANCE: Decimal('1'),
-                DataUtil.COMPANY_BYBIT: Decimal('10')
+                DataUtils.COMPANY_BINANCE: Decimal('1'),
+                DataUtils.COMPANY_BYBIT: Decimal('10')
             },
             'XRPUSDT': {
-                DataUtil.COMPANY_BINANCE: Decimal('0.1'),
-                DataUtil.COMPANY_BYBIT: Decimal('0.01')
+                DataUtils.COMPANY_BINANCE: Decimal('0.1'),
+                DataUtils.COMPANY_BYBIT: Decimal('0.01')
             },
             'DOGEUSDT': {
-                DataUtil.COMPANY_BINANCE: Decimal('1'),
-                DataUtil.COMPANY_BYBIT: Decimal('1')
+                DataUtils.COMPANY_BINANCE: Decimal('1'),
+                DataUtils.COMPANY_BYBIT: Decimal('1')
             },
             '1000SHIBUSDT': {
-                DataUtil.COMPANY_BINANCE: Decimal('1'),
-                DataUtil.COMPANY_BYBIT: Decimal('0.01')
+                DataUtils.COMPANY_BINANCE: Decimal('1'),
+                DataUtils.COMPANY_BYBIT: Decimal('0.01')
             },
             "CRVUSDT":{
-                DataUtil.COMPANY_BINANCE: Decimal("0.1")
+                DataUtils.COMPANY_BINANCE: Decimal("0.1")
             },
             "ZECUSDT":{
-                DataUtil.COMPANY_BINANCE: Decimal("0.001")
+                DataUtils.COMPANY_BINANCE: Decimal("0.001")
             }
         }
     )
@@ -634,8 +634,8 @@ class TrendFollow1H(bt.Strategy):
         for i in range(0, len(self.pairs)):
             name = self.names[i]
 
-            long_high_band = DataUtil.convert_to_decimal(self.long_high_bands[i][0])
-            long_low_band = DataUtil.convert_to_decimal(self.long_low_bands[i][0])
+            long_high_band = DataUtils.convert_to_decimal(self.long_high_bands[i][0])
+            long_low_band = DataUtils.convert_to_decimal(self.long_low_bands[i][0])
 
             long_adj_high_band = long_high_band - (long_high_band-long_low_band) * (self.p.high_band_constant[name]['long'] / Decimal('100'))
             long_adj_high_band = int(long_adj_high_band / self.p.tick_size[name][company]) * self.p.tick_size[name][company]
@@ -643,8 +643,8 @@ class TrendFollow1H(bt.Strategy):
             long_adj_low_band = long_low_band + (long_high_band-long_low_band) * (self.p.low_band_constant[name]['long'] / Decimal('100'))
             long_adj_low_band = int(long_adj_low_band / self.p.tick_size[name][company]) * self.p.tick_size[name][company]
 
-            short_high_band = DataUtil.convert_to_decimal(self.short_high_bands[i][0])
-            short_low_band = DataUtil.convert_to_decimal(self.short_low_bands[i][0])
+            short_high_band = DataUtils.convert_to_decimal(self.short_high_bands[i][0])
+            short_low_band = DataUtils.convert_to_decimal(self.short_low_bands[i][0])
 
             short_adj_high_band = short_high_band - (short_high_band-short_low_band) * (self.p.high_band_constant[name]['short'] / Decimal('100'))
             short_adj_high_band = int(short_adj_high_band / self.p.tick_size[name][company]) * self.p.tick_size[name][company]
@@ -653,7 +653,7 @@ class TrendFollow1H(bt.Strategy):
             short_adj_low_band = int(short_adj_low_band / self.p.tick_size[name][company]) * self.p.tick_size[name][company]
 
             entry_mode = self.p.entry_mode[name]
-            equity = DataUtil.convert_to_decimal(self.broker.getvalue())
+            equity = DataUtils.convert_to_decimal(self.broker.getvalue())
             current_position_size = self.getposition(self.pairs[i]).size
             if entry_mode in [0, 1, 2]:
                 if current_position_size == 0:
@@ -674,7 +674,7 @@ class TrendFollow1H(bt.Strategy):
             else:
                 if current_position_size > 0:
                     if self.rsi[i][0] >= self.p.rsi_limit[name]:
-                        exit_price = DataUtil.convert_to_decimal(self.closes[i][0]) * (
+                        exit_price = DataUtils.convert_to_decimal(self.closes[i][0]) * (
                                 Decimal('1') + self.p.exit_percent[name] / Decimal('100'))
                         exit_price = int(exit_price / self.p.tick_size[name][company]) * self.p.tick_size[name][company]
 
@@ -687,17 +687,17 @@ class TrendFollow1H(bt.Strategy):
                 else:
                     percents = self.p.percent[name]['bear']
 
-                equity = DataUtil.convert_to_decimal(self.broker.getvalue())
+                equity = DataUtils.convert_to_decimal(self.broker.getvalue())
                 for j in range(0, len(self.p.risk[name])):
                     percent = percents[j]
-                    price = DataUtil.convert_to_decimal(self.closes[i][0]) * (
+                    price = DataUtils.convert_to_decimal(self.closes[i][0]) * (
                             Decimal('1') - percent / Decimal('100'))
                     price = int(price / self.p.tick_size[name][company]) * self.p.tick_size[name][company]
                     risk = self.p.risk[name][j]
                     qty = equity * risk / Decimal('100') / price
                     qty = int(qty / self.p.step_size[name][company]) * self.p.step_size[name][company]
 
-                    cash = DataUtil.convert_to_decimal(self.broker.get_cash())
+                    cash = DataUtils.convert_to_decimal(self.broker.get_cash())
                     margin = qty * price / Decimal(leverage)
                     if cash >= margin:
                         self.order = self.buy(exectype=bt.Order.Limit, data=self.pairs[i], size=float(qty), price=float(price))
@@ -714,7 +714,7 @@ if __name__ == '__main__':
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, company, pair, tick_kind)
+        df = DataUtils.load_candle_data_as_df(data_path, company, pair, tick_kind)
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 

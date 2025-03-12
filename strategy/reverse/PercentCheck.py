@@ -1,14 +1,14 @@
 import backtrader as bt
 import pandas as pd
 import quantstats as qs
-from util.Util import DataUtil
+from util.Util import DataUtils
 from decimal import Decimal
 
-company = DataUtil.COMPANY_BINANCE
+company = DataUtils.COMPANY_BINANCE
 leverage = 3
 
 pairs = {
-    'ZECUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    'ZECUSDT': DataUtils.CANDLE_TICK_1HOUR,
 }
 class PercentCheck(bt.Strategy):
     params=dict(
@@ -104,7 +104,7 @@ if __name__ == '__main__':
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, company, pair, tick_kind)
+        df = DataUtils.load_candle_data_as_df(data_path, company, pair, tick_kind)
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 

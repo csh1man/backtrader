@@ -2,14 +2,14 @@ import backtrader as bt
 import backtrader as bt
 import pandas as pd
 import quantstats as qs
-from util.Util import DataUtil
+from util.Util import DataUtils
 from decimal import Decimal
 
 '''
 백테스팅할 데이터 목록 초기화
 '''
 pairs = {
-    "KRW-PEPE": DataUtil.CANDLE_TICK_30M
+    "KRW-PEPE": DataUtils.CANDLE_TICK_30M
 }
 
 class BithumbDcaV1(bt.Strategy):
@@ -75,7 +75,7 @@ if __name__ == '__main__':
 
     # data loading
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BITHUMB, pair, tick_kind)
+        df = DataUtils.load_candle_data_as_df(data_path, DataUtils.COMPANY_BITHUMB, pair, tick_kind)
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 

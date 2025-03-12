@@ -1,15 +1,15 @@
 import backtrader as bt
 import pandas as pd
 import quantstats as qs
-from util.Util import DataUtil
+from util.Util import DataUtils
 from decimal import Decimal
 
 pairs = {
-    'BTCUSDT': DataUtil.CANDLE_TICK_4HOUR,
-    'ETHUSDT': DataUtil.CANDLE_TICK_4HOUR,
-    'SOLUSDT': DataUtil.CANDLE_TICK_4HOUR,
-    'BCHUSDT': DataUtil.CANDLE_TICK_4HOUR,
-    'EOSUSDT': DataUtil.CANDLE_TICK_4HOUR
+    'BTCUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    'ETHUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    'SOLUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    'BCHUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    'EOSUSDT': DataUtils.CANDLE_TICK_4HOUR
 }
 
 leverage=4
@@ -305,13 +305,13 @@ class TrendFollowV1(bt.Strategy):
 
     def next(self):
         self.record_asset()
-        equity = DataUtil.convert_to_decimal(self.broker.getvalue())
+        equity = DataUtils.convert_to_decimal(self.broker.getvalue())
         for i in range(0, len(self.pairs)):
             name = self.names[i]
             self.cancel_all(target_name=name)
 
-            long_high_band = DataUtil.convert_to_decimal(self.long_high_bands[i][0])
-            long_low_band = DataUtil.convert_to_decimal(self.long_low_bands[i][0])
+            long_high_band = DataUtils.convert_to_decimal(self.long_high_bands[i][0])
+            long_low_band = DataUtils.convert_to_decimal(self.long_low_bands[i][0])
 
             long_adj_high_band = long_high_band - (long_high_band - long_low_band) * self.p.high_band_constant[name]['long'] / Decimal('100')
             long_adj_high_band = int(long_adj_high_band / self.p.tick_size[name]) * self.p.tick_size[name]
@@ -319,8 +319,8 @@ class TrendFollowV1(bt.Strategy):
             long_adj_low_band = long_low_band + (long_high_band - long_low_band) * self.p.low_band_constant[name]['long'] / Decimal('100')
             long_adj_low_band = int(long_adj_low_band / self.p.tick_size[name]) * self.p.tick_size[name]
 
-            short_high_band = DataUtil.convert_to_decimal(self.short_high_bands[i][0])
-            short_low_band = DataUtil.convert_to_decimal(self.short_low_bands[i][0])
+            short_high_band = DataUtils.convert_to_decimal(self.short_high_bands[i][0])
+            short_low_band = DataUtils.convert_to_decimal(self.short_low_bands[i][0])
 
             short_adj_high_band = short_high_band - (short_high_band - short_low_band) * self.p.high_band_constant[name]['short'] / Decimal('100')
             short_adj_high_band = int(short_adj_high_band / self.p.tick_size[name]) * self.p.tick_size[name]
@@ -328,11 +328,11 @@ class TrendFollowV1(bt.Strategy):
             short_adj_low_band = short_low_band + (short_high_band - short_low_band) * self.p.low_band_constant[name]['short'] / Decimal('100')
             short_adj_low_band = int(short_adj_low_band / self.p.tick_size[name]) * self.p.tick_size[name]
 
-            long_atr = DataUtil.convert_to_decimal(self.long_atrs[i][0])
-            short_atr = DataUtil.convert_to_decimal(self.short_atrs[i][0])
+            long_atr = DataUtils.convert_to_decimal(self.long_atrs[i][0])
+            short_atr = DataUtils.convert_to_decimal(self.short_atrs[i][0])
 
-            before_close = DataUtil.convert_to_decimal(self.closes[i][-1])
-            current_close = DataUtil.convert_to_decimal(self.closes[i][0])
+            before_close = DataUtils.convert_to_decimal(self.closes[i][-1])
+            current_close = DataUtils.convert_to_decimal(self.closes[i][0])
 
             current_position_size = self.getposition(self.pairs[i]).size
             if current_position_size == 0:
@@ -381,7 +381,7 @@ if __name__ == '__main__':
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BINANCE, pair, tick_kind)
+        df = DataUtils.load_candle_data_as_df(data_path, DataUtils.COMPANY_BINANCE, pair, tick_kind)
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 

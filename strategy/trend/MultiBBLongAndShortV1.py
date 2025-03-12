@@ -1,16 +1,16 @@
 import backtrader as bt
 import pandas as pd
 import quantstats as qs
-from util.Util import DataUtil
+from util.Util import DataUtils
 from decimal import Decimal
 
 
 pairs = {
-    'ETHUSDT': DataUtil.CANDLE_TICK_4HOUR,
-    'BTCUSDT': DataUtil.CANDLE_TICK_4HOUR,
-    'SOLUSDT': DataUtil.CANDLE_TICK_4HOUR,
-    'BNBUSDT': DataUtil.CANDLE_TICK_4HOUR,
-    'BCHUSDT': DataUtil.CANDLE_TICK_4HOUR,
+    'ETHUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    'BTCUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    'SOLUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    'BNBUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    'BCHUSDT': DataUtils.CANDLE_TICK_4HOUR,
     # 'EOSUSDT': DataUtil.CANDLE_TICK_4HOUR,
 }
 
@@ -342,35 +342,35 @@ class MultiBBLongAndShortV1(bt.Strategy):
             long_risk = self.p.risk[name]['long']
             short_risk = self.p.risk[name]['short']
 
-            long_atr = DataUtil.convert_to_decimal(self.long_atrs[i][0])
+            long_atr = DataUtils.convert_to_decimal(self.long_atrs[i][0])
             long_atr_constant = self.p.atr[name]['constant']['long']
 
-            short_atr = DataUtil.convert_to_decimal(self.short_atrs[i][0])
+            short_atr = DataUtils.convert_to_decimal(self.short_atrs[i][0])
             short_atr_constant = self.p.atr[name]['constant']['short']
 
             current_position_size = self.getposition(self.pairs[i]).size
-            equity = DataUtil.convert_to_decimal(self.broker.get_cash())
+            equity = DataUtils.convert_to_decimal(self.broker.get_cash())
             if name not in('BCHUSDT', 'EOSUSDT'):
                 if current_position_size == 0:
                     if self.closes[i][-1] < self.long_bb_top[i][-1] and self.closes[i][0] > self.long_bb_top[i][0]:
-                        long_stop_price = DataUtil.convert_to_decimal(self.closes[i][0]) - long_atr * long_atr_constant
+                        long_stop_price = DataUtils.convert_to_decimal(self.closes[i][0]) - long_atr * long_atr_constant
                         long_stop_price = int(long_stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
                         self.long_stop_prices[i] = long_stop_price
 
-                        qty = equity * long_risk / Decimal('100') / abs(DataUtil.convert_to_decimal(self.closes[i][0]) - long_stop_price)
-                        if qty * DataUtil.convert_to_decimal(self.closes[i][0]) >= equity:
-                            qty = equity * Decimal('0.98') / DataUtil.convert_to_decimal(self.closes[i][0])
+                        qty = equity * long_risk / Decimal('100') / abs(DataUtils.convert_to_decimal(self.closes[i][0]) - long_stop_price)
+                        if qty * DataUtils.convert_to_decimal(self.closes[i][0]) >= equity:
+                            qty = equity * Decimal('0.98') / DataUtils.convert_to_decimal(self.closes[i][0])
                         qty = int(qty / self.p.step_size[name]) * self.p.step_size[name]
 
                         self.order = self.buy(exectype=bt.Order.Market, data=self.pairs[i], size=float(qty))
                     elif self.p.use_short[name] and self.closes[i][-1] > self.short_bb_bot[i][-1] and self.closes[i][0] < self.short_bb_bot[i][0]:
-                        short_stop_price = DataUtil.convert_to_decimal(self.closes[i][0]) + short_atr * short_atr_constant
+                        short_stop_price = DataUtils.convert_to_decimal(self.closes[i][0]) + short_atr * short_atr_constant
                         short_stop_price = int(short_stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
                         self.short_stop_prices[i] = short_stop_price
 
-                        qty = equity * short_risk / Decimal('100') / abs(DataUtil.convert_to_decimal(self.closes[i][0]) - short_stop_price)
-                        if qty * DataUtil.convert_to_decimal(self.closes[i][0]) >= equity:
-                            qty = equity * Decimal('0.98') / DataUtil.convert_to_decimal(self.closes[i][0])
+                        qty = equity * short_risk / Decimal('100') / abs(DataUtils.convert_to_decimal(self.closes[i][0]) - short_stop_price)
+                        if qty * DataUtils.convert_to_decimal(self.closes[i][0]) >= equity:
+                            qty = equity * Decimal('0.98') / DataUtils.convert_to_decimal(self.closes[i][0])
                         qty = int(qty / self.p.step_size[name]) * self.p.step_size[name]
 
                         self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i], size=float(qty))
@@ -394,18 +394,18 @@ class MultiBBLongAndShortV1(bt.Strategy):
             else:
 
                 if current_position_size == 0:
-                    short_stop_price = DataUtil.convert_to_decimal(self.low_band[i][0]) + short_atr * short_atr_constant
+                    short_stop_price = DataUtils.convert_to_decimal(self.low_band[i][0]) + short_atr * short_atr_constant
                     short_stop_price = int(short_stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
                     self.short_stop_prices[i] = short_stop_price
 
-                    qty = equity * short_risk / Decimal('100') / abs(DataUtil.convert_to_decimal(self.low_band[i][0]) - short_stop_price)
-                    if qty * DataUtil.convert_to_decimal(self.closes[i][0]) > equity:
-                        qty = equity * Decimal('0.98') / DataUtil.convert_to_decimal(self.low_band[i][0])
+                    qty = equity * short_risk / Decimal('100') / abs(DataUtils.convert_to_decimal(self.low_band[i][0]) - short_stop_price)
+                    if qty * DataUtils.convert_to_decimal(self.closes[i][0]) > equity:
+                        qty = equity * Decimal('0.98') / DataUtils.convert_to_decimal(self.low_band[i][0])
                     qty = int(qty / self.p.step_size[name]) * self.p.step_size[name]
                     if qty > 0:
                         self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], price=float(self.low_band[i][0]), size=float(qty))
                 elif current_position_size < 0:
-                    if DataUtil.convert_to_decimal(self.closes[i][-1]) < self.short_stop_prices[i] < DataUtil.convert_to_decimal(self.closes[i][0]):
+                    if DataUtils.convert_to_decimal(self.closes[i][-1]) < self.short_stop_prices[i] < DataUtils.convert_to_decimal(self.closes[i][0]):
                         self.order = self.buy(exectype=bt.Order.Market, data=self.pairs[i], size=abs(current_position_size))
                     else:
                         self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(self.high_band[i][0]), size=abs(current_position_size))
@@ -423,7 +423,7 @@ if __name__ == '__main__':
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BINANCE, pair, tick_kind)
+        df = DataUtils.load_candle_data_as_df(data_path, DataUtils.COMPANY_BINANCE, pair, tick_kind)
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 

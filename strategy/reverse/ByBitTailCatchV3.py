@@ -2,21 +2,21 @@ import backtrader as bt
 import pandas as pd
 import quantstats as qs
 import math
-from util.Util import DataUtil
+from util.Util import DataUtils
 from decimal import Decimal
 
 pairs = {
-    'BTCUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    'ETHUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    'SOLUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    '1000PEPEUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    'JASMYUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    'SEIUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    'STXUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    'SHIB1000USDT': DataUtil.CANDLE_TICK_1HOUR,
-    'INJUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    'BTCUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    'ETHUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    'SOLUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    '1000PEPEUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    'JASMYUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    'SEIUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    'STXUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    'SHIB1000USDT': DataUtils.CANDLE_TICK_1HOUR,
+    'INJUSDT': DataUtils.CANDLE_TICK_1HOUR,
     # 'ONDOUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    'IMXUSDT': DataUtil.CANDLE_TICK_1HOUR
+    'IMXUSDT': DataUtils.CANDLE_TICK_1HOUR
 }
 
 class ByBitTailCatchV3(bt.Strategy):
@@ -372,7 +372,7 @@ class ByBitTailCatchV3(bt.Strategy):
                     mode = "bearish"
 
                 percent = self.p.percent[name][mode][j]
-                price = DataUtil.convert_to_decimal(self.closes[i][0]) * (Decimal('1') - percent / Decimal('100'))
+                price = DataUtils.convert_to_decimal(self.closes[i][0]) * (Decimal('1') - percent / Decimal('100'))
                 price = int(price / tick_size) * tick_size
                 prices.append(price)
 
@@ -384,7 +384,7 @@ class ByBitTailCatchV3(bt.Strategy):
                         self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i], size=current_position_size)
 
                 if mode is not "bullish":
-                    equity = DataUtil.convert_to_decimal(self.broker.get_value())
+                    equity = DataUtils.convert_to_decimal(self.broker.get_value())
                     qties = []
                     for j in range(0, len(prices)):
                         qty = equity * (self.p.risk[name][j] / Decimal('100')) / prices[j]
@@ -398,17 +398,17 @@ class ByBitTailCatchV3(bt.Strategy):
             else:
                 if current_position_size == 0:
                     if self.closes[i][-1] < self.bb_top[i][-1] and self.closes[i][0] >= self.bb_top[i][0]:
-                        stop_price = DataUtil.convert_to_decimal(self.closes[i][0]) - DataUtil.convert_to_decimal(self.atr[i][0]) * self.p.atr_constant[name]
+                        stop_price = DataUtils.convert_to_decimal(self.closes[i][0]) - DataUtils.convert_to_decimal(self.atr[i][0]) * self.p.atr_constant[name]
                         stop_price = int(stop_price / tick_size) * tick_size
                         self.stop_price[i] = stop_price
 
-                        equity = DataUtil.convert_to_decimal(self.broker.get_value())
-                        qty = equity * (self.p.risk[name][0] / Decimal('100')) / abs(DataUtil.convert_to_decimal(self.closes[i][0]) - stop_price)
+                        equity = DataUtils.convert_to_decimal(self.broker.get_value())
+                        qty = equity * (self.p.risk[name][0] / Decimal('100')) / abs(DataUtils.convert_to_decimal(self.closes[i][0]) - stop_price)
                         qty = int(qty / step_size) * step_size
 
                         self.order = self.buy(exectype=bt.Order.Market, data=self.pairs[i], size=float(qty))
                 elif current_position_size > 0:
-                    if DataUtil.convert_to_decimal(self.closes[i][-1]) >= self.stop_price[i] > DataUtil.convert_to_decimal(self.closes[i][0]):
+                    if DataUtils.convert_to_decimal(self.closes[i][-1]) >= self.stop_price[i] > DataUtils.convert_to_decimal(self.closes[i][0]):
                         self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i], size=float(current_position_size))
                     elif self.closes[i][-1] >= self.bb_mid[i][-1] and self.closes[i][0] < self.bb_mid[i][0]:
                         self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i],size=float(current_position_size))
@@ -423,7 +423,7 @@ if __name__ == '__main__':
     cerebro.broker.setcommission(commission=0.0005, leverage=5)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BYBIT, pair, tick_kind)
+        df = DataUtils.load_candle_data_as_df(data_path, DataUtils.COMPANY_BYBIT, pair, tick_kind)
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 

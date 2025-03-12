@@ -1,12 +1,12 @@
 import backtrader as bt
 import pandas as pd
 import quantstats as qs
-from util.Util import DataUtil
+from util.Util import DataUtils
 from decimal import Decimal
 
 pairs = {
-    'XRPUSDT' : DataUtil.CANDLE_TICK_30M,
-    'TONUSDT': DataUtil.CANDLE_TICK_30M,
+    'XRPUSDT' : DataUtils.CANDLE_TICK_30M,
+    'TONUSDT': DataUtils.CANDLE_TICK_30M,
     # 'POPCATUSDT' : DataUtil.CANDLE_TICK_30M
 }
 
@@ -161,11 +161,11 @@ class MultiAtrDcaV1(bt.Strategy):
             self.cancel_all()
             self.record_asset()
             name = self.names[i]
-            price = DataUtil.convert_to_decimal(self.low_band[i][-1]) - DataUtil.convert_to_decimal(self.atrs[i][0]) * self.p.atr_constant[name]
+            price = DataUtils.convert_to_decimal(self.low_band[i][-1]) - DataUtils.convert_to_decimal(self.atrs[i][0]) * self.p.atr_constant[name]
             price = int(price / self.p.tick_size[name]) * self.p.tick_size[name]
 
             current_position_size = self.getposition(self.pairs[i]).size
-            equity = DataUtil.convert_to_decimal(self.broker.get_cash())
+            equity = DataUtils.convert_to_decimal(self.broker.get_cash())
             if current_position_size == 0:
                 qty = equity * self.p.risk[name] / Decimal('100') / price
                 qty = int(qty / self.p.step_size[name]) * self.p.step_size[name]
@@ -181,7 +181,7 @@ class MultiAtrDcaV1(bt.Strategy):
                 if self.rsis[i][0] < self.p.rsi_low_limit[name]:
                     percent += self.p.add_exit_percent[name]
 
-                exit_price = DataUtil.convert_to_decimal(self.getposition(self.pairs[i]).price) * (Decimal('1') + percent / Decimal('100'))
+                exit_price = DataUtils.convert_to_decimal(self.getposition(self.pairs[i]).price) * (Decimal('1') + percent / Decimal('100'))
                 exit_price = int(exit_price / self.p.tick_size[name]) * self.p.tick_size[name]
                 self.order = self.sell(exectype=bt.Order.Limit, data=self.pairs[i], price=float(exit_price), size=float(qty))
 
@@ -201,7 +201,7 @@ if __name__ == '__main__':
 
     # data loading
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BYBIT, pair, tick_kind)
+        df = DataUtils.load_candle_data_as_df(data_path, DataUtils.COMPANY_BYBIT, pair, tick_kind)
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 

@@ -1,14 +1,14 @@
 import backtrader as bt
 import pandas as pd
 import quantstats as qs
-from util.Util import DataUtil
+from util.Util import DataUtils
 from decimal import Decimal
 import math
 
 pairs = {
-    'BCHUSDT' : DataUtil.CANDLE_TICK_4HOUR,
-    'EOSUSDT' : DataUtil.CANDLE_TICK_4HOUR,
-    'NEARUSDT' : DataUtil.CANDLE_TICK_4HOUR,
+    'BCHUSDT' : DataUtils.CANDLE_TICK_4HOUR,
+    'EOSUSDT' : DataUtils.CANDLE_TICK_4HOUR,
+    'NEARUSDT' : DataUtils.CANDLE_TICK_4HOUR,
 }
 
 class MultiDonchianShortV1(bt.Strategy):
@@ -203,11 +203,11 @@ class MultiDonchianShortV1(bt.Strategy):
             self.cancel_all(target_name=name)  # 미체결 주문 모두 취소
 
             leverage = self.p.leverage[name]['short']
-            close = DataUtil.convert_to_decimal(self.closes[i][0])
-            before_close = DataUtil.convert_to_decimal(self.closes[i][-1])
-            atr = DataUtil.convert_to_decimal(self.atrs[i][0])
-            highest = DataUtil.convert_to_decimal(self.highest[i][0])
-            lowest = DataUtil.convert_to_decimal(self.lowest[i][0])
+            close = DataUtils.convert_to_decimal(self.closes[i][0])
+            before_close = DataUtils.convert_to_decimal(self.closes[i][-1])
+            atr = DataUtils.convert_to_decimal(self.atrs[i][0])
+            highest = DataUtils.convert_to_decimal(self.highest[i][0])
+            lowest = DataUtils.convert_to_decimal(self.lowest[i][0])
             current_position_size = self.getposition(self.pairs[i]).size
 
             # 진입 포지션이 없을 경우
@@ -223,13 +223,13 @@ class MultiDonchianShortV1(bt.Strategy):
                     self.short_stop_prices[i] = stop_price
 
                 # 수량 계산
-                qty = leverage * DataUtil.convert_to_decimal(self.broker.get_cash()) * self.p.risk[name]['short'] / Decimal('100') / abs(lowest - stop_price)
+                qty = leverage * DataUtils.convert_to_decimal(self.broker.get_cash()) * self.p.risk[name]['short'] / Decimal('100') / abs(lowest - stop_price)
                 qty = int(qty / self.p.step_size[name]) * self.p.step_size[name]
 
                 # 계산된 수량에 대해서 진입하는데 필요한 자산이 레버리지 * 현재 자산보다 크면 진입이 되지 않는다.
                 # 따라서 현재 자산의 98% x 레버리지 만큼 진입한다.
-                if qty * lowest >= leverage * DataUtil.convert_to_decimal(self.broker.get_cash()):
-                    qty = leverage * DataUtil.convert_to_decimal(self.broker.get_cash()) * Decimal('0.98') / lowest
+                if qty * lowest >= leverage * DataUtils.convert_to_decimal(self.broker.get_cash()):
+                    qty = leverage * DataUtils.convert_to_decimal(self.broker.get_cash()) * Decimal('0.98') / lowest
                     qty = int(qty / self.p.step_size[name]) * self.p.step_size[name]
 
                 # 지정가 주문 체결
@@ -256,7 +256,7 @@ if __name__ == '__main__':
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BYBIT, pair, tick_kind)
+        df = DataUtils.load_candle_data_as_df(data_path, DataUtils.COMPANY_BYBIT, pair, tick_kind)
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 

@@ -1,19 +1,19 @@
 import backtrader as bt
 import pandas as pd
 import quantstats as qs
-from util.Util import DataUtil
+from util.Util import DataUtils
 from decimal import Decimal
 from indicator.Indicators import Indicator
 from datetime import datetime
 
 pairs = {
-    'BTCUSDT': DataUtil.CANDLE_TICK_30M,
+    'BTCUSDT': DataUtils.CANDLE_TICK_30M,
     # 'SEIUSDT': DataUtil.CANDLE_TICK_30M,
     # '1000PEPEUSDT': DataUtil.CANDLE_TICK_30M,
     # '1000BONKUSDT': DataUtil.CANDLE_TICK_30M,
-    'DOGEUSDT': DataUtil.CANDLE_TICK_30M,
-    'XRPUSDT': DataUtil.CANDLE_TICK_30M,
-    'SOLUSDT': DataUtil.CANDLE_TICK_30M
+    'DOGEUSDT': DataUtils.CANDLE_TICK_30M,
+    'XRPUSDT': DataUtils.CANDLE_TICK_30M,
+    'SOLUSDT': DataUtils.CANDLE_TICK_30M
 }
 
 class RsiWithStopPriceWithBTCV2(bt.Strategy):
@@ -232,31 +232,31 @@ class RsiWithStopPriceWithBTCV2(bt.Strategy):
                 if self.pairs_rsi[i][0] > self.p.rsi_high:
                     self.order = self.sell(data=self.pairs[i], size=current_position_size)
                 # 손절라인보다 낮아졌을 경우 모두 종료
-                elif DataUtil.convert_to_decimal(self.pairs_close[i][0]) < self.pairs_stop_price[name]:
+                elif DataUtils.convert_to_decimal(self.pairs_close[i][0]) < self.pairs_stop_price[name]:
                     self.order = self.sell(data=self.pairs[i], size=current_position_size)
             situation = ""
             price = 0
             # case.1 btc 종가가 btc bb 상한선보다 위에있을 때
             if self.btc_close[0] >= self.btc_bb_top[0]:
                 situation = "bullish"
-                price = DataUtil.convert_to_decimal(self.pairs_close[i][0]) * \
+                price = DataUtils.convert_to_decimal(self.pairs_close[i][0]) * \
                         (Decimal('1') - self.p.bullish_percent[name] / Decimal('100'))
                 price = int(price / self.p.tick_size[name]) * self.p.tick_size[name]
             # case.2 btc 종가가 btc bb 하한선, 상한선 사이에 있을 때
             elif self.btc_bb_bot[0] <= self.btc_close[0] < self.btc_bb_top[0]:
                 situation = "default"
-                price = DataUtil.convert_to_decimal(self.pairs_close[i][0]) * \
+                price = DataUtils.convert_to_decimal(self.pairs_close[i][0]) * \
                         (Decimal('1') - self.p.default_percent[name] / Decimal('100'))
                 price = int(price / self.p.tick_size[name]) * self.p.tick_size[name]
             # case.3 btc종가가 btc bb 하한선 보다 밑에 있을 때
             elif self.btc_close[0] < self.btc_bb_bot[0]:
                 situation = "bearish"
-                price = DataUtil.convert_to_decimal(self.pairs_close[i][0]) * \
+                price = DataUtils.convert_to_decimal(self.pairs_close[i][0]) * \
                         (Decimal('1') - self.p.bearish_percent[name] / Decimal('100'))
                 price = int(price / self.p.tick_size[name]) * self.p.tick_size[name]
 
-            stop_price = DataUtil.convert_to_decimal(price) \
-                         - DataUtil.convert_to_decimal(self.pairs_atr[i][0]) * self.p.atr_constant[name]
+            stop_price = DataUtils.convert_to_decimal(price) \
+                         - DataUtils.convert_to_decimal(self.pairs_atr[i][0]) * self.p.atr_constant[name]
             stop_price = int(stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
 
             portion = self.p.risk / Decimal('100')
@@ -264,7 +264,7 @@ class RsiWithStopPriceWithBTCV2(bt.Strategy):
                 portion = portion / (price - stop_price)
             else:
                 portion = Decimal('0.98')
-            qty = DataUtil.convert_to_decimal(self.broker.get_cash()) * portion
+            qty = DataUtils.convert_to_decimal(self.broker.get_cash()) * portion
             qty = int(qty / self.p.step_size[name]) * self.p.step_size[name]
             # self.log(f'{self.pairs_date[i].datetime(0)} => {price}, pyramiding : {self.pairs_pyramiding[name]}')
             if self.pairs_pyramiding[name] < self.p.pyramiding:
@@ -286,7 +286,7 @@ if __name__ == '__main__':
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')  # 결과 분석기 추가
 
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BYBIT, pair, tick_kind)
+        df = DataUtils.load_candle_data_as_df(data_path, DataUtils.COMPANY_BYBIT, pair, tick_kind)
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 

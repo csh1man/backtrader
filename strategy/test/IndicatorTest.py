@@ -1,12 +1,12 @@
 import backtrader as bt
 import pandas as pd
 import quantstats as qs
-from util.Util import DataUtil
+from util.Util import DataUtils
 from decimal import Decimal
 import math
 
 pairs = {
-    'ETHUSDT': DataUtil.CANDLE_TICK_4HOUR,
+    'ETHUSDT': DataUtils.CANDLE_TICK_4HOUR,
     # 'BTCUSDT' : DataUtil.CANDLE_TICK_4HOUR,
     # 'BCHUSDT' : DataUtil.CANDLE_TICK_4HOUR,
     # 'BNBUSDT': DataUtil.CANDLE_TICK_4HOUR,
@@ -300,7 +300,7 @@ class MultiLongAndShortV1(bt.Strategy):
 
         for i in range(0, len(self.pairs)):
             name = self.names[i]
-            long_atr = int(DataUtil.convert_to_decimal(self.long_atrs[i][0]) / self.p.tick_size[name]) * self.p.tick_size[name]
+            long_atr = int(DataUtils.convert_to_decimal(self.long_atrs[i][0]) / self.p.tick_size[name]) * self.p.tick_size[name]
             self.log(f"[{name}] [{self.dates[i].datetime(0)}] long atr : {long_atr}, short atr : {self.short_atrs[i][0]}")
 
 
@@ -318,7 +318,7 @@ if __name__ == '__main__':
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BINANCE, pair, tick_kind)
+        df = DataUtils.load_candle_data_as_df(data_path, DataUtils.COMPANY_BINANCE, pair, tick_kind)
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 

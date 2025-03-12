@@ -1,13 +1,13 @@
 import backtrader as bt
 import pandas as pd
 import quantstats as qs
-from util.Util import DataUtil
+from util.Util import DataUtils
 from decimal import Decimal
 import math
 
 
 pairs = {
-    'JTOUSDT' : DataUtil.CANDLE_TICK_30M,
+    'JTOUSDT' : DataUtils.CANDLE_TICK_30M,
 }
 
 long_init_equity = {
@@ -155,16 +155,16 @@ class MultiDcaLimitLongV1(bt.Strategy):
             name = self.names[i]
             self.cancel_all(target_name=name)  # 미체결 주문 모두 취소
 
-            close = DataUtil.convert_to_decimal(self.closes[i][0])
-            before_close = DataUtil.convert_to_decimal(self.closes[i][-1])
-            highest = DataUtil.convert_to_decimal(self.highest[i][0])
+            close = DataUtils.convert_to_decimal(self.closes[i][0])
+            before_close = DataUtils.convert_to_decimal(self.closes[i][-1])
+            highest = DataUtils.convert_to_decimal(self.highest[i][0])
             current_position_size = self.getposition(self.pairs[i]).size
 
             # 진입 포지션이 없을 경우
             if current_position_size == 0:
                 # 손절 가격 계산 및 저장
-                long_init_equity[name] = self.p.leverage[name] * DataUtil.convert_to_decimal(self.broker.get_cash())
-                init_long_standard_price = DataUtil.convert_to_decimal(highest)  * (Decimal('1.0') - self.p.high_band[name]['initStandard'] / Decimal('100'))
+                long_init_equity[name] = self.p.leverage[name] * DataUtils.convert_to_decimal(self.broker.get_cash())
+                init_long_standard_price = DataUtils.convert_to_decimal(highest) * (Decimal('1.0') - self.p.high_band[name]['initStandard'] / Decimal('100'))
                 init_long_standard_price = int(init_long_standard_price / self.p.tick_size[name]) * self.p.tick_size[name]
                 if init_long_standard_price > close:
                     for j in range(0, len(self.p.limit_percent[name]['init'])):
@@ -177,10 +177,10 @@ class MultiDcaLimitLongV1(bt.Strategy):
                             self.order = self.buy(exectype=bt.Order.Limit, data=self.pairs[i], price=float(entry_price), size=float(qty))
             # 현재 포지션이 존재할 경우
             if current_position_size > 0:
-                entry_avg_price = DataUtil.convert_to_decimal(self.getposition(self.pairs[i]).price)
-                long_add_equity = self.p.leverage[name] * DataUtil.convert_to_decimal(self.broker.get_cash())
-                if long_init_equity[name] > entry_avg_price * DataUtil.convert_to_decimal(current_position_size):
-                    add_long_standard_price = DataUtil.convert_to_decimal(highest) * (Decimal('1.0') - self.p.high_band[name]['addStandard'] / Decimal('100'))
+                entry_avg_price = DataUtils.convert_to_decimal(self.getposition(self.pairs[i]).price)
+                long_add_equity = self.p.leverage[name] * DataUtils.convert_to_decimal(self.broker.get_cash())
+                if long_init_equity[name] > entry_avg_price * DataUtils.convert_to_decimal(current_position_size):
+                    add_long_standard_price = DataUtils.convert_to_decimal(highest) * (Decimal('1.0') - self.p.high_band[name]['addStandard'] / Decimal('100'))
                     if add_long_standard_price > close:
                         for j in range(0, len(self.p.limit_percent[name]['add'])):
                             add_limit_percent = self.p.limit_percent[name]['add'][j]
@@ -217,7 +217,7 @@ if __name__ == '__main__':
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BYBIT, pair, tick_kind)
+        df = DataUtils.load_candle_data_as_df(data_path, DataUtils.COMPANY_BYBIT, pair, tick_kind)
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 

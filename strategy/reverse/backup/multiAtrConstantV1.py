@@ -1,5 +1,5 @@
 import backtrader as bt
-from util.Util import DataUtil
+from util.Util import DataUtils
 from decimal import Decimal, ROUND_HALF_UP
 import quantstats as qs
 import pandas as pd
@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 import pyfolio as pf
 from indicator.Indicators import Indicator
 pairs = {
-    'BTCUSDT': DataUtil.CANDLE_TICK_1DAY,
-    '1000BONKUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    'BTCUSDT': DataUtils.CANDLE_TICK_1DAY,
+    '1000BONKUSDT': DataUtils.CANDLE_TICK_1HOUR,
 }
 
 
@@ -149,12 +149,12 @@ class MultiAtrConstantStrategy(bt.Strategy):
                 prices = []
                 if (self.btc_close[0] - self.btc_close[-1]) * 100 / self.btc_close[-1] < - 0.2:
                     for j in range(0, len(self.p.risks)):
-                        price = DataUtil.convert_to_decimal(self.pairs_close[i][0]) - DataUtil.convert_to_decimal(self.pairs_atr[i][0]) * self.p.bearish_atr_constants[name][j]
+                        price = DataUtils.convert_to_decimal(self.pairs_close[i][0]) - DataUtils.convert_to_decimal(self.pairs_atr[i][0]) * self.p.bearish_atr_constants[name][j]
                         price = price.quantize(self.p.step_size[name], rounding=ROUND_HALF_UP)
                         prices.append(price)
                 else:
                     for j in range(0, len(self.p.risks)):
-                        price = DataUtil.convert_to_decimal(self.pairs_close[i][0]) - DataUtil.convert_to_decimal(self.pairs_atr[i][0]) * self.p.default_atr_constants[name][j]
+                        price = DataUtils.convert_to_decimal(self.pairs_close[i][0]) - DataUtils.convert_to_decimal(self.pairs_atr[i][0]) * self.p.default_atr_constants[name][j]
                         price = price.quantize(self.p.step_size[name], rounding=ROUND_HALF_UP)
                         prices.append(price)
 
@@ -178,7 +178,7 @@ class MultiAtrConstantStrategy(bt.Strategy):
                 '''
                 현재 사용가능 시드 획득
                 '''
-                equity = DataUtil.convert_to_decimal(self.broker.get_cash())
+                equity = DataUtils.convert_to_decimal(self.broker.get_cash())
 
                 '''
                 진입한 수량이 전혀 없을 경우에는 risks를 사용하여 진입 시드를 결정한다.
@@ -197,7 +197,7 @@ class MultiAtrConstantStrategy(bt.Strategy):
                     평단가 획득 및 종료 가격을 계산하고 종료 주문을 넣는다.
                     '''
                     avg_price = self.getposition(self.pairs[i]).price
-                    target_price = DataUtil.convert_to_decimal(avg_price) * self.p.exitPercent[name]
+                    target_price = DataUtils.convert_to_decimal(avg_price) * self.p.exitPercent[name]
                     self.order = self.sell(exectype=bt.Order.Limit, data=self.pairs[i], price=float(target_price), size=current_position)
 
                     for j in range(0, len(prices)):
@@ -219,7 +219,7 @@ if __name__ == '__main__':
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')  # 결과 분석기 추가
 
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BYBIT, pair, tick_kind)
+        df = DataUtils.load_candle_data_as_df(data_path, DataUtils.COMPANY_BYBIT, pair, tick_kind)
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 

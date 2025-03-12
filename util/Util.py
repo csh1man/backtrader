@@ -44,7 +44,7 @@ class FileUtil:
             return json.load(file)
 
 
-class DataUtil:
+class DataUtils:
     """
     캔들 tick_kind static 변수 선언
     """

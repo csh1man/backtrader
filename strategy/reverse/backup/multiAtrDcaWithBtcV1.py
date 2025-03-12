@@ -1,15 +1,15 @@
 import backtrader as bt
 import pandas as pd
 import quantstats as qs
-from util.Util import DataUtil
+from util.Util import DataUtils
 from decimal import Decimal
 from datetime import datetime
 
 pairs={
-    'BTCUSDT' : DataUtil.CANDLE_TICK_30M,
-    'BONDUSDT' : DataUtil.CANDLE_TICK_30M,
-    'BAKEUSDT': DataUtil.CANDLE_TICK_30M,
-    '1000BONKUSDT': DataUtil.CANDLE_TICK_30M
+    'BTCUSDT' : DataUtils.CANDLE_TICK_30M,
+    'BONDUSDT' : DataUtils.CANDLE_TICK_30M,
+    'BAKEUSDT': DataUtils.CANDLE_TICK_30M,
+    '1000BONKUSDT': DataUtils.CANDLE_TICK_30M
 }
 
 
@@ -197,7 +197,7 @@ class MultiAtrDcaWithBtcV1(bt.Strategy):
             # 지정가 주문에 사용할 가격 계산
             prices = []
             for j in range(0, len(constants)):
-                price = DataUtil.convert_to_decimal(self.closes[i][0]) - DataUtil.convert_to_decimal(self.atrs[i][0]) * constants[j]
+                price = DataUtils.convert_to_decimal(self.closes[i][0]) - DataUtils.convert_to_decimal(self.atrs[i][0]) * constants[j]
                 price = int(price / self.p.tick_size[name]) * self.p.tick_size[name]
                 prices.append(price)
 
@@ -210,7 +210,7 @@ class MultiAtrDcaWithBtcV1(bt.Strategy):
             elif entry_position_size > 0:
                 risks = self.p.add_risks
 
-            equity = DataUtil.convert_to_decimal(self.broker.getcash())
+            equity = DataUtils.convert_to_decimal(self.broker.getcash())
             for j in range(0, len(prices)):
                 if prices[j] == Decimal('0'):
                     continue
@@ -223,7 +223,7 @@ class MultiAtrDcaWithBtcV1(bt.Strategy):
                 if self.rsis[i][0] < self.p.rsi_low:
                     target_percent += self.p.add_target_percent
 
-                target_price = DataUtil.convert_to_decimal(self.getposition(self.pairs[i]).price) * (Decimal('1') + target_percent / Decimal('100'))
+                target_price = DataUtils.convert_to_decimal(self.getposition(self.pairs[i]).price) * (Decimal('1') + target_percent / Decimal('100'))
                 target_price = int(target_price / self.p.tick_size[name]) * self.p.tick_size[name]
                 self.order = self.sell(exectype=bt.Order.Limit, data=self.pairs[i], size=self.getposition(self.pairs[i]).size, price=float(target_price))
 
@@ -241,7 +241,7 @@ if __name__ == '__main__':
 
     # data loading
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BYBIT, pair, tick_kind)
+        df = DataUtils.load_candle_data_as_df(data_path, DataUtils.COMPANY_BYBIT, pair, tick_kind)
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
 
         cerebro.adddata(data, name=pair)

@@ -1,11 +1,11 @@
 import backtrader as bt
 import pandas as pd
 import quantstats as qs
-from util.Util import DataUtil
+from util.Util import DataUtils
 from decimal import Decimal
 
 pairs = {
-    '1000PEPEUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    '1000PEPEUSDT': DataUtils.CANDLE_TICK_1HOUR,
     # 'SHIB1000USDT': DataUtil.CANDLE_TICK_1HOUR,
     # '1000LUNCUSDT': DataUtil.CANDLE_TICK_1HOUR,
     # 'JASMYUSDT': DataUtil.CANDLE_TICK_1HOUR,
@@ -222,11 +222,11 @@ class TailStrategyV1(bt.Strategy):
             prices = []
             limit_percents = self.p.limit_percents[name]
             for j in range(0, len(limit_percents)):
-                price = DataUtil.convert_to_decimal(self.closes[i][0]) * (Decimal('1.0')-limit_percents[j]/Decimal('100'))
+                price = DataUtils.convert_to_decimal(self.closes[i][0]) * (Decimal('1.0') - limit_percents[j] / Decimal('100'))
                 price = int(price / self.p.tick_size[name]) * self.p.tick_size[name]
                 prices.append(price)
 
-            equity = DataUtil.convert_to_decimal(self.broker.get_cash())
+            equity = DataUtils.convert_to_decimal(self.broker.get_cash())
             for j in range(0, len(prices)):
                 price = prices[j]
                 risk = self.p.risks[name][j]
@@ -246,8 +246,8 @@ if __name__ == '__main__':
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BYBIT, pair, tick_kind)
-        df = DataUtil.get_candle_data_in_scape(df, '2024-01-01 00:00:00', '2024-12-31 00:00:00')
+        df = DataUtils.load_candle_data_as_df(data_path, DataUtils.COMPANY_BYBIT, pair, tick_kind)
+        df = DataUtils.get_candle_data_in_scape(df, '2024-01-01 00:00:00', '2024-12-31 00:00:00')
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 

@@ -1,12 +1,12 @@
 import backtrader as bt
-from util.Util import DataUtil
+from util.Util import DataUtils
 from decimal import Decimal
 from indicator.Indicators import Indicator
 from datetime import datetime
 
 pairs = {
-    'BTCUSDT': DataUtil.CANDLE_TICK_30M,
-    'XRPUSDT': DataUtil.CANDLE_TICK_30M
+    'BTCUSDT': DataUtils.CANDLE_TICK_30M,
+    'XRPUSDT': DataUtils.CANDLE_TICK_30M
 }
 
 
@@ -221,8 +221,8 @@ if __name__ == '__main__':
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')  # 결과 분석기 추가
 
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BYBIT, pair, tick_kind)
-        df = DataUtil.get_candle_data_in_scape(df, '2022-12-31 00:00:00', '2024-05-17 23:00:00')
+        df = DataUtils.load_candle_data_as_df(data_path, DataUtils.COMPANY_BYBIT, pair, tick_kind)
+        df = DataUtils.get_candle_data_in_scape(df, '2022-12-31 00:00:00', '2024-05-17 23:00:00')
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 

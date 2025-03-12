@@ -1,17 +1,17 @@
 import backtrader as bt
 import pandas as pd
 import quantstats as qs
-from util.Util import DataUtil
+from util.Util import DataUtils
 from decimal import Decimal
 
 pairs = {
-    'XRPUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    'DOGEUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    '1000SHIBUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    'XRPUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    'DOGEUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    '1000SHIBUSDT': DataUtils.CANDLE_TICK_1HOUR,
     # 'XLMUSDT': DataUtil.CANDLE_TICK_1HOUR,
 }
 
-company = DataUtil.COMPANY_BINANCE
+company = DataUtils.COMPANY_BINANCE
 leverage=3
 
 class TailCatchWithBBV1(bt.Strategy):
@@ -83,38 +83,38 @@ class TailCatchWithBBV1(bt.Strategy):
         },
         tick_size={
             'XRPUSDT': {
-                DataUtil.COMPANY_BINANCE : Decimal('0.0001'),
-                DataUtil.COMPANY_BYBIT : Decimal('0.0001')
+                DataUtils.COMPANY_BINANCE : Decimal('0.0001'),
+                DataUtils.COMPANY_BYBIT : Decimal('0.0001')
             },
             'DOGEUSDT': {
-                DataUtil.COMPANY_BINANCE: Decimal('0.000010'),
-                DataUtil.COMPANY_BYBIT: Decimal('0.00001')
+                DataUtils.COMPANY_BINANCE: Decimal('0.000010'),
+                DataUtils.COMPANY_BYBIT: Decimal('0.00001')
             },
             'XLMUSDT': {
-                DataUtil.COMPANY_BINANCE: Decimal('0.00001'),
-                DataUtil.COMPANY_BYBIT: Decimal('0.01')
+                DataUtils.COMPANY_BINANCE: Decimal('0.00001'),
+                DataUtils.COMPANY_BYBIT: Decimal('0.01')
             },
             '1000SHIBUSDT': {
-                DataUtil.COMPANY_BINANCE: Decimal('0.000001'),
-                DataUtil.COMPANY_BYBIT: Decimal('0.01')
+                DataUtils.COMPANY_BINANCE: Decimal('0.000001'),
+                DataUtils.COMPANY_BYBIT: Decimal('0.01')
             }
         },
         step_size={
             'XRPUSDT': {
-                DataUtil.COMPANY_BINANCE: Decimal('0.1'),
-                DataUtil.COMPANY_BYBIT: Decimal('0.01')
+                DataUtils.COMPANY_BINANCE: Decimal('0.1'),
+                DataUtils.COMPANY_BYBIT: Decimal('0.01')
             },
             'DOGEUSDT': {
-                DataUtil.COMPANY_BINANCE: Decimal('1'),
-                DataUtil.COMPANY_BYBIT: Decimal('1')
+                DataUtils.COMPANY_BINANCE: Decimal('1'),
+                DataUtils.COMPANY_BYBIT: Decimal('1')
             },
             'XLMUSDT': {
-                DataUtil.COMPANY_BINANCE: Decimal('1'),
-                DataUtil.COMPANY_BYBIT: Decimal('0.01')
+                DataUtils.COMPANY_BINANCE: Decimal('1'),
+                DataUtils.COMPANY_BYBIT: Decimal('0.01')
             },
             '1000SHIBUSDT': {
-                DataUtil.COMPANY_BINANCE: Decimal('1'),
-                DataUtil.COMPANY_BYBIT: Decimal('0.01')
+                DataUtils.COMPANY_BINANCE: Decimal('1'),
+                DataUtils.COMPANY_BYBIT: Decimal('0.01')
             }
         }
     )
@@ -227,7 +227,7 @@ class TailCatchWithBBV1(bt.Strategy):
             current_position_size = self.getposition(self.pairs[i]).size
             if current_position_size > 0:
                 if self.rsi[i][0] >= self.p.rsi_limit[name]:
-                    exit_price = DataUtil.convert_to_decimal(self.closes[i][0]) * (
+                    exit_price = DataUtils.convert_to_decimal(self.closes[i][0]) * (
                                 Decimal('1') + self.p.exit_percent[name] / Decimal('100'))
                     exit_price = int(exit_price / self.p.tick_size[name][company]) * self.p.tick_size[name][company]
 
@@ -253,10 +253,10 @@ class TailCatchWithBBV1(bt.Strategy):
                 half_qty = True
                 percents = self.p.percent[name]['bear']
 
-            equity = DataUtil.convert_to_decimal(self.broker.getvalue())
+            equity = DataUtils.convert_to_decimal(self.broker.getvalue())
             for j in range(0, len(self.p.risk[name])):
                 percent = percents[j]
-                price = DataUtil.convert_to_decimal(self.closes[i][0]) * (Decimal('1') - percent / Decimal('100'))
+                price = DataUtils.convert_to_decimal(self.closes[i][0]) * (Decimal('1') - percent / Decimal('100'))
                 price = int(price / self.p.tick_size[name][company]) * self.p.tick_size[name][company]
 
                 risk = self.p.risk[name][j]
@@ -301,7 +301,7 @@ if __name__ == '__main__':
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, company, pair, tick_kind)
+        df = DataUtils.load_candle_data_as_df(data_path, company, pair, tick_kind)
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 

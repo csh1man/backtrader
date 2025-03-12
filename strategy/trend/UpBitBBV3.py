@@ -1,15 +1,15 @@
 import backtrader as bt
-from util.Util import DataUtil
+from util.Util import DataUtils
 from decimal import Decimal, ROUND_HALF_UP
 from indicator.Indicators import Indicator
 import pandas as pd
 import quantstats as qs
 
 pairs = {
-    "KRW-ETH": DataUtil.CANDLE_TICK_4HOUR,
+    "KRW-ETH": DataUtils.CANDLE_TICK_4HOUR,
     # "KRW-SOL": DataUtil.CANDLE_TICK_4HOUR,
-    "KRW-BTC": DataUtil.CANDLE_TICK_4HOUR,
-    "KRW-BCH": DataUtil.CANDLE_TICK_4HOUR,
+    "KRW-BTC": DataUtils.CANDLE_TICK_4HOUR,
+    "KRW-BCH": DataUtils.CANDLE_TICK_4HOUR,
 }
 
 
@@ -225,14 +225,14 @@ class UpbitBBV3(bt.Strategy):
                 high_band_constant = self.p.high_band_constant[name]
                 low_band_constant = self.p.low_band_constant[name]
 
-                before_high_band = DataUtil.convert_to_decimal(self.high_bands[i][-1])
-                before_low_band = DataUtil.convert_to_decimal(self.low_bands[i][-1])
+                before_high_band = DataUtils.convert_to_decimal(self.high_bands[i][-1])
+                before_low_band = DataUtils.convert_to_decimal(self.low_bands[i][-1])
 
                 before_adj_low_band = before_low_band + (before_high_band - before_low_band) * (high_band_constant / Decimal('100'))
                 before_adj_low_band = int(before_adj_low_band / get_tick_size(self.closes[i][0])) * get_tick_size(self.closes[i][0])
 
-                two_before_high_band = DataUtil.convert_to_decimal(self.high_bands[i][-2])
-                two_before_low_band = DataUtil.convert_to_decimal(self.low_bands[i][-2])
+                two_before_high_band = DataUtils.convert_to_decimal(self.high_bands[i][-2])
+                two_before_low_band = DataUtils.convert_to_decimal(self.low_bands[i][-2])
 
                 two_before_adj_low_band = two_before_low_band + (two_before_high_band - two_before_low_band) * (low_band_constant / Decimal('100'))
                 two_before_adj_low_band = int(two_before_adj_low_band / get_tick_size(self.closes[i][0])) * get_tick_size(self.closes[i][0])
@@ -244,7 +244,7 @@ class UpbitBBV3(bt.Strategy):
                 elif self.closes[i][-1] > self.bb_mid[i][-1] and self.closes[i][0] < self.bb_mid[i][0]:
                     self.order = self.sell(data=self.pairs[i], size=entry_position_size)
                     self.stop_price[i] = Decimal('-1')
-                elif DataUtil.convert_to_decimal(self.closes[i][-1]) >= two_before_adj_low_band and DataUtil.convert_to_decimal(self.closes[i][0]) < before_adj_low_band:
+                elif DataUtils.convert_to_decimal(self.closes[i][-1]) >= two_before_adj_low_band and DataUtils.convert_to_decimal(self.closes[i][0]) < before_adj_low_band:
                     self.order = self.sell(data=self.pairs[i], size=entry_position_size)
                     self.stop_price[i] = Decimal('-1')
 
@@ -265,7 +265,7 @@ if __name__ == '__main__':
 
     # 데이터 INSERT
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_UPBIT, pair, tick_kind)
+        df = DataUtils.load_candle_data_as_df(data_path, DataUtils.COMPANY_UPBIT, pair, tick_kind)
         # df = DataUtil.get_candle_data_in_scape(df, "2022-01-01", "2026-01-01")
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)

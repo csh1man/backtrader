@@ -1,12 +1,12 @@
 import quantstats as qs
-from util.Util import DataUtil
+from util.Util import DataUtils
 from decimal import Decimal
 import backtrader as bt
 import pandas as pd
 pairs = {
-    'BTCUSDT': DataUtil.CANDLE_TICK_4HOUR,
-    '1000BONKUSDT': DataUtil.CANDLE_TICK_30M,
-    '1000PEPEUSDT' : DataUtil.CANDLE_TICK_30M,
+    'BTCUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    '1000BONKUSDT': DataUtils.CANDLE_TICK_30M,
+    '1000PEPEUSDT' : DataUtils.CANDLE_TICK_30M,
 }
 
 
@@ -153,23 +153,23 @@ class PercentGridWithBTCBBV1(bt.Strategy):
 
             if self.pair_close[0][0] >= self.bb_top[0]:
                 for j in range(0, len(bullish_percents)):
-                    price = DataUtil.convert_to_decimal(self.pair_close[i][0]) * (Decimal('1') - bullish_percents[j] / Decimal('100'))
+                    price = DataUtils.convert_to_decimal(self.pair_close[i][0]) * (Decimal('1') - bullish_percents[j] / Decimal('100'))
                     price = int(Decimal(price) / tick_size) * tick_size
                     prices.append(price)
             elif self.bb_bot[0] <= self.pair_close[0][0] < self.bb_top[0]:
                 for j in range(0, len(default_percents)):
-                    price = DataUtil.convert_to_decimal(self.pair_close[i][0]) * (
+                    price = DataUtils.convert_to_decimal(self.pair_close[i][0]) * (
                                 Decimal('1') - default_percents[j] / Decimal('100'))
                     price = int(Decimal(price) / tick_size) * tick_size
                     prices.append(price)
             elif self.pair_close[0][0] < self.bb_bot[0]:
                 for j in range(0, len(bearish_percents)):
-                    price = DataUtil.convert_to_decimal(self.pair_close[i][0]) * (
+                    price = DataUtils.convert_to_decimal(self.pair_close[i][0]) * (
                                 Decimal('1') - bearish_percents[j] / Decimal('100'))
                     price = int(Decimal(price) / tick_size) * tick_size
                     prices.append(price)
 
-            equity = DataUtil.convert_to_decimal(self.broker.get_cash())
+            equity = DataUtils.convert_to_decimal(self.broker.get_cash())
             for j in range(0, len(prices)):
                 if prices[j] == Decimal('0'):
                     continue
@@ -181,7 +181,7 @@ class PercentGridWithBTCBBV1(bt.Strategy):
 
             current_position_size = self.getposition(self.pairs[i]).size
             if current_position_size > 0:
-                avg_price = DataUtil.convert_to_decimal(self.getposition(self.pairs[i]).price)
+                avg_price = DataUtils.convert_to_decimal(self.getposition(self.pairs[i]).price)
                 target_price = avg_price * (Decimal('1') + self.p.target_percents[name] / Decimal('100'))
                 self.order = self.sell(exectype=bt.Order.Limit, data=self.pairs[i], price=float(target_price),
                                        size=current_position_size)
@@ -195,7 +195,7 @@ if __name__ == '__main__':
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')  # 결과 분석기 추가
 
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BYBIT, pair, tick_kind)
+        df = DataUtils.load_candle_data_as_df(data_path, DataUtils.COMPANY_BYBIT, pair, tick_kind)
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 

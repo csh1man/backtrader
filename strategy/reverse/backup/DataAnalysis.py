@@ -1,9 +1,9 @@
 import backtrader as bt
-from util.Util import DataUtil
+from util.Util import DataUtils
 
 pairs = {
-    'BTCUSDT' : DataUtil.CANDLE_TICK_30M,
-    "1000BONKUSDT" : DataUtil.CANDLE_TICK_30M,
+    'BTCUSDT' : DataUtils.CANDLE_TICK_30M,
+    "1000BONKUSDT" : DataUtils.CANDLE_TICK_30M,
 }
 
 
@@ -61,7 +61,7 @@ if __name__ == '__main__':
 
     # data loading
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BYBIT, pair, tick_kind)
+        df = DataUtils.load_candle_data_as_df(data_path, DataUtils.COMPANY_BYBIT, pair, tick_kind)
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 

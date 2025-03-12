@@ -1,5 +1,5 @@
 import backtrader as bt
-from util.Util import DataUtil
+from util.Util import DataUtils
 from decimal import Decimal, ROUND_HALF_UP
 import quantstats as qs
 import pyfolio as pf
@@ -153,8 +153,8 @@ if __name__ == '__main__':
     end_date = '2024-04-16 00:00:00'
 
     pairs = {
-        'BTCUSDT': DataUtil.CANDLE_TICK_1HOUR,
-        'APTUSDT': DataUtil.CANDLE_TICK_30M,
+        'BTCUSDT': DataUtils.CANDLE_TICK_1HOUR,
+        'APTUSDT': DataUtils.CANDLE_TICK_30M,
     }
 
     cerebro = bt.Cerebro()
@@ -164,7 +164,7 @@ if __name__ == '__main__':
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')  # 결과 분석기 추가
 
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BYBIT, pair, tick_kind)
+        df = DataUtils.load_candle_data_as_df(data_path, DataUtils.COMPANY_BYBIT, pair, tick_kind)
         # df = df[(df['datetime'] >= start_date) & (df['datetime'] <= end_date)]
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
 

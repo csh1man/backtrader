@@ -1,11 +1,11 @@
 import backtrader as bt
 import pandas as pd
 import quantstats as qs
-from util.Util import DataUtil
+from util.Util import DataUtils
 from decimal import Decimal
 
 pairs = {
-    '1000PEPEUSDT' : DataUtil.CANDLE_TICK_30M
+    '1000PEPEUSDT' : DataUtils.CANDLE_TICK_30M
 }
 
 class MultiDcaV1(bt.Strategy):
@@ -131,39 +131,39 @@ class MultiDcaV1(bt.Strategy):
             self.record_asset()
             name = self.names[i]
 
-            ma1 = round(DataUtil.convert_to_decimal(self.ma1[i][0]) / self.p.tick_size[name]) * self.p.tick_size[name]
-            ma2 = round(DataUtil.convert_to_decimal(self.ma2[i][0]) / self.p.tick_size[name]) * self.p.tick_size[name]
-            ma3 = round(DataUtil.convert_to_decimal(self.ma3[i][0]) / self.p.tick_size[name]) * self.p.tick_size[name]
+            ma1 = round(DataUtils.convert_to_decimal(self.ma1[i][0]) / self.p.tick_size[name]) * self.p.tick_size[name]
+            ma2 = round(DataUtils.convert_to_decimal(self.ma2[i][0]) / self.p.tick_size[name]) * self.p.tick_size[name]
+            ma3 = round(DataUtils.convert_to_decimal(self.ma3[i][0]) / self.p.tick_size[name]) * self.p.tick_size[name]
 
             is_trend = ma3 < ma2 < ma1
             position_size = self.getposition(self.pairs[i]).size
             if position_size == 0:
-                init_total_value = DataUtil.convert_to_decimal(self.broker.getvalue())
-                init_qty = (init_total_value * self.p.start_percent / Decimal('100')) / DataUtil.convert_to_decimal(self.closes[i][0])
+                init_total_value = DataUtils.convert_to_decimal(self.broker.getvalue())
+                init_qty = (init_total_value * self.p.start_percent / Decimal('100')) / DataUtils.convert_to_decimal(self.closes[i][0])
                 init_qty = int(init_qty / self.p.step_size[name]) * self.p.step_size[name]
 
                 price = 0.0
                 if is_trend:
-                    price = DataUtil.convert_to_decimal(self.closes[i][0]) * (Decimal('1.0') - self.p.init_target_percent[name] / Decimal('100'))
+                    price = DataUtils.convert_to_decimal(self.closes[i][0]) * (Decimal('1.0') - self.p.init_target_percent[name] / Decimal('100'))
                     price = int(price / self.p.tick_size[name]) * self.p.tick_size[name]
                 else:
-                    price = DataUtil.convert_to_decimal(self.closes[i][0]) * (Decimal('1.0') - self.p.init_target_percent2[name] / Decimal('100'))
+                    price = DataUtils.convert_to_decimal(self.closes[i][0]) * (Decimal('1.0') - self.p.init_target_percent2[name] / Decimal('100'))
                     price = int(price / self.p.tick_size[name]) * self.p.tick_size[name]
 
                 self.order = self.buy(exectype=bt.Order.Limit, data=self.pairs[i], price=float(price), size=float(init_qty))
             elif position_size > 0:
-                cur_qty = DataUtil.convert_to_decimal(position_size) * self.p.acc / Decimal('2')
+                cur_qty = DataUtils.convert_to_decimal(position_size) * self.p.acc / Decimal('2')
                 cur_qty = int(cur_qty / self.p.step_size[name]) * self.p.step_size[name]
 
                 avg_price = self.getposition(self.pairs[i]).price
-                price = DataUtil.convert_to_decimal(avg_price) * (Decimal('1') - self.p.add_target_percent[name] / Decimal('100'))
+                price = DataUtils.convert_to_decimal(avg_price) * (Decimal('1') - self.p.add_target_percent[name] / Decimal('100'))
                 price = int(price / self.p.tick_size[name]) * self.p.tick_size[name]
                 self.order = self.buy(exectype=bt.Order.Limit, data=self.pairs[i], price=float(price), size=float(cur_qty))
 
                 exit_percent = self.p.profit_percent
                 if self.rsis[i][0] < self.p.rsi_low_limit:
                     exit_percent += self.p.add_profit_percent
-                exit_price = DataUtil.convert_to_decimal(avg_price) * (Decimal('1') + exit_percent / Decimal('100'))
+                exit_price = DataUtils.convert_to_decimal(avg_price) * (Decimal('1') + exit_percent / Decimal('100'))
                 exit_price = int(exit_price / self.p.tick_size[name]) * self.p.tick_size[name]
                 self.order = self.sell(exectype=bt.Order.Limit, data=self.pairs[i], price=float(exit_price), size=float(position_size))
 
@@ -181,7 +181,7 @@ if __name__ == '__main__':
 
     # data loading
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BYBIT, pair, tick_kind)
+        df = DataUtils.load_candle_data_as_df(data_path, DataUtils.COMPANY_BYBIT, pair, tick_kind)
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 

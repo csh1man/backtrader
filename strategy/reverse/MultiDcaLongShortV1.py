@@ -3,12 +3,12 @@ import pandas as pd
 import quantstats as qs
 
 from strategy.trend.multiBBV1 import step_size
-from util.Util import DataUtil
+from util.Util import DataUtils
 from decimal import Decimal
 
 pairs = {
     # 'FETUSDT' : DataUtil.CANDLE_TICK_30M,
-    '1000BONKUSDT' : DataUtil.CANDLE_TICK_30M,
+    '1000BONKUSDT' : DataUtils.CANDLE_TICK_30M,
     # 'ETCUSDT' : DataUtil.CANDLE_TICK_30M,
 }
 
@@ -228,40 +228,40 @@ class MultiDcaLongShortV1(bt.Strategy):
             if position_size == 0:
                 # 진입 포지션이 하나도 없을 경우, 현재 진입가능 수량을 기록하여 둔다.
                 # 진입이 다되었다고하면 더이상 진입이 안되도록 하기 위함이다.
-                available_equity = DataUtil.convert_to_decimal(self.broker.get_cash())
+                available_equity = DataUtils.convert_to_decimal(self.broker.get_cash())
 
                 # 롱 초기 자산 기록
                 long_init_equity[name] = long_leverage * available_equity
                 short_init_equity[name] = short_leverage * available_equity
 
                 # 롱 초기 진입 수량 계산
-                long_init_entry_qty = long_init_equity[name] * init_risk / Decimal('100') / DataUtil.convert_to_decimal(self.closes[i][0])
+                long_init_entry_qty = long_init_equity[name] * init_risk / Decimal('100') / DataUtils.convert_to_decimal(self.closes[i][0])
                 long_init_entry_qty = int(long_init_entry_qty / qty_unit) * qty_unit
 
                 # 숏 초기 진입 수량 계산
-                short_init_entry_qty = short_init_equity[name] * init_risk / Decimal('100') / DataUtil.convert_to_decimal(self.closes[i][0])
+                short_init_entry_qty = short_init_equity[name] * init_risk / Decimal('100') / DataUtils.convert_to_decimal(self.closes[i][0])
                 short_init_entry_qty = int(short_init_entry_qty / qty_unit) * qty_unit
 
                 # 롱 진입 기준 가격 계산
-                long_init_entry_standard_price = DataUtil.convert_to_decimal(self.highest[i][0]) \
-                                                * (Decimal('1') - self.p.init_long_order_percent[name] / Decimal('100'))
+                long_init_entry_standard_price = DataUtils.convert_to_decimal(self.highest[i][0]) \
+                                                 * (Decimal('1') - self.p.init_long_order_percent[name] / Decimal('100'))
                 long_init_entry_standard_price = int(long_init_entry_standard_price / price_unit) * price_unit
 
                 # 숏 진입 기준 가격 계산
-                short_init_entry_standard_price = DataUtil.convert_to_decimal(self.lowest[i][0]) \
+                short_init_entry_standard_price = DataUtils.convert_to_decimal(self.lowest[i][0]) \
                                                   * (Decimal('1') + self.p.init_short_order_percent[name] / Decimal('100'))
                 short_init_entry_standard_price = int(short_init_entry_standard_price / price_unit) * price_unit
 
                 # if long_init_entry_qty > Decimal('0') and DataUtil.convert_to_decimal(self.closes[i][0]) < long_init_entry_standard_price:
                 #     self.order = self.buy(exectype=bt.Order.Market, data=self.pairs[i], size=float(long_init_entry_qty))
-                if short_init_entry_qty > Decimal('0') and DataUtil.convert_to_decimal(self.closes[i][0]) > short_init_entry_standard_price:
+                if short_init_entry_qty > Decimal('0') and DataUtils.convert_to_decimal(self.closes[i][0]) > short_init_entry_standard_price:
                     self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i], size=float(short_init_entry_qty))
             elif position_size > 0:
-                long_add_entry_qty = DataUtil.convert_to_decimal(position_size) * add_risk / Decimal('2')
+                long_add_entry_qty = DataUtils.convert_to_decimal(position_size) * add_risk / Decimal('2')
                 long_add_entry_qty = int(long_add_entry_qty / qty_unit) * qty_unit
 
-                entry_avg_price = DataUtil.convert_to_decimal(self.getposition(self.pairs[i]).price)
-                if long_init_equity[name] > entry_avg_price * DataUtil.convert_to_decimal(position_size):
+                entry_avg_price = DataUtils.convert_to_decimal(self.getposition(self.pairs[i]).price)
+                if long_init_equity[name] > entry_avg_price * DataUtils.convert_to_decimal(position_size):
                     long_add_entry_standard_price = entry_avg_price * (Decimal('1') - self.p.add_long_order_percent[name] / Decimal('100'))
                     long_add_entry_standard_price = int(long_add_entry_standard_price / price_unit) * price_unit
                     if self.closes[i][0] < long_add_entry_standard_price:
@@ -276,11 +276,11 @@ class MultiDcaLongShortV1(bt.Strategy):
                     self.order = self.sell(exectype=bt.Order.Limit, data=self.pairs[i], price=float(exit_price),
                                            size=float(position_size))
             elif position_size < 0:
-                short_add_entry_qty = abs(DataUtil.convert_to_decimal(position_size)) * add_risk / Decimal('2')
+                short_add_entry_qty = abs(DataUtils.convert_to_decimal(position_size)) * add_risk / Decimal('2')
                 short_add_entry_qty = int(short_add_entry_qty / qty_unit) * qty_unit
 
-                entry_avg_price = DataUtil.convert_to_decimal(self.getposition(self.pairs[i]).price)
-                if short_init_equity[name] > entry_avg_price * abs(DataUtil.convert_to_decimal(position_size)):
+                entry_avg_price = DataUtils.convert_to_decimal(self.getposition(self.pairs[i]).price)
+                if short_init_equity[name] > entry_avg_price * abs(DataUtils.convert_to_decimal(position_size)):
                     short_add_entry_standard_price = entry_avg_price * (Decimal('1') - self.p.add_short_order_percent[name] / Decimal('100'))
                     short_add_entry_standard_price = int(short_add_entry_standard_price / price_unit) * price_unit
                     if self.closes[i][0] > short_add_entry_standard_price:
@@ -306,8 +306,8 @@ if __name__ == '__main__':
 
     # data loading
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BINANCE, pair, tick_kind)
-        df = DataUtil.get_candle_data_in_scape(df, '2023-01-01 00:00:00', '2024-11-13 00:00:00')
+        df = DataUtils.load_candle_data_as_df(data_path, DataUtils.COMPANY_BINANCE, pair, tick_kind)
+        df = DataUtils.get_candle_data_in_scape(df, '2023-01-01 00:00:00', '2024-11-13 00:00:00')
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 

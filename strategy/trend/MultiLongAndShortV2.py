@@ -1,14 +1,14 @@
 import backtrader as bt
 import pandas as pd
 import quantstats as qs
-from util.Util import DataUtil
+from util.Util import DataUtils
 from decimal import Decimal
 import math
 
 pairs = {
-    'BTCUSDT' : DataUtil.CANDLE_TICK_4HOUR,
-    'ETHUSDT' : DataUtil.CANDLE_TICK_4HOUR,
-    'BCHUSDT' : DataUtil.CANDLE_TICK_4HOUR,
+    'BTCUSDT' : DataUtils.CANDLE_TICK_4HOUR,
+    'ETHUSDT' : DataUtils.CANDLE_TICK_4HOUR,
+    'BCHUSDT' : DataUtils.CANDLE_TICK_4HOUR,
 }
 
 class MultiLongAndShortV2(bt.Strategy):
@@ -238,26 +238,26 @@ class MultiLongAndShortV2(bt.Strategy):
             leverage = self.p.leverage[name]['long']
             short_leverage = self.p.leverage[name]['short']
             date = self.dates[i].datetime(0)
-            close = DataUtil.convert_to_decimal(self.closes[i][0])
-            before_close = DataUtil.convert_to_decimal(self.closes[i][-1])
-            atr = DataUtil.convert_to_decimal(self.atrs[i][0])
-            highest = DataUtil.convert_to_decimal(self.highest[i][0])
-            lowest = DataUtil.convert_to_decimal(self.lowest[i][0])
+            close = DataUtils.convert_to_decimal(self.closes[i][0])
+            before_close = DataUtils.convert_to_decimal(self.closes[i][-1])
+            atr = DataUtils.convert_to_decimal(self.atrs[i][0])
+            highest = DataUtils.convert_to_decimal(self.highest[i][0])
+            lowest = DataUtils.convert_to_decimal(self.lowest[i][0])
             # if not math.isnan(self.bb_low[i][-1]):
             #     self.log(f'{date} close : {close} / before close : {before_close} / bb_low[-1] : {self.bb_low[i][-1]} / bb_low[0] : {self.bb_low[i][0]}')
 
             current_position_size = self.getposition(self.pairs[i]).size
             if current_position_size == 0:
                 if not math.isnan(self.short_lowest[i][-2]) and not math.isnan(self.short_lowest[i][-1]):
-                    if before_close > DataUtil.convert_to_decimal(self.short_lowest[i][-2]) and close < DataUtil.convert_to_decimal(self.short_lowest[i][-1]) and name == 'BCHUSDT':
+                    if before_close > DataUtils.convert_to_decimal(self.short_lowest[i][-2]) and close < DataUtils.convert_to_decimal(self.short_lowest[i][-1]) and name == 'BCHUSDT':
                         stop_price = close + atr * self.p.atr['constant'][name]['short']
                         stop_price = int(stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
                         self.short_stop_prices[i] = stop_price
-                        qty = short_leverage * DataUtil.convert_to_decimal(self.broker.get_cash()) * self.p.risk[name][
+                        qty = short_leverage * DataUtils.convert_to_decimal(self.broker.get_cash()) * self.p.risk[name][
                             'long'] / Decimal('100') / abs(close - stop_price)
                         qty = int(qty / self.p.step_size[name]) * self.p.step_size[name]
-                        if qty * close >= short_leverage * DataUtil.convert_to_decimal(self.broker.get_cash()):
-                            qty = short_leverage * DataUtil.convert_to_decimal(self.broker.get_cash()) * Decimal(
+                        if qty * close >= short_leverage * DataUtils.convert_to_decimal(self.broker.get_cash()):
+                            qty = short_leverage * DataUtils.convert_to_decimal(self.broker.get_cash()) * Decimal(
                                 '0.98') / close
                             qty = int(qty / self.p.step_size[name]) * self.p.step_size[name]
                         self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i], size=float(qty))
@@ -266,11 +266,11 @@ class MultiLongAndShortV2(bt.Strategy):
                         stop_price = int(stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
                         self.long_stop_prices[i] = stop_price
 
-                        qty = leverage * DataUtil.convert_to_decimal(self.broker.get_cash()) * self.p.risk[name]['long'] / Decimal('100') / abs(highest - stop_price)
+                        qty = leverage * DataUtils.convert_to_decimal(self.broker.get_cash()) * self.p.risk[name]['long'] / Decimal('100') / abs(highest - stop_price)
                         qty = int(qty / self.p.step_size[name]) * self.p.step_size[name]
                         # 진입하려는 수량에 대한 시드 값이 현재 현금보다 클 경우, 들어가지 않는 오류가 발생한다. 따라서, 만약 진입하려는 수량의 시드가 현금보다 클 경우 현금의 98%만을 진입한다.
-                        if qty * highest >= leverage * DataUtil.convert_to_decimal(self.broker.get_cash()):
-                            qty = leverage * DataUtil.convert_to_decimal(self.broker.get_cash()) * Decimal('0.98') / highest
+                        if qty * highest >= leverage * DataUtils.convert_to_decimal(self.broker.get_cash()):
+                            qty = leverage * DataUtils.convert_to_decimal(self.broker.get_cash()) * Decimal('0.98') / highest
                             qty = int(qty / self.p.step_size[name]) * self.p.step_size[name]
                         self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(highest), size=float(qty))
 
@@ -297,7 +297,7 @@ if __name__ == '__main__':
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
-        df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BINANCE, pair, tick_kind)
+        df = DataUtils.load_candle_data_as_df(data_path, DataUtils.COMPANY_BINANCE, pair, tick_kind)
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 

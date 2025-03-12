@@ -2,12 +2,12 @@
 # import pandas as pd
 # import math
 # import quantstats as qs
-from util.Util import DataUtil
+from util.Util import DataUtils
 # from decimal import Decimal
 # from operator import itemgetter
 #
 pairs = {
-    'SOLUSDT': DataUtil.CANDLE_TICK_4HOUR,
+    'SOLUSDT': DataUtils.CANDLE_TICK_4HOUR,
 }
 
 leverage = 3
@@ -126,7 +126,7 @@ if __name__ == '__main__':
 
     print('Starting Portfolio Value: %.2f' % cerebro.broker.getvalue())
 
-    df = DataUtil.load_candle_data_as_df(data_path, DataUtil.COMPANY_BINANCE, 'SOLUSDT', pairs['SOLUSDT'])
+    df = DataUtils.load_candle_data_as_df(data_path, DataUtils.COMPANY_BINANCE, 'SOLUSDT', pairs['SOLUSDT'])
     data = bt.feeds.PandasData(dataname=df, datetime='datetime')
     cerebro.adddata(data)  # 데이터 피드 추가
 
