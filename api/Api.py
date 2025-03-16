@@ -389,19 +389,24 @@ class Binance(ApiBase):
 
         return total_candles
 
+class UpBit(ApiBase):
+    def __init__(self, file_path):
+        super().__init__(file_path, 'upbit', "https://api.upbit.com/v1")
+
+    # def fetch_step_size(self, symbol):
 
 class Common:
     def __init__(self, config_file_path):
         self.bybit = ByBit(config_file_path)
         self.binance = Binance(config_file_path)
 
-    def fetch_step_size(self, exchange, symbol):
+    def fetch_tick_size(self, exchange, symbol):
         if exchange == DataUtil.BINANCE:
             return self.binance.fetch_tick_size(symbol)
         elif exchange == DataUtil.BYBIT:
             return self.bybit.fetch_tick_size(symbol)
 
-    def fetch_tick_size(self, exchange, symbol):
+    def fetch_step_size(self, exchange, symbol):
         if exchange == DataUtil.BINANCE:
             return self.binance.fetch_step_size(symbol)
         elif exchange == DataUtil.BYBIT:

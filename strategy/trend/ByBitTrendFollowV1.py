@@ -407,7 +407,7 @@ if __name__ == '__main__':
     cerebro.addstrategy(ByBitTrendFollowV1)
 
     cerebro.broker.setcash(13000)
-    cerebro.broker.setcommission(commission=0.0002, leverage=leverage)
+    cerebro.broker.setcommission(commission=0.001, leverage=leverage)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
