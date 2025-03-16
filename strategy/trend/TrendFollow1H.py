@@ -2,24 +2,38 @@ import backtrader as bt
 import pandas as pd
 import quantstats as qs
 from util.Util import DataUtils
+from api.ApiUtil import DataUtil
+from api.Api import Common, Download
 from decimal import Decimal
 
+# config_file_path = "C:\\Users\\KOSCOM\\Desktop\\각종자료\\개인자료\\krInvestment\\config.json"
+config_file_path = "C:/Users/user/Desktop/개인자료/콤트/config/config.json"
+# download_dir_path ="C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+download_dir_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+# download_dir_path = "/Users/tjgus/Desktop/project/krtrade/backData"
+
+# result_file_path = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+result_file_path = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+# result_file_path = "/Users/tjgus/Desktop/project/krtrade/backData/result/"
+
+result_file_prefix = "TrendFollow1H"
+
 pairs = {
-    'ETHUSDT': DataUtils.CANDLE_TICK_1HOUR,
-    # 'TRXUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    # 'SUIUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    # '1000PEPEUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    # 'XRPUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    # '1000BONKUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    # 'DOGEUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    # 'CRVUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    # 'STXUSDT': DataUtil.CANDLE_TICK_1HOUR,
-    # 'ZECUSDT': DataUtil.CANDLE_TICK_1HOUR,
+    # 'ETHUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    # 'SUIUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    # '1000PEPEUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    'XRPUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    'DOGEUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    'CRVUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    # 'STXUSDT': DataUtils.CANDLE_TICK_1HOUR,
 }
 
-company=DataUtils.COMPANY_BINANCE
 
+exchange = DataUtil.BINANCE
 leverage=3
+
+common = Common(config_file_path)
+download = Download(config_file_path, download_dir_path)
 
 class TrendFollow1H(bt.Strategy):
     params = dict(
@@ -286,30 +300,22 @@ class TrendFollow1H(bt.Strategy):
           },
         },
         rsi_length={
-            'ETHUSDT': 3,
-            'TRXUSDT': 3,
-            '1000PEPEUSDT': 3,
+            'ETHUSDT': 2,
+            '1000PEPEUSDT': 2,
             'SUIUSDT': 3,
-            'STXUSDT': 3,
-            '1000BONKUSDT': 3,
-            'XRPUSDT': 3,
-            'DOGEUSDT': 3,
-            '1000SHIBUSDT': 3,
-            'CRVUSDT': 3,
-            'ZECUSDT': 3,
+            'STXUSDT': 2,
+            'XRPUSDT': 2,
+            'DOGEUSDT': 2,
+            'CRVUSDT': 2,
         },
         rsi_limit={
-            'ETHUSDT': 70,
-            'TRXUSDT': 70,
-            '1000PEPEUSDT': 70,
-            'SUIUSDT': 70,
-            'STXUSDT': 70,
-            '1000BONKUSDT': 70,
-            'XRPUSDT': 70,
-            'DOGEUSDT': 70,
-            '1000SHIBUSDT': 70,
-            'CRVUSDT': 70,
-            'ZECUSDT': 70
+            'ETHUSDT': 50,
+            '1000PEPEUSDT': 50,
+            'SUIUSDT': 50,
+            'STXUSDT': 50,
+            'XRPUSDT': 50,
+            'DOGEUSDT': 50,
+            'CRVUSDT': 50,
         },
         bb_length={
             'ETHUSDT': 30,
@@ -338,15 +344,12 @@ class TrendFollow1H(bt.Strategy):
             'ZECUSDT': 0.5,
         },
         exit_percent={
-            '1000PEPEUSDT': Decimal('1'),
-            'SUIUSDT': Decimal('1'),
-            'STXUSDT': Decimal('1'),
-            '1000BONKUSDT': Decimal('1'),
-            'XRPUSDT': Decimal('1'),
-            'DOGEUSDT': Decimal('1'),
-            '1000SHIBUSDT': Decimal('1'),
-            'CRVUSDT': Decimal('1'),
-            'ZECUSDT': Decimal('1'),
+            '1000PEPEUSDT': Decimal('0'),
+            'SUIUSDT': Decimal('0'),
+            'STXUSDT': Decimal('0'),
+            'XRPUSDT': Decimal('0'),
+            'DOGEUSDT': Decimal('0'),
+            'CRVUSDT': Decimal('0'),
         },
         percent={
             '1000PEPEUSDT': {
@@ -396,88 +399,22 @@ class TrendFollow1H(bt.Strategy):
             },
         },
         tick_size={
-            'ETHUSDT': {
-                DataUtils.COMPANY_BINANCE: Decimal('0.01'),
-            },
-            'TRXUSDT': {
-                DataUtils.COMPANY_BINANCE: Decimal('0.00001'),
-            },
-            '1000PEPEUSDT': {
-                DataUtils.COMPANY_BINANCE: Decimal('0.0000001'),
-                DataUtils.COMPANY_BYBIT: Decimal('0.0000010')
-            },
-            'SUIUSDT': {
-                DataUtils.COMPANY_BINANCE: Decimal('0.000100'),
-                DataUtils.COMPANY_BYBIT: Decimal('0.00010')
-            },
-            'STXUSDT': {
-                DataUtils.COMPANY_BINANCE: Decimal('0.0001000'),
-                DataUtils.COMPANY_BYBIT: Decimal('0.00010')
-            },
-            '1000BONKUSDT': {
-                DataUtils.COMPANY_BINANCE: Decimal('0.0000010'),
-                DataUtils.COMPANY_BYBIT: Decimal('0.00010')
-            },
-            'XRPUSDT': {
-                DataUtils.COMPANY_BINANCE: Decimal('0.0001'),
-                DataUtils.COMPANY_BYBIT: Decimal('0.0001')
-            },
-            'DOGEUSDT': {
-                DataUtils.COMPANY_BINANCE: Decimal('0.000010'),
-                DataUtils.COMPANY_BYBIT: Decimal('0.00001')
-            },
-            '1000SHIBUSDT': {
-                DataUtils.COMPANY_BINANCE: Decimal('0.000001'),
-                DataUtils.COMPANY_BYBIT: Decimal('0.01')
-            },
-            "CRVUSDT":{
-                DataUtils.COMPANY_BINANCE: Decimal("0.001")
-            },
-            "ZECUSDT":{
-                DataUtils.COMPANY_BINANCE: Decimal("0.01")
-            }
+            'ETHUSDT': common.fetch_tick_size(exchange, 'ETHUSDT'),
+            'SUIUSDT': common.fetch_tick_size(exchange, 'SUISUDT'),
+            '1000PEPEUSDT': common.fetch_tick_size(exchange, '1000PEPEUSDT'),
+            'XRPUSDT': common.fetch_tick_size(exchange, 'XRPUSDT'),
+            'DOGEUSDT': common.fetch_tick_size(exchange, 'DOGEUSDT'),
+            'CRVUSDT': common.fetch_tick_size(exchange, 'CRVUSDT'),
+            'STXUSDT': common.fetch_tick_size(exchange, 'STXUSDT'),
         },
         step_size={
-            'ETHUSDT': {
-                DataUtils.COMPANY_BINANCE: Decimal('0.001'),
-            },
-            'TRXUSDT': {
-                DataUtils.COMPANY_BINANCE: Decimal('1'),
-            },
-            '1000PEPEUSDT': {
-                DataUtils.COMPANY_BINANCE: Decimal('1'),
-                DataUtils.COMPANY_BYBIT: Decimal('100')
-            },
-            'SUIUSDT': {
-                DataUtils.COMPANY_BINANCE: Decimal('0.1'),
-                DataUtils.COMPANY_BYBIT: Decimal('10')
-            },
-            'STXUSDT': {
-                DataUtils.COMPANY_BINANCE: Decimal('1'),
-                DataUtils.COMPANY_BYBIT: Decimal('10')
-            },
-            '1000BONKUSDT': {
-                DataUtils.COMPANY_BINANCE: Decimal('1'),
-                DataUtils.COMPANY_BYBIT: Decimal('10')
-            },
-            'XRPUSDT': {
-                DataUtils.COMPANY_BINANCE: Decimal('0.1'),
-                DataUtils.COMPANY_BYBIT: Decimal('0.01')
-            },
-            'DOGEUSDT': {
-                DataUtils.COMPANY_BINANCE: Decimal('1'),
-                DataUtils.COMPANY_BYBIT: Decimal('1')
-            },
-            '1000SHIBUSDT': {
-                DataUtils.COMPANY_BINANCE: Decimal('1'),
-                DataUtils.COMPANY_BYBIT: Decimal('0.01')
-            },
-            "CRVUSDT":{
-                DataUtils.COMPANY_BINANCE: Decimal("0.1")
-            },
-            "ZECUSDT":{
-                DataUtils.COMPANY_BINANCE: Decimal("0.001")
-            }
+            'ETHUSDT': common.fetch_step_size(exchange, 'ETHUSDT'),
+            'SUIUSDT': common.fetch_step_size(exchange, 'SUISUDT'),
+            '1000PEPEUSDT': common.fetch_step_size(exchange, '1000PEPEUSDT'),
+            'XRPUSDT': common.fetch_step_size(exchange, 'XRPUSDT'),
+            'DOGEUSDT': common.fetch_step_size(exchange, 'DOGEUSDT'),
+            'CRVUSDT': common.fetch_step_size(exchange, 'CRVUSDT'),
+            'STXUSDT': common.fetch_step_size(exchange, 'STXUSDT'),
         }
     )
 
@@ -632,25 +569,28 @@ class TrendFollow1H(bt.Strategy):
             self.cancel_all(target_name=name)
 
         for i in range(0, len(self.pairs)):
+
             name = self.names[i]
+            tick_size = common.fetch_tick_size(exchange, name)
+            step_size = common.fetch_step_size(exchange, name)
 
             long_high_band = DataUtils.convert_to_decimal(self.long_high_bands[i][0])
             long_low_band = DataUtils.convert_to_decimal(self.long_low_bands[i][0])
 
             long_adj_high_band = long_high_band - (long_high_band-long_low_band) * (self.p.high_band_constant[name]['long'] / Decimal('100'))
-            long_adj_high_band = int(long_adj_high_band / self.p.tick_size[name][company]) * self.p.tick_size[name][company]
+            long_adj_high_band = int(long_adj_high_band / tick_size) * tick_size
 
             long_adj_low_band = long_low_band + (long_high_band-long_low_band) * (self.p.low_band_constant[name]['long'] / Decimal('100'))
-            long_adj_low_band = int(long_adj_low_band / self.p.tick_size[name][company]) * self.p.tick_size[name][company]
+            long_adj_low_band = int(long_adj_low_band / tick_size) * tick_size
 
             short_high_band = DataUtils.convert_to_decimal(self.short_high_bands[i][0])
             short_low_band = DataUtils.convert_to_decimal(self.short_low_bands[i][0])
 
             short_adj_high_band = short_high_band - (short_high_band-short_low_band) * (self.p.high_band_constant[name]['short'] / Decimal('100'))
-            short_adj_high_band = int(short_adj_high_band / self.p.tick_size[name][company]) * self.p.tick_size[name][company]
+            short_adj_high_band = int(short_adj_high_band / tick_size) * tick_size
 
             short_adj_low_band = short_low_band + (short_high_band-short_low_band) * (self.p.low_band_constant[name]['short'] / Decimal('100'))
-            short_adj_low_band = int(short_adj_low_band / self.p.tick_size[name][company]) * self.p.tick_size[name][company]
+            short_adj_low_band = int(short_adj_low_band / tick_size) * tick_size
 
             entry_mode = self.p.entry_mode[name]
             equity = DataUtils.convert_to_decimal(self.broker.getvalue())
@@ -659,12 +599,12 @@ class TrendFollow1H(bt.Strategy):
                 if current_position_size == 0:
                     if entry_mode in [0, 2]:
                         long_qty = equity * self.p.risk[name]['long'] / Decimal('100') / abs(long_adj_high_band-long_adj_low_band)
-                        long_qty = int(long_qty / self.p.step_size[name][company]) * self.p.step_size[name][company]
+                        long_qty = int(long_qty / step_size) * step_size
                         if long_qty > 0 and self.long_short_ma[i][0] >= self.long_mid_ma[i][0] >= self.long_long_ma[i][0]:
                             self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(long_adj_high_band), size=float(long_qty))
                     if entry_mode in [1, 2]:
                         short_qty = equity * self.p.risk[name]['short'] / Decimal('100') / abs(short_adj_low_band-short_adj_high_band)
-                        short_qty = int(short_qty / self.p.step_size[name][company]) * self.p.step_size[name][company]
+                        short_qty = int(short_qty / step_size) * step_size
                         if short_qty > 0 and self.short_short_ma[i][0] <= self.short_mid_ma[i][0] <= self.short_long_ma[i][0]:
                             self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], price=float(short_adj_low_band), size=float(short_qty))
                 elif current_position_size > 0:
@@ -676,7 +616,7 @@ class TrendFollow1H(bt.Strategy):
                     if self.rsi[i][0] >= self.p.rsi_limit[name]:
                         exit_price = DataUtils.convert_to_decimal(self.closes[i][0]) * (
                                 Decimal('1') + self.p.exit_percent[name] / Decimal('100'))
-                        exit_price = int(exit_price / self.p.tick_size[name][company]) * self.p.tick_size[name][company]
+                        exit_price = int(exit_price / tick_size) * tick_size
 
                         self.order = self.sell(exectype=bt.Order.Limit, data=self.pairs[i], size=current_position_size,
                                                price=float(exit_price))
@@ -692,10 +632,10 @@ class TrendFollow1H(bt.Strategy):
                     percent = percents[j]
                     price = DataUtils.convert_to_decimal(self.closes[i][0]) * (
                             Decimal('1') - percent / Decimal('100'))
-                    price = int(price / self.p.tick_size[name][company]) * self.p.tick_size[name][company]
+                    price = int(price / tick_size) * tick_size
                     risk = self.p.risk[name][j]
                     qty = equity * risk / Decimal('100') / price
-                    qty = int(qty / self.p.step_size[name][company]) * self.p.step_size[name][company]
+                    qty = int(qty / step_size) * step_size
 
                     cash = DataUtils.convert_to_decimal(self.broker.get_cash())
                     margin = qty * price / Decimal(leverage)
@@ -703,9 +643,6 @@ class TrendFollow1H(bt.Strategy):
                         self.order = self.buy(exectype=bt.Order.Limit, data=self.pairs[i], size=float(qty), price=float(price))
 
 if __name__ == '__main__':
-    # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
-    data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
-    # data_path = "/Users/tjgus/Desktop/project/krtrade/backData"
     cerebro = bt.Cerebro()
     cerebro.addstrategy(TrendFollow1H)
 
@@ -714,7 +651,8 @@ if __name__ == '__main__':
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
-        df = DataUtils.load_candle_data_as_df(data_path, company, pair, tick_kind)
+        download.download_candles(exchange, pair, tick_kind)
+        df = DataUtils.load_candle_data_as_df(download_dir_path, exchange, pair, tick_kind)
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 
@@ -739,12 +677,9 @@ if __name__ == '__main__':
     mdd = qs.stats.max_drawdown(returns)
     print(f" quanstats's my returns MDD : {mdd * 100:.2f} %")
 
-    file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
-    # file_name = "/Users/tjgus/Desktop/project/krtrade/backData/result/"
-    # file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/" + company + "-"
+    file_name = result_file_path + result_file_prefix
     for pair, tick_kind in pairs.items():
         file_name += pair + "-"
-    file_name += "TrendFollow1H"
 
     strat = results[0]
     order_balance_list = strat.order_balance_list
@@ -758,15 +693,8 @@ if __name__ == '__main__':
     df = df.dropna()
     df = df.set_index('date')
     df.index.name = 'date'
-    # print(df['value'])
     df.to_csv(f'{file_name}.csv')
     qs.reports.html(df['value'], output=f"{file_name}.html", download_filename=f"{file_name}.html", title=file_name)
 
-    # 인덱스가 날짜 형식으로 되어 있지 않다면, 'returns.index'를 datetime 형식으로 변환
-    returns.index = pd.to_datetime(returns.index)
-
-    # 2023년 1월 1일 이후의 데이터만 필터링
-    returns = returns[returns.index >= '2020-05-01']
-
-    # 'returns' DataFrame을 HTML로 출력
-    qs.reports.html(returns, output=f'{file_name}_숏_종가 중심.html', title='result')
+    returns = returns[returns.index >= '2021-11-01']
+    qs.reports.html(returns, output=f'{file_name}_종가 중심.html', title='result')
