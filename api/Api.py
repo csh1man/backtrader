@@ -7,6 +7,13 @@ import requests
 from decimal import Decimal
 from urllib.parse import urlencode
 import json
+import hashlib
+import uuid
+import time
+import random
+import hmac
+import jwt
+from hashlib import sha512
 
 class ApiBase:
     def __init__(self, file_path, exchange_name, base_url):
@@ -393,24 +400,205 @@ class UpBit(ApiBase):
     def __init__(self, file_path):
         super().__init__(file_path, 'upbit', "https://api.upbit.com/v1")
 
-    # def fetch_step_size(self, symbol):
+    def get_remaining_req(self, headers):
+        for header in headers:
+            header_key = header[0]
+            if header_key == "Remaining-Req":
+                header_value = header[1]
+                start = header_value.index("sec=") + 4
+                return int(header_value[start:])
+        return 0
+
+    def send_request_with_checking_remaining_seq(self, method, headers, params, url):
+        while True:
+            response = self.send_request(method, headers, params, url)  # 실제 요청을 보내는 함수
+
+            remain_req = self.get_remaining_req(response.headers)  # 남은 요청 수 확인
+            if remain_req < 3:
+                time.sleep(0.3)  # 300ms 대기
+
+            status_code = response.status_code
+
+            if status_code == 200 or status_code == 201:
+                break
+            elif status_code == 429:
+                time.sleep(0.3)  # 429 상태 코드 (Too Many Requests)일 경우 300ms 대기
+            else:
+                raise RuntimeError(response.text)
+        return response
+
+
+    def get_nonce(self):
+        nonce = int(time.time() * 1000) + 1000
+        nonce += random.randint(0, 99)
+
+        return str(nonce)
+
+    def get_query_string(self, params):
+        return urlencode(params)
+
+    def get_authentication(self, params=None):
+        authentication = None
+        try:
+            access = self.api_key
+            secret = self.api_secret
+
+            if params:
+                query = self.get_query_string(params)
+                query_hash = hashlib.sha512(query.encode('utf-8')).hexdigest()
+
+                algorithm = hmac.new(secret.encode('utf-8'), query_hash.encode('utf-8'), hashlib.sha256)
+                authentication = jwt.encode({
+                    'access_key': access,
+                    'nonce': str(uuid.uuid4()),
+                    'timestamp': str(int(time.time() * 1000)),
+                    'query_hash': query_hash,
+                    'query_hash_alg': 'SHA512'
+                }, secret, algorithm='HS256')  # HS256을 사용하여 서명
+
+            else:
+                # params가 없을 경우, 기본적인 JWT 생성
+                algorithm = hmac.new(secret.encode('utf-8'), access.encode('utf-8'), hashlib.sha256)
+                authentication = jwt.encode({
+                    'access_key': access,
+                    'nonce': self.get_nonce(),  # nonce를 가져오는 함수
+                    'timestamp': str(int(time.time() * 1000))
+                }, secret, algorithm='HS256')
+
+        except Exception as e:
+            raise RuntimeError(e)
+
+        return authentication
+
+    def fetch_current_price(self, symbol: str):
+        url = self.base_url + "/ticker"
+        params = {
+            "markets": symbol
+        }
+
+        headers = {
+            "Authorization": self.get_authentication(params)
+        }
+
+        response = self.send_request(0, headers, params, url)
+        if response.status_code == 200:
+            return Decimal(response.json()[0]['trade_price'])
+
+    def fetch_tick_size(self, symbol: str) -> Decimal:
+        price = self.fetch_current_price(symbol)
+
+        if price >= Decimal("2000000"):
+            return Decimal("1000")
+        elif price >= Decimal("1000000"):
+            return Decimal("500")
+        elif price >= Decimal("500000"):
+            return Decimal("100")
+        elif price >= Decimal("100000"):
+            return Decimal("50")
+        elif price >= Decimal("10000"):
+            return Decimal("10")
+        elif price >= Decimal("1000"):
+            return Decimal("5")
+        elif price >= Decimal("100"):
+            return Decimal("1")
+        elif price >= Decimal("10"):
+            return Decimal("0.1")
+        elif price >= Decimal("0"):
+            return Decimal("0.01")
+
+        return Decimal("0")
+
+    def fetch_step_size(self, symbol):
+        return Decimal("0.00000001")
+
+    def fetch_candle_sticks_with_end_time(self, symbol: str, timeframe: str, to: str, count: int):
+        url = self.base_url + "/candles"
+        if timeframe == TimeUtil.CANDLE_TIMEFRAME_15MINUTES:
+            url += "/minutes/15"
+        elif timeframe == TimeUtil.CANDLE_TIMEFRAME_30MINUTES:
+            url += "/minutes/30"
+        elif timeframe == TimeUtil.CANDLE_TIMEFRAME_1HOURS:
+            url += "/minutes/60"
+        elif timeframe == TimeUtil.CANDLE_TIMEFRAME_4HOURS:
+            url += "/minutes/240"
+        elif timeframe == TimeUtil.CANDLE_TIMEFRAME_1DAY:
+            url += "/days"
+
+        params = {
+            "market": symbol,
+            "to": to.replace(' ', 'T'),
+            "count": count
+        }
+
+        headers = {
+            "Authorization": self.get_authentication(params)
+        }
+
+        response = self.send_request_with_checking_remaining_seq(0, headers, params, url)
+        if response.status_code == 200:
+            candles = response.json()
+            returns = []
+            for candle in reversed(candles):
+                candle_time = candle["candle_date_time_kst"].replace('T', ' ')  # 공백으로 교체
+                open = candle["opening_price"]
+                high = candle["high_price"]
+                low = candle["low_price"]
+                close = candle["trade_price"]
+                volume = candle["candle_acc_trade_volume"]
+
+                # JSON 데이터 만들기
+                candle_data = {
+                    "exchange": DataUtil.UPBIT,
+                    "candle_time": candle_time,
+                    "open": open,
+                    "high": high,
+                    "low": low,
+                    "close": close,
+                    "volume": volume
+                }
+                returns.append(candle_data)
+
+            return list(reversed(returns))
+
+    def fetch_all_candles(self, symbol: str, timeframe: str):
+        total_candles = []
+        end_time = TimeUtil.get_current_time_yyyy_mm_dd_hh_mm_ss(True)
+        while True:
+            candles = self.fetch_candle_sticks_with_end_time(symbol, timeframe, end_time, 200)
+            if not candles or candles[0]['candle_time'] == candles[-1]['candle_time']:
+                print(f"[{symbol}] no more candle data to download.")
+                break
+
+            print(f'{symbol} download done : {candles[-1]["candle_time"]} ~ {candles[0]["candle_time"]}')
+            total_candles.extend(candles)
+
+            end_time = TimeUtil.minus_times(candles[-1]['candle_time'], timeframe, 0) + "+09:00:00"
+            # print(f"end time : {candles[-1]['candle_time']}")
+            # print(f"subtract time : {end_time}")
+
+        return total_candles
 
 class Common:
     def __init__(self, config_file_path):
         self.bybit = ByBit(config_file_path)
         self.binance = Binance(config_file_path)
+        self.upbit = UpBit(config_file_path)
 
     def fetch_tick_size(self, exchange, symbol):
         if exchange == DataUtil.BINANCE:
             return self.binance.fetch_tick_size(symbol)
         elif exchange == DataUtil.BYBIT:
             return self.bybit.fetch_tick_size(symbol)
+        elif exchange == DataUtil.UPBIT:
+            return self.upbit.fetch_tick_size(symbol)
 
     def fetch_step_size(self, exchange, symbol):
         if exchange == DataUtil.BINANCE:
             return self.binance.fetch_step_size(symbol)
         elif exchange == DataUtil.BYBIT:
             return self.bybit.fetch_step_size(symbol)
+        elif exchange == DataUtil.UPBIT:
+            return self.upbit.fetch_step_size(symbol)
 
     def fetch_candle_sticks(self, exchange: str, symbol: str, timeframe: str, count: int):
         if exchange == DataUtil.BINANCE:
@@ -429,6 +617,8 @@ class Common:
             return self.binance.fetch_candle_sticks_with_end_time(symbol, timeframe, to, count)
         elif exchange == DataUtil.BYBIT:
             return self.bybit.fetch_candle_sticks_with_end_time(symbol, timeframe, to, count)
+        elif exchange == DataUtil.UPBIT:
+            return self.upbit.fetch_candle_sticks_with_end_time(symbol, timeframe, to, count)
 
     def fetch_all_candles_from_start(self, exchange: str, symbol: str, timeframe: str, start: str):
         if exchange == DataUtil.BINANCE:

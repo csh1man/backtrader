@@ -4,6 +4,7 @@ import pytz, time, json
 class DataUtil:
     BINANCE = "binance"
     BYBIT = "bybit"
+    UPBIT = "upbit"
 
 class FileUtil:
     @staticmethod
@@ -163,6 +164,8 @@ class TimeUtil:
 
     @staticmethod
     def add_times(target: str, timeframe: str, count: int) -> str:
+        if target.__contains__("+09:00"):
+            target = target.replace("+09:00", "")
         local_date_time = datetime.strptime(target, "%Y-%m-%d %H:%M:%S")
 
         if timeframe == TimeUtil.CANDLE_TIMEFRAME_1MINUTES:
