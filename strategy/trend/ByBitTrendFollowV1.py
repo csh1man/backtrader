@@ -407,7 +407,7 @@ if __name__ == '__main__':
     cerebro.addstrategy(ByBitTrendFollowV1)
 
     cerebro.broker.setcash(13000)
-    cerebro.broker.setcommission(commission=0.001, leverage=leverage)
+    cerebro.broker.setcommission(commission=0.002, leverage=leverage)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
@@ -448,7 +448,7 @@ if __name__ == '__main__':
     df['date'] = df['date'].dt.date
     df = df.sort_values('value', ascending=True).drop_duplicates('date').sort_index()
     df['value'] = df['value'].astype('float64')
-    df['value'] = df['value'].pct_change()
+    # df['value'] = df['value'].pct_change()
     df['date'] = pd.to_datetime(df['date'])
     df = df.dropna()
     df = df.set_index('date')
@@ -457,4 +457,9 @@ if __name__ == '__main__':
     qs.reports.html(df['value'], output=f"{file_name}.html", download_filename=f"{file_name}.html", title=file_name)
 
     returns = returns[returns.index >= '2021-11-01']
+    returns.index.name = 'date'
+    returns.name = 'value'
+    # returns['date'] = returns['date'].dt.date
+
+    returns.to_csv(f'{file_name}_close.csv')
     qs.reports.html(returns, output=f'{file_name}_종가 중심.html', title='result')

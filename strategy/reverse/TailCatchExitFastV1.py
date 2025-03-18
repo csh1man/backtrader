@@ -300,9 +300,10 @@ if __name__ == '__main__':
     df['date'] = df['date'].dt.date
     df = df.sort_values('value', ascending=True).drop_duplicates('date').sort_index()
     df['value'] = df['value'].astype('float64')
-    df['value'] = df['value'].pct_change()
+    # df['value'] = df['value'].pct_change()
     df['date'] = pd.to_datetime(df['date'])
     df = df.dropna()
     df = df.set_index('date')
     df.index.name = 'date'
+    df.to_csv(f'{file_name}.csv')
     qs.reports.html(df['value'], output=f"{file_name}.html", download_filename=f"{file_name}.html", title=file_name)
