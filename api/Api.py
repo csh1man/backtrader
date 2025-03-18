@@ -572,9 +572,25 @@ class UpBit(ApiBase):
             print(f'{symbol} download done : {candles[-1]["candle_time"]} ~ {candles[0]["candle_time"]}')
             total_candles.extend(candles)
 
-            end_time = TimeUtil.minus_times(candles[-1]['candle_time'], timeframe, 0) + "+09:00:00"
-            # print(f"end time : {candles[-1]['candle_time']}")
-            # print(f"subtract time : {end_time}")
+            end_time = TimeUtil.minus_times(candles[-1]['candle_time'], timeframe, 0) + "+09:00"
+
+        return total_candles
+
+    def fetch_all_candles_from_start(self, symbol: str, timeframe: str, start_time: str):
+        total_candles = []
+        last_candle_time = TimeUtil.get_latest_candle_time(timeframe, True)
+        end_time = TimeUtil.add_times(last_candle_time, timeframe, 1) + "+09:00"
+        exit_while = False
+        while not exit_while:
+            candles = self.fetch_candle_sticks_with_end_time(symbol, timeframe, end_time, 200)
+            for candle in candles:
+                candle_time = candle['candle_time']
+                if TimeUtil.compare_times(start_time, candle_time) > 0:
+                    exit_while = True
+                    break
+                else:
+                    total_candles.append(candle)
+            end_time = TimeUtil.minus_times(candles[-1]['candle_time'], timeframe, 0) + "+09:00"
 
         return total_candles
 
@@ -611,6 +627,8 @@ class Common:
             return self.binance.fetch_candle_sticks_with_start_time(symbol, timeframe, start, count)
         elif exchange == DataUtil.BYBIT:
             return self.bybit.fetch_candle_sticks_with_start_time(symbol, timeframe, start, count)
+        elif exchange == DataUtil.UPBIT:
+            return self.upbit.fetch_candle_sticks_with_end_time(symbol, timeframe, start, count)
 
     def fetch_candle_sticks_with_end_time(self, exchange: str, symbol: str, timeframe: str, to: str, count: int):
         if exchange == DataUtil.BINANCE:
@@ -625,12 +643,16 @@ class Common:
             return self.binance.fetch_all_candles_from_start(symbol, timeframe, start)
         elif exchange == DataUtil.BYBIT:
             return self.bybit.fetch_all_candles_from_start(symbol, timeframe, start)
+        elif exchange == DataUtil.UPBIT:
+            return self.upbit.fetch_all_candles_from_start(symbol, timeframe, start)
 
     def fetch_all_candles(self, exchange: str, symbol: str, timeframe: str):
         if exchange == DataUtil.BINANCE:
             return self.binance.fetch_all_candles(symbol, timeframe)
         elif exchange == DataUtil.BYBIT:
             return self.bybit.fetch_all_candles(symbol, timeframe)
+        elif exchange == DataUtil.UPBIT:
+            return self.upbit.fetch_all_candles(symbol, timeframe)
 
 class Download:
     def __init__(self, config_file_path, download_dir_path):

@@ -44,6 +44,61 @@ class TimeUtil:
     CANDLE_TIMEFRAME_1MONTH = "1M"
 
     @staticmethod
+    def get_latest_candle_time(timeframe, is_kst):
+        # 현재 시간
+        current_time_str = TimeUtil.get_current_time_yyyy_mm_dd_hh_mm_ss(is_kst)
+        # 현재 시간을 datetime 객체로 변환
+        current_time = datetime.strptime(current_time_str, "%Y-%m-%d %H:%M:%S")
+
+        # 타임프레임에 따라 가장 최신 캔들 시간 계산
+        if timeframe == TimeUtil.CANDLE_TIMEFRAME_1MINUTES:
+            # 1분 단위: 가장 가까운 분
+            latest_time = current_time.replace(second=0, microsecond=0)
+
+        elif timeframe == TimeUtil.CANDLE_TIMEFRAME_5MINUTES:
+            # 5분 단위
+            minutes = (current_time.minute // 5) * 5
+            latest_time = current_time.replace(minute=minutes, second=0, microsecond=0)
+
+        elif timeframe == TimeUtil.CANDLE_TIMEFRAME_15MINUTES:
+            # 15분 단위
+            minutes = (current_time.minute // 15) * 15
+            latest_time = current_time.replace(minute=minutes, second=0, microsecond=0)
+
+        elif timeframe == TimeUtil.CANDLE_TIMEFRAME_30MINUTES:
+            # 30분 단위
+            minutes = (current_time.minute // 30) * 30
+            latest_time = current_time.replace(minute=minutes, second=0, microsecond=0)
+
+        elif timeframe == TimeUtil.CANDLE_TIMEFRAME_1HOURS:
+            # 1시간 단위
+            latest_time = current_time.replace(minute=0, second=0, microsecond=0)
+
+        elif timeframe == TimeUtil.CANDLE_TIMEFRAME_4HOURS:
+            # 4시간 단위
+            closest_candle_hour = 1 + (current_time.hour - 1) // 4 * 4
+            latest_time = current_time.replace(hour=closest_candle_hour, minute=0, second=0, microsecond=0)
+
+        else:
+            raise ValueError("Invalid timeframe")
+
+        # 반환할 시간 문자열 형식: 'yyyy-mm-dd HH:mm:ss'
+        return latest_time.strftime("%Y-%m-%d %H:%M:%S")
+
+    @staticmethod
+    def compare_times(time1: str, time2: str):
+        date_format = '%Y-%m-%d %H:%M:%S'
+        date1 = datetime.strptime(time1, date_format)
+        date2 = datetime.strptime(time2, date_format)
+
+        if date1 > date2:
+            return 1
+        elif date1 == date2:
+            return 0
+        else:
+            return -1
+
+    @staticmethod
     def delay(delay_time):
         try:
             time.sleep(delay_time)  # delay_time은 초 단위
