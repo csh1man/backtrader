@@ -6,101 +6,147 @@ from api.ApiUtil import DataUtil
 from api.Api import Common, Download
 from decimal import Decimal
 
-leverage=2
+config_file_path = "C:\\Users\\KOSCOM\\Desktop\\각종자료\\개인자료\\krInvestment\\config.json"
+# config_file_path = "C:/Users/user/Desktop/개인자료/콤트/config/config.json"
+
+download_dir_path ="C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+# download_dir_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+# download_dir_path = "/Users/tjgus/Desktop/project/krtrade/backData"
+
+result_file_path = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+# result_file_path = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+
+file_name = "/Users/tjgus/Desktop/project/krtrade/backData/result/"
+# file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+
+result_file_prefix = "TailCatchExitFastV1"
+
 pairs={
     'XRPUSDT': DataUtils.CANDLE_TICK_1HOUR,
     'DOGEUSDT': DataUtils.CANDLE_TICK_1HOUR,
     '1000SHIBUSDT': DataUtils.CANDLE_TICK_1HOUR,
-    'AAVEUSDT': DataUtils.CANDLE_TICK_1HOUR,
     'SNXUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    'MKRUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    # 'AAVEUSDT': DataUtils.CANDLE_TICK_1HOUR,
     'ALGOUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    # '1000PEPEUSDT': DataUtils.CANDLE_TICK_1HOUR,
 }
+
+exchange = DataUtil.BINANCE
+leverage=3
+
+common = Common(config_file_path)
+download = Download(config_file_path, download_dir_path)
 
 class TailCatchExitFastV1(bt.Strategy):
     params=dict(
         log=True,
         risks={
-            'XRPUSDT': [Decimal('1'), Decimal('3'), Decimal('5'), Decimal('8'), Decimal('16')],
-            'DOGEUSDT': [Decimal('1'), Decimal('3'), Decimal('5'), Decimal('8'), Decimal('16')],
-            '1000SHIBUSDT': [Decimal('1'), Decimal('3'), Decimal('5'), Decimal('8'), Decimal('16')],
-            'AAVEUSDT': [Decimal('1'), Decimal('3'), Decimal('5'), Decimal('8'), Decimal('16')],
-            'SNXUSDT': [Decimal('1'), Decimal('3'), Decimal('5'), Decimal('8'), Decimal('16')],
-            'ALGOUSDT': [Decimal('1'), Decimal('3'), Decimal('5'), Decimal('8'), Decimal('16')],
+            'XRPUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
+            'DOGEUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
+            '1000SHIBUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
+            'AAVEUSDT': [Decimal('2'), Decimal('4'), Decimal('6'), Decimal('8'), Decimal('16')],
+            'SNXUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
+            'ALGOUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
+            '1000PEPEUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
+            'MKRUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
         },
         percents={
             'XRPUSDT':{
-                'bull': [Decimal(4.0), Decimal(6.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
-                'def': [Decimal(3.0), Decimal(4.0), Decimal(6.0), Decimal(8.0), Decimal(12.0)],
-                'bear': [Decimal(4.0), Decimal(6.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
+                'bull': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
+                'def': [Decimal(4.0), Decimal(6.0), Decimal(8.0), Decimal(10.0), Decimal(12.0)],
+                'bear': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
             },
             'DOGEUSDT':{
-                'bull': [Decimal(4.0), Decimal(6.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
-                'def': [Decimal(3.0), Decimal(4.0), Decimal(6.0), Decimal(8.0), Decimal(12.0)],
-                'bear': [Decimal(4.0), Decimal(6.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
+                'bull': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
+                'def': [Decimal(4.0), Decimal(6.0), Decimal(8.0), Decimal(10.0), Decimal(12.0)],
+                'bear': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
             },
             '1000SHIBUSDT':{
-                'bull': [Decimal(4.0), Decimal(6.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
-                'def': [Decimal(3.0), Decimal(4.0), Decimal(6.0), Decimal(8.0), Decimal(12.0)],
-                'bear': [Decimal(4.0), Decimal(6.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
+                'bull': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
+                'def': [Decimal(4.0), Decimal(6.0), Decimal(8.0), Decimal(10.0), Decimal(12.0)],
+                'bear': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
+            },
+            '1000PEPEUSDT':{
+                'bull': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
+                'def': [Decimal(4.0), Decimal(6.0), Decimal(8.0), Decimal(10.0), Decimal(12.0)],
+                'bear': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
             },
             'AAVEUSDT':{
-                'bull': [Decimal(4.0), Decimal(6.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
-                'def': [Decimal(3.0), Decimal(4.0), Decimal(6.0), Decimal(8.0), Decimal(12.0)],
-                'bear': [Decimal(4.0), Decimal(6.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
+                'bull': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
+                'def': [Decimal(4.0), Decimal(6.0), Decimal(8.0), Decimal(10.0), Decimal(12.0)],
+                'bear': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
             },
             'SNXUSDT':{
-                'bull': [Decimal(4.0), Decimal(6.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
-                'def': [Decimal(3.0), Decimal(4.0), Decimal(6.0), Decimal(8.0), Decimal(12.0)],
-                'bear': [Decimal(4.0), Decimal(6.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
+                'bull': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
+                'def': [Decimal(4.0), Decimal(6.0), Decimal(8.0), Decimal(10.0), Decimal(12.0)],
+                'bear': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
             },
             'ALGOUSDT':{
-                'bull': [Decimal(4.0), Decimal(6.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
-                'def': [Decimal(3.0), Decimal(4.0), Decimal(6.0), Decimal(8.0), Decimal(12.0)],
-                'bear': [Decimal(4.0), Decimal(6.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
+                'bull': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
+                'def': [Decimal(4.0), Decimal(6.0), Decimal(8.0), Decimal(10.0), Decimal(12.0)],
+                'bear': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
+            },
+            'MKRUSDT':{
+                'bull': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
+                'def': [Decimal(4.0), Decimal(6.0), Decimal(8.0), Decimal(10.0), Decimal(12.0)],
+                'bear': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
             }
         },
         bb_length={
           'XRPUSDT': 50,
+          '1000PEPEUSDT': 50,
           'DOGEUSDT': 50,
           '1000SHIBUSDT': 50,
           'AAVEUSDT': 50,
           'SNXUSDT': 50,
           'ALGOUSDT': 50,
+          'MKRUSDT': 50,
         },
         bb_mult={
             'XRPUSDT': 1.0,
+            '1000PEPEUSDT': 1.0,
             'DOGEUSDT': 1.0,
             '1000SHIBUSDT': 1.0,
             'AAVEUSDT': 1.0,
             'SNXUSDT': 1.0,
             'ALGOUSDT': 1.0,
+            'MKRUSDT': 1.0,
         },
         rsi_length={
             'XRPUSDT': 3,
+            '1000PEPEUSDT': 3,
             'DOGEUSDT': 3,
             '1000SHIBUSDT': 3,
             'AAVEUSDT': 3,
             'SNXUSDT': 3,
             'ALGOUSDT': 3,
+            'MKRUSDT': 3,
         },
         rsi_limit={
             'XRPUSDT': 40,
+            '1000PEPEUSDT': 40,
             'DOGEUSDT': 40,
             '1000SHIBUSDT': 40,
             'AAVEUSDT': 40,
             'SNXUSDT': 40,
             'ALGOUSDT': 40,
+            'MKRUSDT': 40,
         },
         exit_percent={
             'XRPUSDT': Decimal('1.0'),
+            '1000PEPEUSDT': Decimal('1.0'),
             'DOGEUSDT': Decimal('1.0'),
             '1000SHIBUSDT': Decimal('1.0'),
             'AAVEUSDT': Decimal('1.0'),
             'SNXUSDT': Decimal('1.0'),
             'ALGOUSDT': Decimal('1.0'),
+            'MKRUSDT': Decimal('1.0'),
         },
         tick_size={
             'XRPUSDT': Decimal('0.0001'),
+            '1000PEPEUSDT': common.fetch_tick_size(exchange, '1000PEPEUSDT'),
+            'MKRUSDT': common.fetch_tick_size(exchange, 'MKRUSDT'),
             'DOGEUSDT': Decimal('0.000010'),
             '1000SHIBUSDT': Decimal('0.000001'),
             'AAVEUSDT': Decimal('0.010'),
@@ -109,6 +155,8 @@ class TailCatchExitFastV1(bt.Strategy):
         },
         step_size={
             'XRPUSDT': Decimal('0.1'),
+            '1000PEPEUSDT': common.fetch_step_size(exchange, '1000PEPEUSDT'),
+            'MKRUSDT': common.fetch_step_size(exchange, 'MKRUSDT'),
             'DOGEUSDT': Decimal('1'),
             '1000SHIBUSDT': Decimal('1'),
             'AAVEUSDT': Decimal('0.1'),
@@ -249,9 +297,6 @@ class TailCatchExitFastV1(bt.Strategy):
                     self.order = self.buy(exectype=bt.Order.Limit, data=self.pairs[i], price=float(price), size=float(qty))
 
 if __name__ == '__main__':
-    data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
-    # data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
-    # data_path = "/Users/tjgus/Desktop/project/krtrade/backData"
     cerebro = bt.Cerebro()
     cerebro.addstrategy(TailCatchExitFastV1)
 
@@ -260,7 +305,8 @@ if __name__ == '__main__':
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
-        df = DataUtils.load_candle_data_as_df(data_path, DataUtils.COMPANY_BINANCE, pair, tick_kind)
+        download.download_candles(exchange, pair, tick_kind)
+        df = DataUtils.load_candle_data_as_df(download_dir_path, DataUtils.COMPANY_BINANCE, pair, tick_kind)
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 
@@ -285,13 +331,10 @@ if __name__ == '__main__':
     mdd = qs.stats.max_drawdown(returns)
     print(f" quanstats's my returns MDD : {mdd * 100:.2f} %")
 
-
-    # file_name = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
-    # file_name = "/Users/tjgus/Desktop/project/krtrade/backData/result/"
-    file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+    file_name = result_file_path + result_file_prefix
     for pair, tick_kind in pairs.items():
         file_name += pair + "-"
-    file_name += "TailCatchExitFastV1"
+
 
     strat = results[0]
     order_balance_list = strat.order_balance_list
@@ -300,10 +343,9 @@ if __name__ == '__main__':
     df['date'] = df['date'].dt.date
     df = df.sort_values('value', ascending=True).drop_duplicates('date').sort_index()
     df['value'] = df['value'].astype('float64')
-    # df['value'] = df['value'].pct_change()
+    df['value'] = df['value'].pct_change()
     df['date'] = pd.to_datetime(df['date'])
     df = df.dropna()
     df = df.set_index('date')
     df.index.name = 'date'
-    df.to_csv(f'{file_name}.csv')
     qs.reports.html(df['value'], output=f"{file_name}.html", download_filename=f"{file_name}.html", title=file_name)

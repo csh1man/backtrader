@@ -6,18 +6,18 @@ from api.ApiUtil import DataUtil
 from api.Api import Common, Download
 from decimal import Decimal
 
-# config_file_path = "C:\\Users\\KOSCOM\\Desktop\\각종자료\\개인자료\\krInvestment\\config.json"
-config_file_path = "C:/Users/user/Desktop/개인자료/콤트/config/config.json"
+config_file_path = "C:\\Users\\KOSCOM\\Desktop\\각종자료\\개인자료\\krInvestment\\config.json"
+# config_file_path = "C:/Users/user/Desktop/개인자료/콤트/config/config.json"
 
-# download_dir_path ="C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
-download_dir_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+download_dir_path ="C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+# download_dir_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
 # download_dir_path = "/Users/tjgus/Desktop/project/krtrade/backData"
 
-# result_file_path = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
-result_file_path = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+result_file_path = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+# result_file_path = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
 
-# file_name = "/Users/tjgus/Desktop/project/krtrade/backData/result/"
-file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+file_name = "/Users/tjgus/Desktop/project/krtrade/backData/result/"
+# file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
 
 result_file_prefix = "ByBitTrendFollowV1"
 
@@ -446,7 +446,8 @@ if __name__ == '__main__':
     df = pd.DataFrame(order_balance_list, columns=["date", "value"])
     df['date'] = pd.to_datetime(df['date'])
     df['date'] = df['date'].dt.date
-    df = df.sort_values('value', ascending=True).drop_duplicates('date').sort_index()
+    df = df.drop_duplicates('date', keep='last').sort_index()  # 각 날짜에 대해서 마지막 시간에 대한 값을 그날의 값으로 설정
+    # df = df.sort_values('value', ascending=True).drop_duplicates('date', keep='last').sort_index()
     df['value'] = df['value'].astype('float64')
     # df['value'] = df['value'].pct_change()
     df['date'] = pd.to_datetime(df['date'])
