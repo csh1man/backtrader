@@ -6,30 +6,27 @@ from api.ApiUtil import DataUtil
 from api.Api import Common, Download
 from decimal import Decimal
 
-config_file_path = "C:\\Users\\KOSCOM\\Desktop\\각종자료\\개인자료\\krInvestment\\config.json"
-# config_file_path = "C:/Users/user/Desktop/개인자료/콤트/config/config.json"
+# config_file_path = "C:\\Users\\KOSCOM\\Desktop\\각종자료\\개인자료\\krInvestment\\config.json"
+config_file_path = "C:/Users/user/Desktop/개인자료/콤트/config/config.json"
 
-download_dir_path ="C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
-# download_dir_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+# download_dir_path ="C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+download_dir_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
 # download_dir_path = "/Users/tjgus/Desktop/project/krtrade/backData"
 
-result_file_path = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
-# result_file_path = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+# result_file_path = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+result_file_path = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
 
-file_name = "/Users/tjgus/Desktop/project/krtrade/backData/result/"
-# file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+# file_name = "/Users/tjgus/Desktop/project/krtrade/backData/result/"
+file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
 
 result_file_prefix = "TailCatchExitFastV1"
 
 pairs={
     'XRPUSDT': DataUtils.CANDLE_TICK_1HOUR,
     'DOGEUSDT': DataUtils.CANDLE_TICK_1HOUR,
-    '1000SHIBUSDT': DataUtils.CANDLE_TICK_1HOUR,
-    'SNXUSDT': DataUtils.CANDLE_TICK_1HOUR,
     'MKRUSDT': DataUtils.CANDLE_TICK_1HOUR,
-    # 'AAVEUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    'AAVEUSDT': DataUtils.CANDLE_TICK_1HOUR,
     'ALGOUSDT': DataUtils.CANDLE_TICK_1HOUR,
-    # '1000PEPEUSDT': DataUtils.CANDLE_TICK_1HOUR,
 }
 
 exchange = DataUtil.BINANCE
@@ -47,6 +44,7 @@ class TailCatchExitFastV1(bt.Strategy):
             '1000SHIBUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
             'AAVEUSDT': [Decimal('2'), Decimal('4'), Decimal('6'), Decimal('8'), Decimal('16')],
             'SNXUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
+            'STORJUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
             'ALGOUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
             '1000PEPEUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
             'MKRUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
@@ -64,32 +62,37 @@ class TailCatchExitFastV1(bt.Strategy):
             },
             '1000SHIBUSDT':{
                 'bull': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
-                'def': [Decimal(4.0), Decimal(6.0), Decimal(8.0), Decimal(10.0), Decimal(12.0)],
+                'def': [Decimal(5.0), Decimal(7.0), Decimal(9.0), Decimal(11.0), Decimal(13.0)],
                 'bear': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
             },
             '1000PEPEUSDT':{
                 'bull': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
-                'def': [Decimal(4.0), Decimal(6.0), Decimal(8.0), Decimal(10.0), Decimal(12.0)],
+                'def': [Decimal(5.0), Decimal(6.0), Decimal(8.0), Decimal(10.0), Decimal(12.0)],
                 'bear': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
             },
             'AAVEUSDT':{
                 'bull': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
-                'def': [Decimal(4.0), Decimal(6.0), Decimal(8.0), Decimal(10.0), Decimal(12.0)],
+                'def': [Decimal(5.0), Decimal(6.0), Decimal(8.0), Decimal(10.0), Decimal(12.0)],
                 'bear': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
             },
             'SNXUSDT':{
                 'bull': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
-                'def': [Decimal(4.0), Decimal(6.0), Decimal(8.0), Decimal(10.0), Decimal(12.0)],
+                'def': [Decimal(5.0), Decimal(6.0), Decimal(8.0), Decimal(10.0), Decimal(12.0)],
+                'bear': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
+            },
+            'STORJUSDT':{
+                'bull': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
+                'def': [Decimal(5.0), Decimal(6.0), Decimal(8.0), Decimal(10.0), Decimal(12.0)],
                 'bear': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
             },
             'ALGOUSDT':{
                 'bull': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
-                'def': [Decimal(4.0), Decimal(6.0), Decimal(8.0), Decimal(10.0), Decimal(12.0)],
+                'def': [Decimal(5.0), Decimal(6.0), Decimal(8.0), Decimal(10.0), Decimal(12.0)],
                 'bear': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
             },
             'MKRUSDT':{
                 'bull': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
-                'def': [Decimal(4.0), Decimal(6.0), Decimal(8.0), Decimal(10.0), Decimal(12.0)],
+                'def': [Decimal(5.0), Decimal(6.0), Decimal(8.0), Decimal(10.0), Decimal(12.0)],
                 'bear': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
             }
         },
@@ -100,6 +103,7 @@ class TailCatchExitFastV1(bt.Strategy):
           '1000SHIBUSDT': 50,
           'AAVEUSDT': 50,
           'SNXUSDT': 50,
+          'STORJUSDT': 50,
           'ALGOUSDT': 50,
           'MKRUSDT': 50,
         },
@@ -110,6 +114,7 @@ class TailCatchExitFastV1(bt.Strategy):
             '1000SHIBUSDT': 1.0,
             'AAVEUSDT': 1.0,
             'SNXUSDT': 1.0,
+            'STORJUSDT': 1.0,
             'ALGOUSDT': 1.0,
             'MKRUSDT': 1.0,
         },
@@ -120,6 +125,7 @@ class TailCatchExitFastV1(bt.Strategy):
             '1000SHIBUSDT': 3,
             'AAVEUSDT': 3,
             'SNXUSDT': 3,
+            'STORJUSDT': 3,
             'ALGOUSDT': 3,
             'MKRUSDT': 3,
         },
@@ -130,6 +136,7 @@ class TailCatchExitFastV1(bt.Strategy):
             '1000SHIBUSDT': 40,
             'AAVEUSDT': 40,
             'SNXUSDT': 40,
+            'STORJUSDT': 40,
             'ALGOUSDT': 40,
             'MKRUSDT': 40,
         },
@@ -140,6 +147,7 @@ class TailCatchExitFastV1(bt.Strategy):
             '1000SHIBUSDT': Decimal('1.0'),
             'AAVEUSDT': Decimal('1.0'),
             'SNXUSDT': Decimal('1.0'),
+            'STORJUSDT': Decimal('1.0'),
             'ALGOUSDT': Decimal('1.0'),
             'MKRUSDT': Decimal('1.0'),
         },
@@ -147,6 +155,7 @@ class TailCatchExitFastV1(bt.Strategy):
             'XRPUSDT': Decimal('0.0001'),
             '1000PEPEUSDT': common.fetch_tick_size(exchange, '1000PEPEUSDT'),
             'MKRUSDT': common.fetch_tick_size(exchange, 'MKRUSDT'),
+            'STORJUSDT': common.fetch_tick_size(exchange, 'STORJUSDT'),
             'DOGEUSDT': Decimal('0.000010'),
             '1000SHIBUSDT': Decimal('0.000001'),
             'AAVEUSDT': Decimal('0.010'),
@@ -157,6 +166,7 @@ class TailCatchExitFastV1(bt.Strategy):
             'XRPUSDT': Decimal('0.1'),
             '1000PEPEUSDT': common.fetch_step_size(exchange, '1000PEPEUSDT'),
             'MKRUSDT': common.fetch_step_size(exchange, 'MKRUSDT'),
+            'STORJUSDT': common.fetch_step_size(exchange, 'STORJUSDT'),
             'DOGEUSDT': Decimal('1'),
             '1000SHIBUSDT': Decimal('1'),
             'AAVEUSDT': Decimal('0.1'),
