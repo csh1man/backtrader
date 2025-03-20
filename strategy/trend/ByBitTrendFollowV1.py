@@ -6,18 +6,15 @@ from api.ApiUtil import DataUtil
 from api.Api import Common, Download
 from decimal import Decimal
 
-# config_file_path = "C:\\Users\\KOSCOM\\Desktop\\각종자료\\개인자료\\krInvestment\\config.json"
-config_file_path = "C:/Users/user/Desktop/개인자료/콤트/config/config.json"
+config_file_path = "C:\\Users\\KOSCOM\\Desktop\\각종자료\\개인자료\\krInvestment\\config.json"
+# config_file_path = "C:/Users/user/Desktop/개인자료/콤트/config/config.json"
 
-# download_dir_path ="C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
-download_dir_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+download_dir_path ="C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+# download_dir_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
 # download_dir_path = "/Users/tjgus/Desktop/project/krtrade/backData"
 
-# result_file_path = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
-result_file_path = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
-
-# file_name = "/Users/tjgus/Desktop/project/krtrade/backData/result/"
-file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+result_file_path = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+# result_file_path = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
 
 result_file_prefix = "ByBitTrendFollowV1"
 
@@ -182,14 +179,14 @@ class ByBitTrendFollowV1(bt.Strategy):
             },
         },
         tick_size={
-            'BTCUSDT': common.fetch_tick_size(exchange, 'BTCUSDT'), #Decimal('0.10'),
-            'ETHUSDT': common.fetch_tick_size(exchange, 'ETHUSDT'), #Decimal('0.01'),
-            'SOLUSDT': common.fetch_tick_size(exchange, 'SOLUSDT'), #Decimal('0.010'),
+            'BTCUSDT': common.fetch_tick_size(exchange, 'BTCUSDT'),
+            'ETHUSDT': common.fetch_tick_size(exchange, 'ETHUSDT'),
+            'SOLUSDT': common.fetch_tick_size(exchange, 'SOLUSDT'),
         },
         step_size={
-            'BTCUSDT': common.fetch_step_size(exchange, "BTCUSDT"),#Decimal('0.001'),
-            'ETHUSDT': common.fetch_step_size(exchange, "ETHUSDT"),#Decimal('0.01'),
-            'SOLUSDT': common.fetch_step_size(exchange, "SOLUSDT"),#Decimal('0.1'),
+            'BTCUSDT': common.fetch_step_size(exchange, "BTCUSDT"),
+            'ETHUSDT': common.fetch_step_size(exchange, "ETHUSDT"),
+            'SOLUSDT': common.fetch_step_size(exchange, "SOLUSDT"),
         }
     )
 
@@ -407,7 +404,7 @@ if __name__ == '__main__':
     cerebro.addstrategy(ByBitTrendFollowV1)
 
     cerebro.broker.setcash(13000)
-    cerebro.broker.setcommission(commission=0.002, leverage=leverage)
+    cerebro.broker.setcommission(commission=0.0002, leverage=leverage)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
@@ -457,7 +454,7 @@ if __name__ == '__main__':
     df.to_csv(f'{file_name}.csv')
     qs.reports.html(df['value'], output=f"{file_name}.html", download_filename=f"{file_name}.html", title=file_name)
 
-    returns = returns[returns.index >= '2021-11-01']
+    # returns = returns[returns.index >= '2021-11-01']
     returns.index.name = 'date'
     returns.name = 'value'
     # returns['date'] = returns['date'].dt.date

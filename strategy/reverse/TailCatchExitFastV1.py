@@ -6,18 +6,15 @@ from api.ApiUtil import DataUtil
 from api.Api import Common, Download
 from decimal import Decimal
 
-# config_file_path = "C:\\Users\\KOSCOM\\Desktop\\각종자료\\개인자료\\krInvestment\\config.json"
-config_file_path = "C:/Users/user/Desktop/개인자료/콤트/config/config.json"
+config_file_path = "C:\\Users\\KOSCOM\\Desktop\\각종자료\\개인자료\\krInvestment\\config.json"
+# config_file_path = "C:/Users/user/Desktop/개인자료/콤트/config/config.json"
 
-# download_dir_path ="C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
-download_dir_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+download_dir_path ="C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+# download_dir_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
 # download_dir_path = "/Users/tjgus/Desktop/project/krtrade/backData"
 
-# result_file_path = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
-result_file_path = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
-
-# file_name = "/Users/tjgus/Desktop/project/krtrade/backData/result/"
-file_name = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+result_file_path = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+# result_file_path = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
 
 result_file_prefix = "TailCatchExitFastV1"
 
@@ -27,6 +24,7 @@ pairs={
     'MKRUSDT': DataUtils.CANDLE_TICK_1HOUR,
     'AAVEUSDT': DataUtils.CANDLE_TICK_1HOUR,
     'ALGOUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    'SNXUSDT': DataUtils.CANDLE_TICK_1HOUR,
 }
 
 exchange = DataUtil.BINANCE
@@ -42,7 +40,7 @@ class TailCatchExitFastV1(bt.Strategy):
             'XRPUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
             'DOGEUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
             '1000SHIBUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
-            'AAVEUSDT': [Decimal('2'), Decimal('4'), Decimal('6'), Decimal('8'), Decimal('16')],
+            'AAVEUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
             'SNXUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
             'STORJUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
             'ALGOUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
@@ -72,12 +70,12 @@ class TailCatchExitFastV1(bt.Strategy):
             },
             'AAVEUSDT':{
                 'bull': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
-                'def': [Decimal(5.0), Decimal(6.0), Decimal(8.0), Decimal(10.0), Decimal(12.0)],
+                'def': [Decimal(4.0), Decimal(6.0), Decimal(8.0), Decimal(10.0), Decimal(12.0)],
                 'bear': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
             },
             'SNXUSDT':{
                 'bull': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
-                'def': [Decimal(5.0), Decimal(6.0), Decimal(8.0), Decimal(10.0), Decimal(12.0)],
+                'def': [Decimal(4.0), Decimal(5.0), Decimal(7.0), Decimal(9.0), Decimal(12.0)],
                 'bear': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
             },
             'STORJUSDT':{
@@ -87,12 +85,12 @@ class TailCatchExitFastV1(bt.Strategy):
             },
             'ALGOUSDT':{
                 'bull': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
-                'def': [Decimal(5.0), Decimal(6.0), Decimal(8.0), Decimal(10.0), Decimal(12.0)],
+                'def': [Decimal(4.0), Decimal(6.0), Decimal(8.0), Decimal(10.0), Decimal(12.0)],
                 'bear': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
             },
             'MKRUSDT':{
                 'bull': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
-                'def': [Decimal(5.0), Decimal(6.0), Decimal(8.0), Decimal(10.0), Decimal(12.0)],
+                'def': [Decimal(4.0), Decimal(6.0), Decimal(8.0), Decimal(10.0), Decimal(12.0)],
                 'bear': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
             }
         },
