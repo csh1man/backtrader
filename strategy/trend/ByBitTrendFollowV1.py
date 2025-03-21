@@ -19,8 +19,8 @@ result_file_path = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestme
 result_file_prefix = "ByBitTrendFollowV1"
 
 pairs = {
-    'BTCUSDT': DataUtils.CANDLE_TICK_4HOUR,
     'ETHUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    'BTCUSDT': DataUtils.CANDLE_TICK_4HOUR,
     'SOLUSDT': DataUtils.CANDLE_TICK_4HOUR,
 }
 
@@ -203,6 +203,12 @@ class ByBitTrendFollowV1(bt.Strategy):
         self.dates = []
         
         # 롱 채널 변수 설정
+        self.long_high_bands = []
+        self.long_low_bands = []
+        self.long_low_bands2 = []
+        self.short_high_bands = []
+        self.short_low_bands = []
+
         self.adj_long_high_bands = []
         self.adj_long_low_bands = []
         self.adj_long_low_bands2 = []
@@ -247,26 +253,19 @@ class ByBitTrendFollowV1(bt.Strategy):
             name = self.names[i]
 
             long_high_band = bt.indicators.Highest(self.highs[i], period=self.p.high_band_length[name]['long'])
+            self.long_high_bands.append(long_high_band)
+
             long_low_band = bt.indicators.Lowest(self.lows[i], period=self.p.low_band_length[name]['long'])
+            self.long_low_bands.append(long_low_band)
+
             long_low_band2 = bt.indicators.Lowest(self.lows[i], period=self.p.low_band_length2[name]['long'])
-
-            adj_long_high_band = long_high_band - (long_high_band-long_low_band) * (self.p.high_band_constant[name]['long'] / 100)
-            self.adj_long_high_bands.append(adj_long_high_band)
-
-            adj_long_low_band = long_low_band + (long_high_band-long_low_band) * (self.p.low_band_constant[name]['long'] / 100)
-            self.adj_long_low_bands.append(adj_long_low_band)
-
-            adj_long_low_band2 = long_low_band2 + (long_high_band - long_low_band2) * (self.p.low_band_constant2[name]['long'] / 100)
-            self.adj_long_low_bands2.append(adj_long_low_band2)
+            self.long_low_bands2.append(long_low_band2)
 
             short_high_band = bt.indicators.Highest(self.highs[i], period=self.p.high_band_length[name]['short'])
+            self.short_high_bands.append(short_high_band)
+
             short_low_band = bt.indicators.Lowest(self.lows[i], period=self.p.low_band_length[name]['short'])
-
-            adj_short_high_band = short_high_band - (short_high_band-short_low_band) * (self.p.high_band_constant[name]['short'] / 100)
-            self.adj_short_high_bands.append(adj_short_high_band)
-
-            adj_short_low_band = short_low_band + (short_high_band-short_low_band) * (self.p.low_band_constant[name]['short'] / 100)
-            self.adj_short_low_bands.append(adj_short_low_band)
+            self.short_low_bands.append(short_low_band)
 
             long_rsi = bt.indicators.RSI_Safe(self.closes[i], period=self.p.rsi_length[name]['long'])
             self.long_rsi.append(long_rsi)
@@ -343,18 +342,25 @@ class ByBitTrendFollowV1(bt.Strategy):
             tick_size = self.p.tick_size[name]
             step_size = self.p.tick_size[name]
 
-            adj_long_high_band = DataUtils.convert_to_decimal(self.adj_long_high_bands[i][0])
-            adj_long_low_band = DataUtils.convert_to_decimal(self.adj_long_low_bands[i][0])
-            adj_long_low_band2 = DataUtils.convert_to_decimal(self.adj_long_low_bands2[i][0])
+            long_high_band = DataUtils.convert_to_decimal(self.long_high_bands[i][0])
+            long_low_band = DataUtils.convert_to_decimal(self.long_low_bands[i][0])
+            long_low_band2 = DataUtils.convert_to_decimal(self.long_low_bands2[i][0])
+            short_high_band = DataUtils.convert_to_decimal(self.short_high_bands[i][0])
+            short_low_band = DataUtils.convert_to_decimal(self.short_low_bands[i][0])
 
-            adj_short_high_band = DataUtils.convert_to_decimal(self.adj_short_high_bands[i][0])
-            adj_short_low_band = DataUtils.convert_to_decimal(self.adj_short_low_bands[i][0])
-
+            adj_long_high_band = long_high_band - (long_high_band-long_low_band) * (DataUtils.convert_to_decimal(self.p.high_band_constant[name]['long']) / Decimal('100'))
             adj_long_high_band = int(adj_long_high_band / tick_size) * tick_size
+
+            adj_long_low_band = long_low_band + (long_high_band - long_low_band) * (DataUtils.convert_to_decimal(self.p.low_band_constant[name]['long']) / Decimal('100'))
             adj_long_low_band = int(adj_long_low_band / tick_size) * tick_size
+
+            adj_long_low_band2 = long_low_band2 + (long_high_band - long_low_band2) * (DataUtils.convert_to_decimal(self.p.low_band_constant2[name]['long']) / Decimal('100'))
             adj_long_low_band2 = int(adj_long_low_band2 / tick_size) * tick_size
 
+            adj_short_high_band = short_high_band - (short_high_band - short_low_band) * (DataUtils.convert_to_decimal(self.p.high_band_constant[name]['short']) / Decimal('100'))
             adj_short_high_band = int(adj_short_high_band / tick_size) * tick_size
+
+            adj_short_low_band = short_low_band + (short_high_band - short_low_band) * (DataUtils.convert_to_decimal(self.p.low_band_constant[name]['short']) / Decimal('100'))
             adj_short_low_band = int(adj_short_low_band / tick_size) * tick_size
 
             current_position_size = self.getposition(self.pairs[i]).size
@@ -376,7 +382,7 @@ class ByBitTrendFollowV1(bt.Strategy):
                             - RSI 값이 특정 제한값보다 크다 : 일시적 상승장을 의미
                         2. 종가 >= 이평선
                             - 장기 추세가 상승장에 들어섰다는 것을 의미
-                        
+
                         -> 즉, 현재 일시적으로 상승 추세에 있으면서 장기적으로도 상승 추세에 있을 때만 지정가 주문을 넣는다.
                     '''
                     if self.long_rsi[i][0] >= self.p.rsi_limit[name]['long'] and self.closes[i][0] >= self.long_ma[i][0]:
@@ -387,7 +393,7 @@ class ByBitTrendFollowV1(bt.Strategy):
                     [숏 진입 조건 분석]
                         1. 중기 이평선 <= 장기 이평선
                             - 중,장기 이평선이 역배열이라는 것은 장기적으로 하락추세에 있다는 것을 뜻한다.
-                        
+
                         -> 즉, 장기적으로 하락 추세에 있을 경우에만 지정가 주문을 넣는다.
                     '''
                     if self.short_ma1[i][0] <= self.short_ma2[i][0]:
@@ -404,7 +410,7 @@ if __name__ == '__main__':
     cerebro.addstrategy(ByBitTrendFollowV1)
 
     cerebro.broker.setcash(13000)
-    cerebro.broker.setcommission(commission=0.0002, leverage=leverage)
+    cerebro.broker.setcommission(commission=0.001, leverage=leverage)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
