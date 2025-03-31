@@ -19,21 +19,21 @@ result_file_path = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과
 result_file_prefix = "TailCatchExitFastV1"
 
 pairs={
-    'XRPUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    # 'XRPUSDT': DataUtils.CANDLE_TICK_1HOUR,
     'DOGEUSDT': DataUtils.CANDLE_TICK_1HOUR,
-    'MKRUSDT': DataUtils.CANDLE_TICK_1HOUR,
-    'AAVEUSDT': DataUtils.CANDLE_TICK_1HOUR,
-    'ALGOUSDT': DataUtils.CANDLE_TICK_1HOUR,
-    'SNXUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    # 'MKRUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    # 'AAVEUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    # 'ALGOUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    # 'SNXUSDT': DataUtils.CANDLE_TICK_1HOUR,
 }
 
-exchange = DataUtil.BINANCE
+exchange = DataUtil.BYBIT
 leverage=3
 
 common = Common(config_file_path)
 download = Download(config_file_path, download_dir_path)
 
-class TailCatchExitFastV1(bt.Strategy):
+class TailCatchExitFastV2(bt.Strategy):
     params=dict(
         log=True,
         risks={
@@ -306,10 +306,10 @@ class TailCatchExitFastV1(bt.Strategy):
 
 if __name__ == '__main__':
     cerebro = bt.Cerebro()
-    cerebro.addstrategy(TailCatchExitFastV1)
+    cerebro.addstrategy(TailCatchExitFastV2)
 
     cerebro.broker.setcash(13000)
-    cerebro.broker.setcommission(commission=0.003, leverage=leverage)
+    cerebro.broker.setcommission(commission=0.0002, leverage=leverage)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
