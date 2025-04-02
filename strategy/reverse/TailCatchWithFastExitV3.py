@@ -16,15 +16,19 @@ download_dir_path ="C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestme
 result_file_path = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
 # result_file_path = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
 
-result_file_prefix = "TailCatchExitFastV1"
+result_file_prefix = "TailCatchExitFastV3"
 
 pairs={
-    'XRPUSDT': DataUtils.CANDLE_TICK_1HOUR,
-    'DOGEUSDT': DataUtils.CANDLE_TICK_1HOUR,
-    '1000PEPEUSDT': DataUtils.CANDLE_TICK_1HOUR,
-    'AAVEUSDT': DataUtils.CANDLE_TICK_1HOUR,
-    'ONDOUSDT': DataUtils.CANDLE_TICK_1HOUR,
     'SNXUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    'DOGEUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    # 'QTUMUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    '1000SHIBUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    'XRPUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    '1000PEPEUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    'ONDOUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    # 'STXUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    # 'ORDIUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    # 'SUIUSDT': DataUtils.CANDLE_TICK_1HOUR,
 }
 
 exchange = DataUtil.BINANCE
@@ -33,155 +37,40 @@ leverage=3
 common = Common(config_file_path)
 download = Download(config_file_path, download_dir_path)
 
-class TailCatchExitFastV1(bt.Strategy):
+class TailCatchExitFastV2(bt.Strategy):
     params=dict(
         log=True,
-        risks={
-            'XRPUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
-            'DOGEUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
-            '1000SHIBUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
-            'AAVEUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
-            'SNXUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
-            'STORJUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
-            'ONDOUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
-            '1000PEPEUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
-            'MKRUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
-        },
-        percents={
-            'XRPUSDT':{
-                'bull': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
-                'def': [Decimal(4.0), Decimal(6.0), Decimal(8.0), Decimal(10.0), Decimal(12.0)],
-                'bear': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
-            },
-            'DOGEUSDT':{
-                'bull': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
-                'def': [Decimal(4.0), Decimal(6.0), Decimal(8.0), Decimal(10.0), Decimal(12.0)],
-                'bear': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
-            },
-            '1000SHIBUSDT':{
-                'bull': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
-                'def': [Decimal(5.0), Decimal(7.0), Decimal(9.0), Decimal(11.0), Decimal(13.0)],
-                'bear': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
-            },
-            '1000PEPEUSDT':{
-                'bull': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
-                'def': [Decimal(5.0), Decimal(6.0), Decimal(8.0), Decimal(10.0), Decimal(12.0)],
-                'bear': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
-            },
-            'AAVEUSDT':{
-                'bull': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
-                'def': [Decimal(4.0), Decimal(6.0), Decimal(8.0), Decimal(10.0), Decimal(12.0)],
-                'bear': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
-            },
-            'SNXUSDT':{
-                'bull': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
-                'def': [Decimal(4.0), Decimal(5.0), Decimal(7.0), Decimal(9.0), Decimal(12.0)],
-                'bear': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
-            },
-            'STORJUSDT':{
-                'bull': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
-                'def': [Decimal(5.0), Decimal(6.0), Decimal(8.0), Decimal(10.0), Decimal(12.0)],
-                'bear': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
-            },
-            'ALGOUSDT':{
-                'bull': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
-                'def': [Decimal(4.0), Decimal(6.0), Decimal(8.0), Decimal(10.0), Decimal(12.0)],
-                'bear': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
-            },
-            'ONDOUSDT':{
-                'bull': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
-                'def': [Decimal(4.0), Decimal(6.0), Decimal(8.0), Decimal(10.0), Decimal(12.0)],
-                'bear': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
-            },
-            'MKRUSDT':{
-                'bull': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
-                'def': [Decimal(4.0), Decimal(6.0), Decimal(8.0), Decimal(10.0), Decimal(12.0)],
-                'bear': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
-            }
-        },
-        bb_length={
-          'XRPUSDT': 50,
-          '1000PEPEUSDT': 50,
-          'DOGEUSDT': 50,
-          '1000SHIBUSDT': 50,
-          'AAVEUSDT': 50,
-          'SNXUSDT': 50,
-          'STORJUSDT': 50,
-          'ALGOUSDT': 50,
-          'ONDOUSDT': 50,
-          'MKRUSDT': 50,
-        },
-        bb_mult={
-            'XRPUSDT': 1.0,
-            '1000PEPEUSDT': 1.0,
-            'DOGEUSDT': 1.0,
-            '1000SHIBUSDT': 1.0,
-            'AAVEUSDT': 1.0,
-            'SNXUSDT': 1.0,
-            'STORJUSDT': 1.0,
-            'ALGOUSDT': 1.0,
-            'ONDOUSDT': 1.0,
-            'MKRUSDT': 1.0,
-        },
-        rsi_length={
-            'XRPUSDT': 3,
-            '1000PEPEUSDT': 3,
-            'DOGEUSDT': 3,
-            '1000SHIBUSDT': 3,
-            'AAVEUSDT': 3,
-            'SNXUSDT': 3,
-            'STORJUSDT': 3,
-            'ALGOUSDT': 3,
-            'ONDOUSDT': 3,
-            'MKRUSDT': 3,
-        },
-        rsi_limit={
-            'XRPUSDT': 40,
-            '1000PEPEUSDT': 40,
-            'DOGEUSDT': 40,
-            '1000SHIBUSDT': 40,
-            'AAVEUSDT': 40,
-            'SNXUSDT': 40,
-            'STORJUSDT': 40,
-            'ALGOUSDT': 40,
-            'ONDOUSDT': 40,
-            'MKRUSDT': 40,
-        },
+        risks=[Decimal('1'), Decimal('2'), Decimal('4'), Decimal('6'), Decimal('8'), Decimal('12'), Decimal('16')],
+        percents=[Decimal(3.0), Decimal(4.0), Decimal(6.0), Decimal(8.0), Decimal(10.0), Decimal(15.0), Decimal(20.0)],
+        rsi_length=3,
+        rsi_limit=60,
         exit_percent={
-            'XRPUSDT': Decimal('1.0'),
-            '1000PEPEUSDT': Decimal('1.0'),
-            'DOGEUSDT': Decimal('1.0'),
-            '1000SHIBUSDT': Decimal('1.0'),
-            'AAVEUSDT': Decimal('1.0'),
-            'SNXUSDT': Decimal('1.0'),
-            'STORJUSDT': Decimal('1.0'),
-            'ALGOUSDT': Decimal('1.0'),
-            'ONDOUSDT': Decimal('1.0'),
-            'MKRUSDT': Decimal('1.0'),
+            'def' : Decimal('0.5'),
+            'bull': Decimal('1.0'),
         },
         tick_size={
-            'XRPUSDT': Decimal('0.0001'),
+            'SNXUSDT': common.fetch_tick_size(exchange, 'SNXUSDT'),
+            'DOGEUSDT': common.fetch_tick_size(exchange, 'DOGEUSDT'),
+            '1000SHIBUSDT': common.fetch_tick_size(exchange, '1000SHIBUSDT'),
+            'QTUMUSDT': common.fetch_tick_size(exchange, 'QTUMUSDT'),
+            'XRPUSDT': common.fetch_tick_size(exchange, 'XRPUSDT'),
             '1000PEPEUSDT': common.fetch_tick_size(exchange, '1000PEPEUSDT'),
+            'STXUSDT': common.fetch_tick_size(exchange, 'STXUSDT'),
+            'ORDIUSDT': common.fetch_tick_size(exchange, 'ORDIUSDT'),
             'ONDOUSDT': common.fetch_tick_size(exchange, 'ONDOUSDT'),
-            'MKRUSDT': common.fetch_tick_size(exchange, 'MKRUSDT'),
-            'STORJUSDT': common.fetch_tick_size(exchange, 'STORJUSDT'),
-            'DOGEUSDT': Decimal('0.000010'),
-            '1000SHIBUSDT': Decimal('0.000001'),
-            'AAVEUSDT': Decimal('0.010'),
-            'SNXUSDT': Decimal('0.001'),
-            'ALGOUSDT': Decimal('0.0001'),
+            'SUIUSDT': common.fetch_tick_size(exchange, 'RENDERUSDT'),
         },
         step_size={
-            'XRPUSDT': Decimal('0.1'),
+            'SNXUSDT': common.fetch_step_size(exchange, 'SNXUSDT'),
+            'DOGEUSDT': common.fetch_step_size(exchange, 'DOGEUSDT'),
+            '1000SHIBUSDT': common.fetch_step_size(exchange, '1000SHIBUSDT'),
+            'QTUMUSDT': common.fetch_step_size(exchange, 'QTUMUSDT'),
+            'XRPUSDT': common.fetch_step_size(exchange, 'XRPUSDT'),
             '1000PEPEUSDT': common.fetch_step_size(exchange, '1000PEPEUSDT'),
+            'STXUSDT': common.fetch_step_size(exchange, 'STXUSDT'),
+            'ORDIUSDT': common.fetch_step_size(exchange, 'ORDIUSDT'),
             'ONDOUSDT': common.fetch_step_size(exchange, 'ONDOUSDT'),
-            'MKRUSDT': common.fetch_step_size(exchange, 'MKRUSDT'),
-            'STORJUSDT': common.fetch_step_size(exchange, 'STORJUSDT'),
-            'DOGEUSDT': Decimal('1'),
-            '1000SHIBUSDT': Decimal('1'),
-            'AAVEUSDT': Decimal('0.1'),
-            'SNXUSDT': Decimal('0.1'),
-            'ALGOUSDT': Decimal('0.1'),
+            'SUIUSDT': common.fetch_step_size(exchange, 'RENDERUSDT'),
         }
     )
     def log(self, txt):
@@ -196,11 +85,6 @@ class TailCatchExitFastV1(bt.Strategy):
         self.lows = []
         self.closes = []
         self.dates = []
-
-        self.top = []
-        self.mid = []
-        self.bot = []
-
         self.rsi = []
 
         # 자산 기록용 변수 셋팅
@@ -228,12 +112,7 @@ class TailCatchExitFastV1(bt.Strategy):
         for i in range(0, len(self.pairs)):
             name = self.names[i]
 
-            bb = bt.indicators.BollingerBands(self.closes[i], period=self.p.bb_length[name], devfactor=self.p.bb_mult[name])
-            self.top.append(bb.lines.top)
-            self.mid.append(bb.lines.mid)
-            self.bot.append(bb.lines.bot)
-
-            rsi = bt.indicators.RSI_Safe(self.closes[i], period=self.p.rsi_length[name])
+            rsi = bt.indicators.RSI_Safe(self.closes[i], period=self.p.rsi_length)
             self.rsi.append(rsi)
 
     def cancel_all(self, target_name=None):
@@ -289,26 +168,24 @@ class TailCatchExitFastV1(bt.Strategy):
 
             current_position_size = self.getposition(self.pairs[i]).size
             if current_position_size > 0:
-                exit_percent = self.p.exit_percent[name]
-                if self.rsi[i][0] >= self.p.rsi_limit[name]:
-                    exit_percent = exit_percent + Decimal('0.5')
+                exit_percent = self.p.exit_percent['def']
+                if self.rsi[i][0] >= self.p.rsi_limit:
+                    exit_percent = self.p.exit_percent['bull']
+
                 exit_price = DataUtils.convert_to_decimal(self.closes[i][0]) * (Decimal(1) + exit_percent / Decimal(100))
                 exit_price = int(exit_price / self.p.tick_size[name]) * self.p.tick_size[name]
+
                 self.order = self.sell(exectype=bt.Order.Limit, data=self.pairs[i], price=float(exit_price), size=current_position_size)
 
-            percents = self.p.percents[name]['def']
-            if self.closes[i][0] >= self.top[i][0]:
-                percents = self.p.percents[name]['bull']
-            elif self.closes[i][0] < self.bot[i][0]:
-                percents = self.p.percents[name]['bear']
 
+            percents = self.p.percents
             equity = DataUtils.convert_to_decimal(self.broker.getvalue())
             for j in range(0, len(percents)):
                 percent = percents[j]
                 price = DataUtils.convert_to_decimal(self.closes[i][0]) * (Decimal(1) - percent / Decimal(100))
                 price = int(price / self.p.tick_size[name]) * self.p.tick_size[name]
 
-                risk = self.p.risks[name][j]
+                risk = self.p.risks[j]
                 qty = equity * risk / Decimal(100) / price
                 qty = int(qty / self.p.step_size[name]) * self.p.step_size[name]
 
@@ -320,10 +197,10 @@ class TailCatchExitFastV1(bt.Strategy):
 
 if __name__ == '__main__':
     cerebro = bt.Cerebro()
-    cerebro.addstrategy(TailCatchExitFastV1)
+    cerebro.addstrategy(TailCatchExitFastV2)
 
     cerebro.broker.setcash(13000)
-    cerebro.broker.setcommission(commission=0.0002, leverage=leverage)
+    cerebro.broker.setcommission(commission=0.003, leverage=leverage)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
