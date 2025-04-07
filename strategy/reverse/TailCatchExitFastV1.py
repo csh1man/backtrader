@@ -6,25 +6,29 @@ from api.ApiUtil import DataUtil
 from api.Api import Common, Download
 from decimal import Decimal
 
-config_file_path = "C:\\Users\\KOSCOM\\Desktop\\각종자료\\개인자료\\krInvestment\\config.json"
-# config_file_path = "C:/Users/user/Desktop/개인자료/콤트/config/config.json"
+# config_file_path = "C:\\Users\\KOSCOM\\Desktop\\각종자료\\개인자료\\krInvestment\\config.json"
+config_file_path = "C:/Users/user/Desktop/개인자료/콤트/config/config.json"
 
-download_dir_path ="C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
-# download_dir_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+# download_dir_path ="C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+download_dir_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
 # download_dir_path = "/Users/tjgus/Desktop/project/krtrade/backData"
 
-result_file_path = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
-# result_file_path = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+# result_file_path = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+result_file_path = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
 
 result_file_prefix = "TailCatchExitFastV1"
 
 pairs={
     'XRPUSDT': DataUtils.CANDLE_TICK_1HOUR,
     'DOGEUSDT': DataUtils.CANDLE_TICK_1HOUR,
-    '1000PEPEUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    # '1000PEPEUSDT': DataUtils.CANDLE_TICK_1HOUR,
     'AAVEUSDT': DataUtils.CANDLE_TICK_1HOUR,
-    'ONDOUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    'ALGOUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    'MKRUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    # 'ONDOUSDT': DataUtils.CANDLE_TICK_1HOUR,
     'SNXUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    # '1000SHIBUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    # 'QTUMUSDT': DataUtils.CANDLE_TICK_1HOUR,
 }
 
 exchange = DataUtil.BINANCE
@@ -40,7 +44,9 @@ class TailCatchExitFastV1(bt.Strategy):
             'XRPUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
             'DOGEUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
             '1000SHIBUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
+            'QTUMUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
             'AAVEUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
+            'ALGOUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
             'SNXUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
             'STORJUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
             'ONDOUSDT': [Decimal('3'), Decimal('5'), Decimal('7'), Decimal('9'), Decimal('16')],
@@ -59,6 +65,11 @@ class TailCatchExitFastV1(bt.Strategy):
                 'bear': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
             },
             '1000SHIBUSDT':{
+                'bull': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
+                'def': [Decimal(5.0), Decimal(7.0), Decimal(9.0), Decimal(11.0), Decimal(13.0)],
+                'bear': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
+            },
+            'QTUMUSDT':{
                 'bull': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
                 'def': [Decimal(5.0), Decimal(7.0), Decimal(9.0), Decimal(11.0), Decimal(13.0)],
                 'bear': [Decimal(5.0), Decimal(7.0), Decimal(12.0), Decimal(15.0), Decimal(20.0)],
@@ -104,6 +115,7 @@ class TailCatchExitFastV1(bt.Strategy):
           '1000PEPEUSDT': 50,
           'DOGEUSDT': 50,
           '1000SHIBUSDT': 50,
+          'QTUMUSDT': 50,
           'AAVEUSDT': 50,
           'SNXUSDT': 50,
           'STORJUSDT': 50,
@@ -116,6 +128,7 @@ class TailCatchExitFastV1(bt.Strategy):
             '1000PEPEUSDT': 1.0,
             'DOGEUSDT': 1.0,
             '1000SHIBUSDT': 1.0,
+            'QTUMUSDT': 1.0,
             'AAVEUSDT': 1.0,
             'SNXUSDT': 1.0,
             'STORJUSDT': 1.0,
@@ -128,6 +141,7 @@ class TailCatchExitFastV1(bt.Strategy):
             '1000PEPEUSDT': 3,
             'DOGEUSDT': 3,
             '1000SHIBUSDT': 3,
+            'QTUMUSDT': 3,
             'AAVEUSDT': 3,
             'SNXUSDT': 3,
             'STORJUSDT': 3,
@@ -140,6 +154,7 @@ class TailCatchExitFastV1(bt.Strategy):
             '1000PEPEUSDT': 40,
             'DOGEUSDT': 40,
             '1000SHIBUSDT': 40,
+            'QTUMUSDT': 40,
             'AAVEUSDT': 40,
             'SNXUSDT': 40,
             'STORJUSDT': 40,
@@ -152,6 +167,7 @@ class TailCatchExitFastV1(bt.Strategy):
             '1000PEPEUSDT': Decimal('1.0'),
             'DOGEUSDT': Decimal('1.0'),
             '1000SHIBUSDT': Decimal('1.0'),
+            'QTUMUSDT': Decimal('1.0'),
             'AAVEUSDT': Decimal('1.0'),
             'SNXUSDT': Decimal('1.0'),
             'STORJUSDT': Decimal('1.0'),
@@ -162,6 +178,7 @@ class TailCatchExitFastV1(bt.Strategy):
         tick_size={
             'XRPUSDT': Decimal('0.0001'),
             '1000PEPEUSDT': common.fetch_tick_size(exchange, '1000PEPEUSDT'),
+            'QTUMUSDT': common.fetch_tick_size(exchange, 'QTUMUSDT'),
             'ONDOUSDT': common.fetch_tick_size(exchange, 'ONDOUSDT'),
             'MKRUSDT': common.fetch_tick_size(exchange, 'MKRUSDT'),
             'STORJUSDT': common.fetch_tick_size(exchange, 'STORJUSDT'),
@@ -174,6 +191,7 @@ class TailCatchExitFastV1(bt.Strategy):
         step_size={
             'XRPUSDT': Decimal('0.1'),
             '1000PEPEUSDT': common.fetch_step_size(exchange, '1000PEPEUSDT'),
+            'QTUMUSDT': common.fetch_step_size(exchange, 'QTUMUSDT'),
             'ONDOUSDT': common.fetch_step_size(exchange, 'ONDOUSDT'),
             'MKRUSDT': common.fetch_step_size(exchange, 'MKRUSDT'),
             'STORJUSDT': common.fetch_step_size(exchange, 'STORJUSDT'),
@@ -323,7 +341,7 @@ if __name__ == '__main__':
     cerebro.addstrategy(TailCatchExitFastV1)
 
     cerebro.broker.setcash(13000)
-    cerebro.broker.setcommission(commission=0.0002, leverage=leverage)
+    cerebro.broker.setcommission(commission=0.001, leverage=leverage)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
