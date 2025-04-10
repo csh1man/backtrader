@@ -6,15 +6,15 @@ from api.ApiUtil import DataUtil
 from api.Api import Common, Download
 from decimal import Decimal
 
-# config_file_path = "C:\\Users\\KOSCOM\\Desktop\\각종자료\\개인자료\\krInvestment\\config.json"
-config_file_path = "C:/Users/user/Desktop/개인자료/콤트/config/config.json"
+config_file_path = "C:\\Users\\KOSCOM\\Desktop\\각종자료\\개인자료\\krInvestment\\config.json"
+# config_file_path = "C:/Users/user/Desktop/개인자료/콤트/config/config.json"
 
-# download_dir_path ="C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
-download_dir_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+download_dir_path ="C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+# download_dir_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
 # download_dir_path = "/Users/tjgus/Desktop/project/krtrade/backData"
 
-# result_file_path = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
-result_file_path = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+result_file_path = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+# result_file_path = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
 
 result_file_prefix = "TailCatchFixPercentAndUpDownPercent"
 
@@ -22,10 +22,12 @@ pairs={
     # '1000PEPEUSDT': DataUtils.CANDLE_TICK_1HOUR,
     'XRPUSDT': DataUtils.CANDLE_TICK_1HOUR,
     'DOGEUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    # 'SNXUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    # 'ONDOUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    # 'SUIUSDT': DataUtils.CANDLE_TICK_1HOUR,
     '1000SHIBUSDT': DataUtils.CANDLE_TICK_1HOUR,
-    'ALGOUSDT': DataUtils.CANDLE_TICK_1HOUR,
-    'QTUMUSDT': DataUtils.CANDLE_TICK_1HOUR,
-    'SNXUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    # 'ALGOUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    # 'QTUMUSDT': DataUtils.CANDLE_TICK_1HOUR,
 }
 
 exchange = DataUtil.BINANCE
@@ -37,15 +39,15 @@ download = Download(config_file_path, download_dir_path)
 class TailCatchFixPercentAndUpDownPercent(bt.Strategy):
     params=dict(
         log=True,
-        risks=[Decimal('0.5'), Decimal('1'), Decimal('2'), Decimal('4'), Decimal('8'), Decimal('8'), Decimal('16'), Decimal('16')],
-        percents=[Decimal('3'), Decimal('4'), Decimal('5'), Decimal('8'), Decimal('10'), Decimal('15'), Decimal('20'), Decimal('25')],
+        risks=[Decimal('1'), Decimal('2'), Decimal('4'), Decimal('8'), Decimal('16'), Decimal('20')],
+        percents=[Decimal('3'), Decimal('5'), Decimal('8'), Decimal('12'), Decimal('15'), Decimal('20')],
         add_percent=Decimal('0.5'),
         rsi_length=3,
         rsi_limit=40,
         exit_percent=Decimal('0.5'),
         check={
-            'up': 10,
-            'down': 10,
+            'up': 5,
+            'down': -5,
             'period': 5,
         },
         tick_size={
@@ -56,6 +58,7 @@ class TailCatchFixPercentAndUpDownPercent(bt.Strategy):
             'ALGOUSDT': common.fetch_tick_size(exchange, 'ALGOUSDT'),
             'QTUMUSDT': common.fetch_tick_size(exchange, 'QTUMUSDT'),
             'SNXUSDT': common.fetch_tick_size(exchange, 'SNXUSDT'),
+            'ONDOUSDT': common.fetch_tick_size(exchange, 'ONDOUSDT'),
         },
         step_size={
             '1000PEPEUSDT': common.fetch_step_size(exchange, '1000PEPEUSDT'),
@@ -65,6 +68,7 @@ class TailCatchFixPercentAndUpDownPercent(bt.Strategy):
             'ALGOUSDT': common.fetch_step_size(exchange, 'ALGOUSDT'),
             'QTUMUSDT': common.fetch_step_size(exchange, 'QTUMUSDT'),
             'SNXUSDT': common.fetch_step_size(exchange, 'SNXUSDT'),
+            'ONDOUSDT': common.fetch_step_size(exchange, 'ONDOUSDT'),
         }
     )
     def log(self, txt):
@@ -172,9 +176,9 @@ class TailCatchFixPercentAndUpDownPercent(bt.Strategy):
             for j in range(0, len(percents)):
                 percent = percents[j]
                 if current_percent >= self.p.check['up']:
-                    percent = percent + self.p.add_percent
-                elif current_percent < self.p.check['down']:
                     percent = percent - self.p.add_percent
+                elif current_percent < self.p.check['down']:
+                    percent = percent + self.p.add_percent
 
                 price = DataUtils.convert_to_decimal(self.closes[i][0]) * (Decimal(1) - percent / Decimal(100))
                 price = int(price / self.p.tick_size[name]) * self.p.tick_size[name]

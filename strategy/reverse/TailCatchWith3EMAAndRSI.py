@@ -20,12 +20,12 @@ result_file_prefix = "TailCatchWith3EMAAndRSI"
 
 pairs={
     'XRPUSDT': DataUtils.CANDLE_TICK_1HOUR,
-    'DOGEUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    # 'DOGEUSDT': DataUtils.CANDLE_TICK_1HOUR,
     # '1000PEPEUSDT': DataUtils.CANDLE_TICK_1HOUR,
     # 'ONDOUSDT': DataUtils.CANDLE_TICK_1HOUR,
-    'SNXUSDT': DataUtils.CANDLE_TICK_1HOUR,
-    '1000SHIBUSDT': DataUtils.CANDLE_TICK_1HOUR,
-    'QTUMUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    # 'SNXUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    # '1000SHIBUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    # 'QTUMUSDT': DataUtils.CANDLE_TICK_1HOUR,
 }
 
 exchange = DataUtil.BINANCE
@@ -37,12 +37,8 @@ download = Download(config_file_path, download_dir_path)
 class TailCatchWith3EMAAndRSI(bt.Strategy):
     params=dict(
         log=True,
-        risks=[Decimal('1'), Decimal('2'), Decimal('4'), Decimal('6'), Decimal('10'), Decimal('15'), Decimal('20')],
-        percents={
-            'bull': [Decimal('2'), Decimal('4'), Decimal('6'), Decimal('8'), Decimal('10'), Decimal('12'), Decimal('15')],
-            'def': [Decimal('3'), Decimal('5'), Decimal('8'), Decimal('10'), Decimal('12'), Decimal('15'), Decimal('20')],
-            'bear': [Decimal('4'), Decimal('6'), Decimal('8'), Decimal('10'), Decimal('12'), Decimal('15'), Decimal('20')],
-        },
+        risks=[Decimal('0.5'), Decimal('1'), Decimal('2'), Decimal('4'), Decimal('8'), Decimal('16')],
+        percents=[Decimal('2'), Decimal('3'), Decimal('4'), Decimal('6'), Decimal('8'), Decimal('12'), Decimal('15'), Decimal('20')],
         ma_length=[10, 20, 60],
         rsi_length=3,
         rsi_limit=40,
