@@ -29,7 +29,7 @@ class TutorialStrategy(bt.Strategy):
         self.low = self.datas[0].low
         self.close = self.datas[0].close
         self.date = self.datas[0].datetime
-        self.atr = bt.indicators.AverageTrueRange(period=self.p.atr_length)
+        self.atr = bt.indicators.AverageTrueRange(period=self.p._length)
         self.ma = bt.ind.SimpleMovingAverage(self.close, period=self.p.ma_length)
 
         # 데이터 추적용
