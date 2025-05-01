@@ -20,14 +20,14 @@ result_file_prefix = "TrendFollowWithATRScalingV1"
 
 pairs = {
     # 'BTCUSDT': DataUtils.CANDLE_TICK_4HOUR,
-    'ETHUSDT': DataUtils.CANDLE_TICK_4HOUR,
-    # 'SOLUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    # 'ETHUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    'SOLUSDT': DataUtils.CANDLE_TICK_4HOUR,
     # 'AVAXUSDT': DataUtils.CANDLE_TICK_4HOUR,
     # '1000PEPEUSDT': DataUtils.CANDLE_TICK_4HOUR,
     # '1000BONKUSDT': DataUtils.CANDLE_TICK_4HOUR,
 }
 
-exchange = DataUtil.BINANCE
+exchange = DataUtil.BYBIT
 leverage = 4
 
 common = Common(config_file_path)
@@ -37,7 +37,7 @@ download = Download(config_file_path, download_dir_path)
 class TrendFollowWithATRScalingV1(bt.Strategy):
     params = dict(
         entry_mode={  # 0 : only long, 1 : only short, 2 : long and short
-            'BTCUSDT': 2,
+            'BTCUSDT': 0,
             'ETHUSDT': 0,
             'SOLUSDT': 0,
             'AVAXUSDT': 0,
@@ -132,7 +132,7 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                 'short': 50,
             },
             'SOLUSDT': {
-                'long': 5,
+                'long': 10,
                 'short': 60,
             },
             'AVAXUSDT': {
@@ -154,11 +154,11 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                 'short': 10,
             },
             'ETHUSDT': {
-                'long': 50,
+                'long': 60,
                 'short': 5,
             },
             'SOLUSDT': {
-                'long': 50,
+                'long': 40,
                 'short': 10,
             },
             'AVAXUSDT': {
@@ -206,11 +206,11 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                 'short': 50,
             },
             'ETHUSDT': {
-                'long': 70,
+                'long': 0,
                 'short': 30,
             },
             'SOLUSDT': {
-                'long': 70,
+                'long': 0,
                 'short': 50,
             },
             'AVAXUSDT': {
@@ -253,9 +253,9 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             },
         },
         atr_length={
-            'BTCUSDT': [14, 50],
-            'ETHUSDT': [14, 50],
-            'SOLUSDT': [14, 50],
+            'BTCUSDT': [14, 30],
+            'ETHUSDT': [5, 50],
+            'SOLUSDT': [5, 50],
             'AVAXUSDT': [14, 50],
             '1000PEPEUSDT': [14, 50],
             '1000BONKUSDT': [14, 50],
@@ -371,11 +371,12 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             self.short_ma2.append(short_ma2)
 
             tr = bt.indicators.TrueRange(self.pairs[i])
-
             atr1 = bt.indicators.MovingAverageSimple(tr, period=self.p.atr_length[name][0])
+            # atr1 = bt.indicators.AverageTrueRange(self.pairs[i], period=self.p.atr_length[name][0])
             self.atr1.append(atr1)
 
             atr2 = bt.indicators.MovingAverageSimple(tr, period=self.p.atr_length[name][1])
+            # atr2 = bt.indicators.AverageTrueRange(self.pairs[i], period=self.p.atr_length[name][1])
             self.atr2.append(atr2)
 
     def cancel_all(self, target_name=None):
@@ -435,7 +436,7 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             name = self.names[i]
 
             tick_size = self.p.tick_size[name]
-            step_size = self.p.tick_size[name]
+            step_size = self.p.step_size[name]
 
             long_high_band = DataUtils.convert_to_decimal(self.long_high_bands[i][0])
             long_low_band = DataUtils.convert_to_decimal(self.long_low_bands[i][0])
@@ -443,8 +444,15 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             short_high_band = DataUtils.convert_to_decimal(self.short_high_bands[i][0])
             short_low_band = DataUtils.convert_to_decimal(self.short_low_bands[i][0])
 
-            vol_factor = DataUtils.convert_to_decimal(self.atr1[i][0]) / DataUtils.convert_to_decimal(self.atr2[i][0])
-            vol_factor = round(vol_factor / step_size) * step_size
+            atr = DataUtils.convert_to_decimal(self.atr1[i][0])
+            atr = int(atr / tick_size) * tick_size
+
+            avg_atr = DataUtils.convert_to_decimal(self.atr2[i][0])
+            avg_atr = int(avg_atr / tick_size) * tick_size
+            vol_factor = DataUtils.convert_to_decimal(atr) / DataUtils.convert_to_decimal(avg_atr)
+            self.log(f"{self.dates[i].datetime(0)} => atr : {atr}, avg atr : {avg_atr}, vol factor : {vol_factor}")
+            vol_factor = int(vol_factor / tick_size) * tick_size
+            # self.log(f'{self.dates[i].datetime(0)} => atr : {self.atr1[i][0]}, avg atr : {self.atr2[i][0]}, vol factor : {vol_factor}')
 
             adj_long_high_band = long_high_band - (long_high_band - long_low_band) * (DataUtils.convert_to_decimal(self.p.high_band_constant[name]['long']) / Decimal('100'))
             adj_long_high_band = int(adj_long_high_band / tick_size) * tick_size
@@ -458,14 +466,19 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             adj_short_low_band = short_low_band + (short_high_band - short_low_band) * (DataUtils.convert_to_decimal(self.p.low_band_constant[name]['short']) / Decimal('100'))
             adj_short_low_band = int(adj_short_low_band / tick_size) * tick_size
 
-            self.log(f'{self.dates[i].datetime(0)} => high : {adj_long_high_band}, low : {adj_long_low_band}')
             long_band_width = abs(adj_long_high_band-adj_long_low_band)
+
             long_stop_distance = long_band_width * vol_factor
+            # long_stop_distance = int(long_stop_distance / tick_size) * tick_size
+
             long_stop_price = adj_long_high_band - long_stop_distance
             long_stop_price = int(long_stop_price / tick_size) * tick_size
 
             short_band_width = abs(adj_short_low_band-adj_short_high_band)
+
             short_stop_distance = short_band_width * vol_factor
+            short_stop_distance = int(short_stop_distance / tick_size) * tick_size
+
             short_stop_price = adj_short_low_band + short_stop_distance
             short_stop_price = int(short_stop_price / tick_size) * tick_size
 
