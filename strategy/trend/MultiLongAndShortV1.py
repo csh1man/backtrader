@@ -218,7 +218,7 @@ class MultiLongAndShortV1(bt.Strategy):
             long_lowest = bt.indicators.Lowest(self.lows[i], period=self.p.high_band_length[name]['long'])
             self.long_lowest.append(long_lowest)
 
-            long_atr = bt.indicators.AverageTrueRange(self.pairs[i], period=self.p.atr['length'][name]['long'])
+            long_atr = bt.indicators.eRange(self.pairs[i], period=self.p.atr['length'][name]['long'])
             self.long_atrs.append(long_atr)
 
             short_highest = bt.indicators.Highest(self.highs[i], period=self.p.high_band_length[name]['short'])
