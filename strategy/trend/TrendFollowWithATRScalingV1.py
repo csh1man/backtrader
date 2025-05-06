@@ -6,15 +6,15 @@ from api.ApiUtil import DataUtil
 from api.Api import Common, Download
 from decimal import Decimal
 
-config_file_path = "C:\\Users\\KOSCOM\\Desktop\\각종자료\\개인자료\\krInvestment\\config.json"
-# config_file_path = "C:/Users/user/Desktop/개인자료/콤트/config/config.json"
+# config_file_path = "C:\\Users\\KOSCOM\\Desktop\\각종자료\\개인자료\\krInvestment\\config.json"
+config_file_path = "C:/Users/user/Desktop/개인자료/콤트/config/config.json"
 
-download_dir_path ="C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
-# download_dir_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+# download_dir_path ="C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+download_dir_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
 # download_dir_path = "/Users/tjgus/Desktop/project/krtrade/backData"
 
-result_file_path = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
-# result_file_path = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+# result_file_path = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+result_file_path = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
 
 result_file_prefix = "TrendFollowWithATRScalingV1"
 
@@ -27,7 +27,7 @@ pairs = {
     '1000BONKUSDT': DataUtils.CANDLE_TICK_4HOUR,
 }
 
-exchange = DataUtil.BYBIT
+exchange = DataUtil.BINANCE
 leverage = 4
 
 common = Common(config_file_path)
@@ -37,12 +37,12 @@ download = Download(config_file_path, download_dir_path)
 class TrendFollowWithATRScalingV1(bt.Strategy):
     params = dict(
         entry_mode={  # 0 : only long, 1 : only short, 2 : long and short
-            'BTCUSDT': 2,
+            'BTCUSDT': 0,
             'ETHUSDT': 2,
-            'SOLUSDT': 0,
-            'AVAXUSDT': 0,
-            '1000PEPEUSDT': 0,
-            '1000BONKUSDT': 0,
+            'SOLUSDT': 2,
+            'AVAXUSDT': 2,
+            '1000PEPEUSDT': 2,
+            '1000BONKUSDT': 2,
         },
         risk={
             'BTCUSDT': {
@@ -63,11 +63,11 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             },
             '1000PEPEUSDT': {
                 'long': Decimal('1.5'),
-                'short': Decimal('3')
+                'short': Decimal('1.5')
             },
             '1000BONKUSDT': {
                 'long': Decimal('1.5'),
-                'short': Decimal('3')
+                'short': Decimal('1.5')
             },
         },
         high_band_length={
@@ -81,18 +81,18 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             },
             'SOLUSDT': {
                 'long': 45,
-                'short': 30,
+                'short': 50,
             },
             'AVAXUSDT': {
                 'long': 45,
-                'short': 15,
+                'short': 50,
             },
             '1000PEPEUSDT': {
                 'long': 40,
-                'short': 15,
+                'short': 40,
             },
             '1000BONKUSDT': {
-                'long': 40,
+                'long': 30,
                 'short': 15,
             },
         },
@@ -107,25 +107,25 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             },
             'SOLUSDT': {
                 'long': 25,
-                'short': 50,
+                'short': 90,
             },
             'AVAXUSDT': {
                 'long': 25,
-                'short': 45,
+                'short': 75,
             },
             '1000PEPEUSDT': {
                 'long': 25,
-                'short': 45,
+                'short': 60,
             },
             '1000BONKUSDT': {
-                'long': 25,
-                'short': 45,
+                'long': 20,
+                'short': 30,
             },
         },
         high_band_constant={
             'BTCUSDT': {
                 'long': 5,
-                'short': 60,
+                'short': 55,
             },
             'ETHUSDT': {
                 'long': 5,
@@ -133,19 +133,19 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             },
             'SOLUSDT': {
                 'long': 10,
-                'short': 60,
+                'short': 40,
             },
             'AVAXUSDT': {
                 'long': 15,
-                'short': 55,
+                'short': 40,
             },
             '1000PEPEUSDT': {
                 'long': 10,
-                'short': 55,
+                'short': 40,
             },
             '1000BONKUSDT': {
                 'long': 10,
-                'short': 55,
+                'short': 0,
             },
         },
         low_band_constant={
@@ -163,15 +163,15 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             },
             'AVAXUSDT': {
                 'long': 45,
-                'short': 5,
+                'short': 10,
             },
             '1000PEPEUSDT': {
                 'long': 50,
-                'short': 5,
+                'short': 20,
             },
             '1000BONKUSDT': {
-                'long': 40,
-                'short': 5,
+                'long': 50,
+                'short': 0,
             },
         },
         rsi_length={
@@ -193,7 +193,7 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             },
             '1000PEPEUSDT': {
                 'long': 2,
-                'short': 3,
+                'short': 2,
             },
             '1000BONKUSDT': {
                 'long': 2,
@@ -214,15 +214,15 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                 'short': 50,
             },
             'AVAXUSDT': {
-                'long': 70,
+                'long': 0,
                 'short': 30,
             },
             '1000PEPEUSDT': {
-                'long': 70,
+                'long': 50,
                 'short': 30,
             },
             '1000BONKUSDT': {
-                'long': 0,
+                'long': 70,
                 'short': 30,
             },
         },
@@ -241,15 +241,15 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             },
             'AVAXUSDT': {
                 'long': 100,
-                'short': [160, 200],
+                'short': [130, 150],
             },
             '1000PEPEUSDT': {
-                'long': 120,
-                'short': [160, 200],
+                'long': 100,
+                'short': [130, 150],
             },
             '1000BONKUSDT': {
                 'long': 120,
-                'short': [160, 200],
+                'short': [60, 120],
             },
         },
         atr_length={
@@ -362,12 +362,10 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             long_ma = bt.indicators.ExponentialMovingAverage(self.closes[i], period=self.p.ma_length[name]['long'])
             self.long_ma.append(long_ma)
 
-            short_ma1 = bt.indicators.ExponentialMovingAverage(self.closes[i],
-                                                               period=self.p.ma_length[name]['short'][0])
+            short_ma1 = bt.indicators.ExponentialMovingAverage(self.closes[i], period=self.p.ma_length[name]['short'][0])
             self.short_ma1.append(short_ma1)
 
-            short_ma2 = bt.indicators.ExponentialMovingAverage(self.closes[i],
-                                                               period=self.p.ma_length[name]['short'][1])
+            short_ma2 = bt.indicators.ExponentialMovingAverage(self.closes[i], period=self.p.ma_length[name]['short'][1])
             self.short_ma2.append(short_ma2)
 
             atr1 = bt.indicators.AverageTrueRange(self.pairs[i], period=self.p.atr_length[name][0])
@@ -498,7 +496,7 @@ if __name__ == '__main__':
     cerebro.addstrategy(TrendFollowWithATRScalingV1)
 
     cerebro.broker.setcash(13000)
-    cerebro.broker.setcommission(commission=0.002, leverage=leverage)
+    cerebro.broker.setcommission(commission=0.0002, leverage=leverage)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
