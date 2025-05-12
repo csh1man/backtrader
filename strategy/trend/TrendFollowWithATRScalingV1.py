@@ -6,15 +6,15 @@ from api.ApiUtil import DataUtil
 from api.Api import Common, Download
 from decimal import Decimal
 
-# config_file_path = "C:\\Users\\KOSCOM\\Desktop\\각종자료\\개인자료\\krInvestment\\config.json"
-config_file_path = "C:/Users/user/Desktop/개인자료/콤트/config/config.json"
+config_file_path = "C:\\Users\\KOSCOM\\Desktop\\각종자료\\개인자료\\krInvestment\\config.json"
+# config_file_path = "C:/Users/user/Desktop/개인자료/콤트/config/config.json"
 
-# download_dir_path ="C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
-download_dir_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+download_dir_path ="C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+# download_dir_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
 # download_dir_path = "/Users/tjgus/Desktop/project/krtrade/backData"
 
-# result_file_path = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
-result_file_path = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+result_file_path = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+# result_file_path = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
 
 result_file_prefix = "TrendFollowWithATRScalingV1"
 
@@ -25,9 +25,10 @@ pairs = {
     'AVAXUSDT': DataUtils.CANDLE_TICK_4HOUR,
     '1000PEPEUSDT': DataUtils.CANDLE_TICK_4HOUR,
     '1000BONKUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    'ADAUSDT': DataUtils.CANDLE_TICK_4HOUR,
 }
 
-exchange = DataUtil.BINANCE
+exchange = DataUtil.BYBIT
 leverage = 4
 
 common = Common(config_file_path)
@@ -43,6 +44,7 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             'AVAXUSDT': 2,
             '1000PEPEUSDT': 2,
             '1000BONKUSDT': 2,
+            'ADAUSDT': 2,
         },
         risk={
             'BTCUSDT': {
@@ -66,6 +68,10 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                 'short': Decimal('1.5')
             },
             '1000BONKUSDT': {
+                'long': Decimal('1.5'),
+                'short': Decimal('1.5')
+            },
+            'ADAUSDT': {
                 'long': Decimal('1.5'),
                 'short': Decimal('1.5')
             },
@@ -95,6 +101,10 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                 'long': 30,
                 'short': 15,
             },
+            'ADAUSDT': {
+                'long': 50,
+                'short': 15,
+            },
         },
         low_band_length={
             'BTCUSDT': {
@@ -120,6 +130,10 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             '1000BONKUSDT': {
                 'long': 20,
                 'short': 30,
+            },
+            'ADAUSDT': {
+                'long': 15,
+                'short': 50,
             },
         },
         high_band_constant={
@@ -147,6 +161,10 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                 'long': 10,
                 'short': 0,
             },
+            'ADAUSDT': {
+                'long': -5,
+                'short': 15,
+            },
         },
         low_band_constant={
             'BTCUSDT': {
@@ -173,6 +191,10 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                 'long': 50,
                 'short': 0,
             },
+            'ADAUSDT': {
+                'long': 60,
+                'short': 0,
+            },
         },
         rsi_length={
             'BTCUSDT': {
@@ -196,6 +218,10 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                 'short': 2,
             },
             '1000BONKUSDT': {
+                'long': 2,
+                'short': 3,
+            },
+            'ADAUSDT': {
                 'long': 2,
                 'short': 3,
             },
@@ -225,6 +251,10 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                 'long': 70,
                 'short': 30,
             },
+            'ADAUSDT': {
+                'long': 0,
+                'short': 30,
+            },
         },
         ma_length={
             'BTCUSDT': {
@@ -251,6 +281,10 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                 'long': 120,
                 'short': [60, 120],
             },
+            'ADAUSDT': {
+                'long': 120,
+                'short': [160, 200],
+            },
         },
         atr_length={
             'BTCUSDT': [5, 50],
@@ -259,6 +293,7 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             'AVAXUSDT': [5, 50],
             '1000PEPEUSDT': [20, 50],
             '1000BONKUSDT': [5, 50],
+            'ADAUSDT': [5, 50],
         },
         tick_size={
             'BTCUSDT': common.fetch_tick_size(exchange, 'BTCUSDT'),
@@ -267,6 +302,7 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             'AVAXUSDT': common.fetch_tick_size(exchange, 'AVAXUSDT'),
             '1000PEPEUSDT': common.fetch_tick_size(exchange, '1000PEPEUSDT'),
             '1000BONKUSDT': common.fetch_tick_size(exchange, '1000BONKUSDT'),
+            'ADAUSDT': common.fetch_tick_size(exchange, 'ADAUSDT'),
         },
         step_size={
             'BTCUSDT': common.fetch_step_size(exchange, "BTCUSDT"),
@@ -275,6 +311,7 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             'AVAXUSDT': common.fetch_step_size(exchange, "AVAXUSDT"),
             '1000PEPEUSDT': common.fetch_step_size(exchange, "1000PEPEUSDT"),
             '1000BONKUSDT': common.fetch_step_size(exchange, "1000BONKUSDT"),
+            'ADAUSDT': common.fetch_step_size(exchange, "ADAUSDT"),
         }
     )
 
@@ -501,7 +538,7 @@ if __name__ == '__main__':
 
     for pair, tick_kind in pairs.items():
         download.download_candles(exchange, pair, tick_kind)
-        df = DataUtils.load_candle_data_as_df(download_dir_path, DataUtils.COMPANY_BYBIT, pair, tick_kind)
+        df = DataUtils.load_candle_data_as_df(download_dir_path, exchange, pair, tick_kind)
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
         cerebro.adddata(data, name=pair)
 
