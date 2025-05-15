@@ -29,6 +29,7 @@ pairs = {
     'PYTHUSDT': DataUtils.CANDLE_TICK_1HOUR,
     'HBARUSDT': DataUtils.CANDLE_TICK_1HOUR,
     'LDOUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    'CRVUSDT': DataUtils.CANDLE_TICK_1HOUR,
 }
 
 exchange = DataUtil.BINANCE
@@ -58,6 +59,7 @@ class BinanceCopyTradingV1(bt.Strategy):
             'PYTHUSDT': common.fetch_tick_size(exchange, 'PYTHUSDT'),
             'HBARUSDT': common.fetch_tick_size(exchange, 'HBARUSDT'),
             'LDOUSDT': common.fetch_tick_size(exchange, 'LDOUSDT'),
+            'CRVUSDT': common.fetch_tick_size(exchange, 'CRVUSDT'),
         },
         step_size={
             '1000PEPEUSDT': common.fetch_step_size(exchange, "1000PEPEUSDT"),
@@ -70,6 +72,7 @@ class BinanceCopyTradingV1(bt.Strategy):
             'PYTHUSDT': common.fetch_step_size(exchange, "PYTHUSDT"),
             'HBARUSDT': common.fetch_step_size(exchange, "HBARUSDT"),
             'LDOUSDT': common.fetch_step_size(exchange, "LDOUSDT"),
+            'CRVUSDT': common.fetch_step_size(exchange, "CRVUSDT"),
         }
     )
 
@@ -237,7 +240,7 @@ if __name__ == '__main__':
     cerebro.addstrategy(BinanceCopyTradingV1)
 
     cerebro.broker.setcash(13000)
-    cerebro.broker.setcommission(commission=0.001, leverage=leverage)
+    cerebro.broker.setcommission(commission=0.0002, leverage=leverage)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
