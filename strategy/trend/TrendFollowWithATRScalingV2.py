@@ -16,7 +16,7 @@ download_dir_path ="C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestme
 result_file_path = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
 # result_file_path = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
 
-result_file_prefix = "TrendFollowWithATRScalingV1"
+result_file_prefix = "TrendFollowWithATRScalingV2"
 
 pairs = {
     'BTCUSDT': DataUtils.CANDLE_TICK_4HOUR,
@@ -36,7 +36,7 @@ common = Common(config_file_path)
 download = Download(config_file_path, download_dir_path)
 
 
-class TrendFollowWithATRScalingV1(bt.Strategy):
+class TrendFollowWithATRScalingV2(bt.Strategy):
     params = dict(
         entry_mode={  # 0 : only long, 1 : only short, 2 : long and short
             'BTCUSDT': 0,
@@ -67,7 +67,7 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             },
             '1000PEPEUSDT': {
                 'long': Decimal('1.5'),
-                'short': Decimal('1.5')
+                'short': Decimal('2.0')
             },
             '1000BONKUSDT': {
                 'long': Decimal('1.5'),
@@ -108,7 +108,7 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                 'short': 15,
             },
             'ADAUSDT': {
-                'long': 50,
+                'long': 45,
                 'short': 15,
             },
             'FETUSDT': {
@@ -176,7 +176,7 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                 'short': 0,
             },
             'ADAUSDT': {
-                'long': -5,
+                'long': 5,
                 'short': 15,
             },
             'FETUSDT': {
@@ -321,14 +321,38 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             },
         },
         atr_length={
-            'BTCUSDT': [5, 50],
-            'ETHUSDT': [5, 50],
-            'SOLUSDT': [5, 50],
-            'AVAXUSDT': [5, 50],
-            '1000PEPEUSDT': [20, 50],
-            '1000BONKUSDT': [5, 50],
-            'ADAUSDT': [5, 50],
-            'FETUSDT': [14, 50],
+            'BTCUSDT': {
+                'long': [5, 50],
+                'short': [5, 50],
+    },
+            'ETHUSDT': {
+                'long' : [5, 50],
+                'short' : [5, 70],
+            },
+            'SOLUSDT': {
+                'long' : [5, 50],
+                'short' : [5, 50],
+            },
+            'AVAXUSDT': {
+                'long' : [5, 70],
+                'short' : [10, 70],
+            },
+            '1000PEPEUSDT': {
+                'long' : [20, 50],
+                'short' : [10, 50],
+            },
+            '1000BONKUSDT': {
+                'long' : [5, 50],
+                'short' : [5, 50],
+            },
+            'ADAUSDT': {
+                'long' : [5, 50],
+                'short' : [5, 50],
+            },
+            'FETUSDT': {
+                'long' : [14, 50],
+                'short' : [5, 50],
+            },
         },
         tick_size={
             'BTCUSDT': common.fetch_tick_size(exchange, 'BTCUSDT'),
@@ -386,8 +410,11 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
         self.short_ma1 = []
         self.short_ma2 = []
 
-        self.atr1 = []
-        self.atr2 = []
+        self.long_atr1 = []
+        self.long_atr2 = []
+
+        self.short_atr1 = []
+        self.short_atr2 = []
 
         # 자산 기록용 변수 셋팅
         self.order = None
@@ -442,11 +469,17 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             short_ma2 = bt.indicators.ExponentialMovingAverage(self.closes[i], period=self.p.ma_length[name]['short'][1])
             self.short_ma2.append(short_ma2)
 
-            atr1 = bt.indicators.AverageTrueRange(self.pairs[i], period=self.p.atr_length[name][0])
-            self.atr1.append(atr1)
+            long_atr1 = bt.indicators.AverageTrueRange(self.pairs[i], period=self.p.atr_length[name]['long'][0])
+            self.long_atr1.append(long_atr1)
 
-            atr2 = bt.indicators.AverageTrueRange(self.pairs[i], period=self.p.atr_length[name][1])
-            self.atr2.append(atr2)
+            long_atr2 = bt.indicators.AverageTrueRange(self.pairs[i], period=self.p.atr_length[name]['long'][1])
+            self.long_atr2.append(long_atr2)
+
+            short_atr1 = bt.indicators.AverageTrueRange(self.pairs[i], period=self.p.atr_length[name]['short'][0])
+            self.short_atr1.append(short_atr1)
+
+            short_atr2 = bt.indicators.AverageTrueRange(self.pairs[i], period=self.p.atr_length[name]['short'][1])
+            self.short_atr2.append(short_atr2)
 
     def cancel_all(self, target_name=None):
         open_orders = self.broker.get_orders_open()
@@ -513,9 +546,13 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             short_high_band = DataUtils.convert_to_decimal(self.short_high_bands[i][0])
             short_low_band = DataUtils.convert_to_decimal(self.short_low_bands[i][0])
 
-            atr = int(DataUtils.convert_to_decimal(self.atr1[i][0]) / tick_size) * tick_size
-            avg_atr = int(DataUtils.convert_to_decimal(self.atr2[i][0]) / tick_size) * tick_size
-            vol_factor = int((atr / avg_atr) / tick_size) * tick_size
+            long_atr = int(DataUtils.convert_to_decimal(self.long_atr1[i][0]) / tick_size) * tick_size
+            long_avg_atr = int(DataUtils.convert_to_decimal(self.long_atr2[i][0]) / tick_size) * tick_size
+            long_vol_factor = int((long_atr / long_avg_atr) / tick_size) * tick_size
+
+            short_atr = int(DataUtils.convert_to_decimal(self.short_atr1[i][0]) / tick_size) * tick_size
+            short_avg_atr = int(DataUtils.convert_to_decimal(self.short_atr2[i][0]) / tick_size) * tick_size
+            short_vol_factor = int((short_atr / short_avg_atr) / tick_size) * tick_size
 
             adj_long_high_band = long_high_band - (long_high_band - long_low_band) * (DataUtils.convert_to_decimal(self.p.high_band_constant[name]['long']) / Decimal('100'))
             adj_long_high_band = int(adj_long_high_band / tick_size) * tick_size
@@ -530,12 +567,12 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             adj_short_low_band = int(adj_short_low_band / tick_size) * tick_size
 
             long_band_width = abs(adj_long_high_band-adj_long_low_band)
-            long_stop_distance = long_band_width * vol_factor
+            long_stop_distance = long_band_width * long_vol_factor
             long_stop_price = adj_long_high_band - long_stop_distance
             long_stop_price = int(long_stop_price / tick_size) * tick_size
 
             short_band_width = abs(adj_short_low_band-adj_short_high_band)
-            short_stop_distance = short_band_width * vol_factor
+            short_stop_distance = short_band_width * short_vol_factor
             short_stop_price = adj_short_low_band + short_stop_distance
             short_stop_price = int(short_stop_price / tick_size) * tick_size
 
@@ -567,7 +604,7 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
 
 if __name__ == '__main__':
     cerebro = bt.Cerebro()
-    cerebro.addstrategy(TrendFollowWithATRScalingV1)
+    cerebro.addstrategy(TrendFollowWithATRScalingV2)
 
     cerebro.broker.setcash(13000)
     cerebro.broker.setcommission(commission=0.002, leverage=leverage)

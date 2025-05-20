@@ -29,7 +29,7 @@ pairs = {
     'PYTHUSDT': DataUtils.CANDLE_TICK_1HOUR,
     'HBARUSDT': DataUtils.CANDLE_TICK_1HOUR,
     'LDOUSDT': DataUtils.CANDLE_TICK_1HOUR,
-    'CRVUSDT': DataUtils.CANDLE_TICK_1HOUR,
+    # 'CRVUSDT': DataUtils.CANDLE_TICK_1HOUR,
 }
 
 exchange = DataUtil.BINANCE
