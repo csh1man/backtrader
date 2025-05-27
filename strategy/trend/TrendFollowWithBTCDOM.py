@@ -11,22 +11,20 @@ config_file_path = "C:\\Users\\KOSCOM\\Desktop\\각종자료\\개인자료\\krIn
 
 download_dir_path ="C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
 # download_dir_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
-# download_dir_path = "/Users/tjgus/Desktop/project/krtrade/backData"
 
 result_file_path = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
 # result_file_path = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
 
-result_file_prefix = "TrendFollowWithATRScalingV1"
+result_file_prefix = "TrendFollowWithBTCDOM"
 
 pairs = {
+    'BTCDOMUSDT': DataUtils.CANDLE_TICK_4HOUR,
     'BTCUSDT': DataUtils.CANDLE_TICK_4HOUR,
     'ETHUSDT': DataUtils.CANDLE_TICK_4HOUR,
     'SOLUSDT': DataUtils.CANDLE_TICK_4HOUR,
     'AVAXUSDT': DataUtils.CANDLE_TICK_4HOUR,
     '1000PEPEUSDT': DataUtils.CANDLE_TICK_4HOUR,
     '1000BONKUSDT': DataUtils.CANDLE_TICK_4HOUR,
-    # 'ADAUSDT': DataUtils.CANDLE_TICK_4HOUR,
-    # 'FETUSDT': DataUtils.CANDLE_TICK_4HOUR,
 }
 
 exchange = DataUtil.BINANCE
@@ -35,20 +33,22 @@ leverage = 4
 common = Common(config_file_path)
 download = Download(config_file_path, download_dir_path)
 
-
-class TrendFollowWithATRScalingV1(bt.Strategy):
+class TrendFollowWithBTCDOM(bt.Strategy):
     params = dict(
-        entry_mode={  # 0 : only long, 1 : only short, 2 : long and short
+        entry_mode={
+            'BTCDOMUSDT': 0,# 0 : only long, 1 : only short, 2 : long and short
             'BTCUSDT': 0,
             'ETHUSDT': 2,
             'SOLUSDT': 2,
             'AVAXUSDT': 2,
             '1000PEPEUSDT': 2,
             '1000BONKUSDT': 2,
-            'ADAUSDT': 0,
-            'FETUSDT': 0,
         },
         risk={
+            'BTCDOMUSDT': {
+                'long': Decimal('1.5'),
+                'short': Decimal('1.5')
+            },
             'BTCUSDT': {
                 'long': Decimal('1.5'),
                 'short': Decimal('1.5')
@@ -63,7 +63,7 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             },
             'AVAXUSDT': {
                 'long': Decimal('1.5'),
-                'short': Decimal('3')
+                'short': Decimal('1.5')
             },
             '1000PEPEUSDT': {
                 'long': Decimal('1.5'),
@@ -73,19 +73,52 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                 'long': Decimal('1.5'),
                 'short': Decimal('1.5')
             },
-            'ADAUSDT': {
+        },
+        risk_factor={
+            'BTCDOMUSDT': {
                 'long': Decimal('1.5'),
-                'short': Decimal('1.5')
+                'short': Decimal('1.5'),
+                'index': 3,
             },
-            'FETUSDT': {
-                'long': Decimal('1.5'),
-                'short': Decimal('1.5')
+            'BTCUSDT': {
+                'long': Decimal('2'),
+                'short': Decimal('2'),
+                'index': 2,
             },
+            'ETHUSDT': {
+                'long': Decimal('2'),
+                'short': Decimal('2'),
+                'index': 2,
+            },
+            'SOLUSDT': {
+                'long': Decimal('2'),
+                'short': Decimal('2'),
+                'index': 3,
+            },
+            'AVAXUSDT': {
+                'long': Decimal('2'),
+                'short': Decimal('2'),
+                'index': 3,
+            },
+            '1000PEPEUSDT': {
+                'long': Decimal('2'),
+                'short': Decimal('2'),
+                'index': 3,
+            },
+            '1000BONKUSDT': {
+                'long': Decimal('2'),
+                'short': Decimal('2'),
+                'index': 3,
+            }
         },
         high_band_length={
-            'BTCUSDT': {
+            'BTCDOMUSDT': {
                 'long': 45,
                 'short': 30,
+            },
+            'BTCUSDT': {
+                'long': 45,
+                'short': 15,
             },
             'ETHUSDT': {
                 'long': 40,
@@ -106,17 +139,13 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             '1000BONKUSDT': {
                 'long': 30,
                 'short': 15,
-            },
-            'ADAUSDT': {
-                'long': 50,
-                'short': 15,
-            },
-            'FETUSDT': {
-                'long': 45,
-                'short': 15,
-            },
+            }
         },
         low_band_length={
+            'BTCDOMUSDT': {
+                'long': 25,
+                'short': 50,
+            },
             'BTCUSDT': {
                 'long': 25,
                 'short': 50,
@@ -140,20 +169,16 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             '1000BONKUSDT': {
                 'long': 20,
                 'short': 30,
-            },
-            'ADAUSDT': {
-                'long': 15,
-                'short': 50,
-            },
-            'FETUSDT': {
-                'long': 30,
-                'short': 50,
-            },
+            }
         },
         high_band_constant={
-            'BTCUSDT': {
+            'BTCDOMUSDT': {
                 'long': 5,
                 'short': 55,
+            },
+            'BTCUSDT': {
+                'long': 5,
+                'short': 60,
             },
             'ETHUSDT': {
                 'long': 5,
@@ -174,20 +199,16 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             '1000BONKUSDT': {
                 'long': 10,
                 'short': 0,
-            },
-            'ADAUSDT': {
-                'long': -5,
-                'short': 15,
-            },
-            'FETUSDT': {
-                'long': 5,
-                'short': 15,
-            },
+            }
         },
         low_band_constant={
-            'BTCUSDT': {
+            'BTCDOMUSDT': {
                 'long': 50,
                 'short': 10,
+            },
+            'BTCUSDT': {
+                'long': 50,
+                'short': 5,
             },
             'ETHUSDT': {
                 'long': 50,
@@ -208,24 +229,20 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             '1000BONKUSDT': {
                 'long': 50,
                 'short': 0,
-            },
-            'ADAUSDT': {
-                'long': 60,
-                'short': 0,
-            },
-            'FETUSDT': {
-                'long': 55,
-                'short': 0,
-            },
+            }
         },
         rsi_length={
+            'BTCDOMUSDT': {
+                'long': 2,
+                'short': 14,
+            },
             'BTCUSDT': {
                 'long': 2,
                 'short': 14,
             },
             'ETHUSDT': {
                 'long': 2,
-                'short': 3,
+                'short': 14,
             },
             'SOLUSDT': {
                 'long': 2,
@@ -237,29 +254,25 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             },
             '1000PEPEUSDT': {
                 'long': 2,
-                'short': 2,
+                'short': 14,
             },
             '1000BONKUSDT': {
                 'long': 2,
                 'short': 3,
-            },
-            'ADAUSDT': {
-                'long': 2,
-                'short': 3,
-            },
-            'FETUSDT': {
-                'long': 2,
-                'short': 3,
-            },
+            }
         },
         rsi_limit={
+            'BTCDOMUSDT': {
+                'long': 0,
+                'short': 50,
+            },
             'BTCUSDT': {
                 'long': 0,
                 'short': 50,
             },
             'ETHUSDT': {
                 'long': 0,
-                'short': 30,
+                'short': 50,
             },
             'SOLUSDT': {
                 'long': 0,
@@ -267,33 +280,29 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             },
             'AVAXUSDT': {
                 'long': 0,
-                'short': 30,
+                'short': 50,
             },
             '1000PEPEUSDT': {
                 'long': 50,
-                'short': 30,
+                'short': 50,
             },
             '1000BONKUSDT': {
                 'long': 70,
-                'short': 30,
-            },
-            'ADAUSDT': {
-                'long': 0,
-                'short': 30,
-            },
-            'FETUSDT': {
-                'long': 0,
-                'short': 30,
-            },
+                'short': 50,
+            }
         },
         ma_length={
-            'BTCUSDT': {
+            'BTCDOMUSDT': {
                 'long': 120,
                 'short': [160, 200]
             },
+            'BTCUSDT': {
+                'long': 120,
+                'short': [150, 200]
+            },
             'ETHUSDT': {
                 'long': 200,
-                'short': [150, 200],
+                'short': [150, 200]
             },
             'SOLUSDT': {
                 'long': 120,
@@ -301,54 +310,43 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             },
             'AVAXUSDT': {
                 'long': 100,
-                'short': [130, 150],
+                'short': [130, 150]
             },
             '1000PEPEUSDT': {
                 'long': 100,
-                'short': [130, 150],
+                'short': [130, 150]
             },
             '1000BONKUSDT': {
                 'long': 120,
-                'short': [60, 120],
-            },
-            'ADAUSDT': {
-                'long': 120,
-                'short': [160, 200],
-            },
-            'FETUSDT': {
-                'long': 100,
-                'short': [160, 200],
-            },
+                'short': [60, 120]
+            }
         },
         atr_length={
+            'BTCDOMUSDT': [5, 50],
             'BTCUSDT': [5, 50],
             'ETHUSDT': [5, 50],
             'SOLUSDT': [5, 50],
             'AVAXUSDT': [5, 50],
             '1000PEPEUSDT': [20, 50],
             '1000BONKUSDT': [5, 50],
-            'ADAUSDT': [5, 50],
-            'FETUSDT': [14, 50],
         },
         tick_size={
+            'BTCDOMUSDT': common.fetch_tick_size(exchange, 'BTCDOMUSDT'),
             'BTCUSDT': common.fetch_tick_size(exchange, 'BTCUSDT'),
             'ETHUSDT': common.fetch_tick_size(exchange, 'ETHUSDT'),
             'SOLUSDT': common.fetch_tick_size(exchange, 'SOLUSDT'),
             'AVAXUSDT': common.fetch_tick_size(exchange, 'AVAXUSDT'),
             '1000PEPEUSDT': common.fetch_tick_size(exchange, '1000PEPEUSDT'),
             '1000BONKUSDT': common.fetch_tick_size(exchange, '1000BONKUSDT'),
-            'ADAUSDT': common.fetch_tick_size(exchange, 'ADAUSDT'),
-            'FETUSDT': common.fetch_tick_size(exchange, 'FETUSDT'),
         },
         step_size={
+            'BTCDOMUSDT': common.fetch_step_size(exchange, "BTCDOMUSDT"),
             'BTCUSDT': common.fetch_step_size(exchange, "BTCUSDT"),
             'ETHUSDT': common.fetch_step_size(exchange, "ETHUSDT"),
             'SOLUSDT': common.fetch_step_size(exchange, "SOLUSDT"),
             'AVAXUSDT': common.fetch_step_size(exchange, "AVAXUSDT"),
             '1000PEPEUSDT': common.fetch_step_size(exchange, "1000PEPEUSDT"),
             '1000BONKUSDT': common.fetch_step_size(exchange, "1000BONKUSDT"),
-            'ADAUSDT': common.fetch_step_size(exchange, "ADAUSDT"),
-            'FETUSDT': common.fetch_step_size(exchange, "FETUSDT"),
         }
     )
 
@@ -436,10 +434,12 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             long_ma = bt.indicators.ExponentialMovingAverage(self.closes[i], period=self.p.ma_length[name]['long'])
             self.long_ma.append(long_ma)
 
-            short_ma1 = bt.indicators.ExponentialMovingAverage(self.closes[i], period=self.p.ma_length[name]['short'][0])
+            short_ma1 = bt.indicators.ExponentialMovingAverage(self.closes[i],
+                                                               period=self.p.ma_length[name]['short'][0])
             self.short_ma1.append(short_ma1)
 
-            short_ma2 = bt.indicators.ExponentialMovingAverage(self.closes[i], period=self.p.ma_length[name]['short'][1])
+            short_ma2 = bt.indicators.ExponentialMovingAverage(self.closes[i],
+                                                               period=self.p.ma_length[name]['short'][1])
             self.short_ma2.append(short_ma2)
 
             atr1 = bt.indicators.AverageTrueRange(self.pairs[i], period=self.p.atr_length[name][0])
@@ -500,8 +500,9 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             name = self.names[i]
             self.cancel_all(target_name=name)
 
+        # BTCDOM은 값 자체로 지표이므로 index는 1부터 진행한다.
         equity = DataUtils.convert_to_decimal(self.broker.getvalue())
-        for i in range(0, len(self.pairs)):
+        for i in range(1, len(self.pairs)):
             name = self.names[i]
 
             tick_size = self.p.tick_size[name]
@@ -517,24 +518,28 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             avg_atr = int(DataUtils.convert_to_decimal(self.atr2[i][0]) / tick_size) * tick_size
             vol_factor = int((atr / avg_atr) / tick_size) * tick_size
 
-            adj_long_high_band = long_high_band - (long_high_band - long_low_band) * (DataUtils.convert_to_decimal(self.p.high_band_constant[name]['long']) / Decimal('100'))
+            adj_long_high_band = long_high_band - (long_high_band - long_low_band) * (
+                        DataUtils.convert_to_decimal(self.p.high_band_constant[name]['long']) / Decimal('100'))
             adj_long_high_band = int(adj_long_high_band / tick_size) * tick_size
 
-            adj_long_low_band = long_low_band + (long_high_band - long_low_band) * (DataUtils.convert_to_decimal(self.p.low_band_constant[name]['long']) / Decimal('100'))
+            adj_long_low_band = long_low_band + (long_high_band - long_low_band) * (
+                        DataUtils.convert_to_decimal(self.p.low_band_constant[name]['long']) / Decimal('100'))
             adj_long_low_band = int(adj_long_low_band / tick_size) * tick_size
 
-            adj_short_high_band = short_high_band - (short_high_band - short_low_band) * (DataUtils.convert_to_decimal(self.p.high_band_constant[name]['short']) / Decimal('100'))
+            adj_short_high_band = short_high_band - (short_high_band - short_low_band) * (
+                        DataUtils.convert_to_decimal(self.p.high_band_constant[name]['short']) / Decimal('100'))
             adj_short_high_band = int(adj_short_high_band / tick_size) * tick_size
 
-            adj_short_low_band = short_low_band + (short_high_band - short_low_band) * (DataUtils.convert_to_decimal(self.p.low_band_constant[name]['short']) / Decimal('100'))
+            adj_short_low_band = short_low_band + (short_high_band - short_low_band) * (
+                        DataUtils.convert_to_decimal(self.p.low_band_constant[name]['short']) / Decimal('100'))
             adj_short_low_band = int(adj_short_low_band / tick_size) * tick_size
 
-            long_band_width = abs(adj_long_high_band-adj_long_low_band)
+            long_band_width = abs(adj_long_high_band - adj_long_low_band)
             long_stop_distance = long_band_width * vol_factor
             long_stop_price = adj_long_high_band - long_stop_distance
             long_stop_price = int(long_stop_price / tick_size) * tick_size
 
-            short_band_width = abs(adj_short_low_band-adj_short_high_band)
+            short_band_width = abs(adj_short_low_band - adj_short_high_band)
             short_stop_distance = short_band_width * vol_factor
             short_stop_price = adj_short_low_band + short_stop_distance
             short_stop_price = int(short_stop_price / tick_size) * tick_size
@@ -543,41 +548,68 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             if current_position_size == 0:
                 entry_mode = self.p.entry_mode[name]
 
+                BTCDOM_INDEX = self.p.risk_factor[name]['index']
+
                 # 롱 포지션 사이즈 계산
-                long_qty = equity * (self.p.risk[name]['long'] / Decimal('100')) / long_stop_distance
+                long_risk = self.p.risk[name]['long']
+                # 도미넌스가 줄어들었음 -> 비트코인에 대한 관심이 줄어들고 알트코인으로 관심이 쏠렸음을 의미
+                if self.closes[0][0] < self.closes[0][-BTCDOM_INDEX]:
+                    if name != 'BTCUSDT': # 비트 코인이 아닐 경우에는 리스크 사이즈 키움
+                        long_risk = long_risk * self.p.risk_factor[name]['long']
+
+                long_qty = equity * (long_risk / Decimal('100')) / long_stop_distance
                 long_qty = int(long_qty / step_size) * step_size
 
                 # 숏 포지션 사이즈 계산
-                short_qty = equity * (self.p.risk[name]['short'] / Decimal('100')) / short_stop_distance
+                short_risk = self.p.risk[name]['short']
+                # 도미넌스가 상승함. -> 비트코인에 대한 관심은 커지고 알트코인에 대한 관심은 부정적으로 변함을 의미.
+                if self.closes[0][0] >= self.closes[0][-BTCDOM_INDEX]:
+                    if name != 'BTCUSDT':
+                        short_risk = short_risk * self.p.risk_factor[name]['short']
+
+                short_qty = equity * (short_risk / Decimal('100')) / short_stop_distance
                 short_qty = int(short_qty / step_size) * step_size
 
                 if entry_mode in [0, 2]:  # long position 진입
-                    if self.long_rsi[i][0] >= self.p.rsi_limit[name]['long'] and self.closes[i][0] >= self.long_ma[i][0]:
-                        self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(adj_long_high_band), size=float(long_qty))
+                    if self.long_rsi[i][0] >= self.p.rsi_limit[name]['long'] and self.closes[i][0] >= self.long_ma[i][
+                        0]:
+                        self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i],
+                                              price=float(adj_long_high_band), size=float(long_qty))
 
                 if entry_mode in [1, 2]:  # short position 진입
                     if self.short_ma1[i][0] <= self.short_ma2[i][0]:
-                        self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i],price=float(adj_short_low_band), size=float(short_qty))
+                        self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i],
+                                               price=float(adj_short_low_band), size=float(short_qty))
 
             elif current_position_size > 0:
-                self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], size=float(current_position_size), price=float(long_stop_price))
+                self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], size=float(current_position_size),
+                                       price=float(long_stop_price))
             elif current_position_size < 0:
-                self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i],size=float(abs(current_position_size)), price=float(short_stop_price))
-
+                self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i],
+                                      size=float(abs(current_position_size)), price=float(short_stop_price))
 
 if __name__ == '__main__':
     cerebro = bt.Cerebro()
-    cerebro.addstrategy(TrendFollowWithATRScalingV1)
+    cerebro.addstrategy(TrendFollowWithBTCDOM)
 
     cerebro.broker.setcash(13000)
-    cerebro.broker.setcommission(commission=0.002, leverage=leverage)
+    cerebro.broker.setcommission(commission=0.002,leverage=leverage)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
-    for pair, tick_kind in pairs.items():
-        download.download_candles(exchange, pair, tick_kind)
-        df = DataUtils.load_candle_data_as_df(download_dir_path, exchange, pair, tick_kind)
+    keys = list(pairs.keys())
+    for i in range(0, len(keys)):
+        name = keys[i]
+        tick_kind = pairs[name]
+        df = None
+        if i == 0:
+            download.download_candles(DataUtil.BINANCE, name, tick_kind)
+            df = DataUtils.load_candle_data_as_df(download_dir_path, DataUtil.BINANCE, name, tick_kind)
+        else:
+            download.download_candles(exchange, name, tick_kind)
+            df = DataUtils.load_candle_data_as_df(download_dir_path, exchange, name, tick_kind)
+
         data = bt.feeds.PandasData(dataname=df, datetime='datetime')
-        cerebro.adddata(data, name=pair)
+        cerebro.adddata(data,name=name)
 
     before_balance = cerebro.broker.getvalue()
     print('Before Portfolio Value: %.2f' % before_balance)
