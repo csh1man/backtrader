@@ -25,11 +25,11 @@ pairs = {
     'AVAXUSDT': DataUtils.CANDLE_TICK_4HOUR,
     '1000PEPEUSDT': DataUtils.CANDLE_TICK_4HOUR,
     '1000BONKUSDT': DataUtils.CANDLE_TICK_4HOUR,
-    # 'ADAUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    'ADAUSDT': DataUtils.CANDLE_TICK_4HOUR,
     # 'FETUSDT': DataUtils.CANDLE_TICK_4HOUR,
 }
 
-exchange = DataUtil.BINANCE
+exchange = DataUtil.BYBIT
 leverage = 4
 
 common = Common(config_file_path)
@@ -108,7 +108,7 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                 'short': 15,
             },
             'ADAUSDT': {
-                'long': 50,
+                'long': 40,
                 'short': 15,
             },
             'FETUSDT': {
@@ -176,7 +176,7 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                 'short': 0,
             },
             'ADAUSDT': {
-                'long': -5,
+                'long': 0,
                 'short': 15,
             },
             'FETUSDT': {
@@ -210,7 +210,7 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                 'short': 0,
             },
             'ADAUSDT': {
-                'long': 60,
+                'long': 65,
                 'short': 0,
             },
             'FETUSDT': {
@@ -327,7 +327,7 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             'AVAXUSDT': [5, 50],
             '1000PEPEUSDT': [20, 50],
             '1000BONKUSDT': [5, 50],
-            'ADAUSDT': [5, 50],
+            'ADAUSDT': [5, 70],
             'FETUSDT': [14, 50],
         },
         tick_size={
@@ -569,8 +569,8 @@ if __name__ == '__main__':
     cerebro = bt.Cerebro()
     cerebro.addstrategy(TrendFollowWithATRScalingV1)
 
-    cerebro.broker.setcash(13000)
-    cerebro.broker.setcommission(commission=0.002, leverage=leverage)
+    cerebro.broker.setcash(80000)
+    cerebro.broker.setcommission(commission=0.0002, leverage=leverage)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
@@ -620,7 +620,7 @@ if __name__ == '__main__':
     df.to_csv(f'{file_name}.csv')
     qs.reports.html(df['value'], output=f"{file_name}.html", download_filename=f"{file_name}.html", title=file_name)
 
-    # returns = returns[returns.index >= '2021-11-01']
+    returns = returns[returns.index >= '2023-04-30']
     returns.index.name = 'date'
     returns.name = 'value'
     # returns['date'] = returns['date'].dt.date

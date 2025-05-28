@@ -27,7 +27,7 @@ pairs = {
     '1000BONKUSDT': DataUtils.CANDLE_TICK_4HOUR,
 }
 
-exchange = DataUtil.BINANCE
+exchange = DataUtil.BYBIT
 leverage = 4
 
 common = Common(config_file_path)
@@ -63,7 +63,7 @@ class TrendFollowWithBTCDOM(bt.Strategy):
             },
             'AVAXUSDT': {
                 'long': Decimal('1.5'),
-                'short': Decimal('1.5')
+                'short': Decimal('3')
             },
             '1000PEPEUSDT': {
                 'long': Decimal('1.5'),
@@ -86,28 +86,28 @@ class TrendFollowWithBTCDOM(bt.Strategy):
                 'index': 2,
             },
             'ETHUSDT': {
-                'long': Decimal('2'),
-                'short': Decimal('2'),
+                'long': Decimal('1.5'),
+                'short': Decimal('1.5'),
                 'index': 2,
             },
             'SOLUSDT': {
-                'long': Decimal('2'),
-                'short': Decimal('2'),
-                'index': 3,
+                'long': Decimal('1.5'),
+                'short': Decimal('1.5'),
+                'index': 2,
             },
             'AVAXUSDT': {
-                'long': Decimal('2'),
-                'short': Decimal('2'),
+                'long': Decimal('1.5'),
+                'short': Decimal('1.5'),
                 'index': 3,
             },
             '1000PEPEUSDT': {
-                'long': Decimal('2'),
-                'short': Decimal('2'),
+                'long': Decimal('1.5'),
+                'short': Decimal('1.5'),
                 'index': 3,
             },
             '1000BONKUSDT': {
-                'long': Decimal('2'),
-                'short': Decimal('2'),
+                'long': Decimal('1.5'),
+                'short': Decimal('1.5'),
                 'index': 3,
             }
         },
@@ -652,7 +652,7 @@ if __name__ == '__main__':
     df.to_csv(f'{file_name}.csv')
     qs.reports.html(df['value'], output=f"{file_name}.html", download_filename=f"{file_name}.html", title=file_name)
 
-    # returns = returns[returns.index >= '2021-11-01']
+    returns = returns[returns.index >= '2023-04-01']
     returns.index.name = 'date'
     returns.name = 'value'
     # returns['date'] = returns['date'].dt.date
