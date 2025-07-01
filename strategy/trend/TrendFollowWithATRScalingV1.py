@@ -20,17 +20,17 @@ result_file_prefix = "TrendFollowWithATRScalingV1"
 
 pairs = {
     'BTCUSDT': DataUtils.CANDLE_TICK_4HOUR,
-    'ETHUSDT': DataUtils.CANDLE_TICK_4HOUR,
-    'SOLUSDT': DataUtils.CANDLE_TICK_4HOUR,
-    'AVAXUSDT': DataUtils.CANDLE_TICK_4HOUR,
-    '1000PEPEUSDT': DataUtils.CANDLE_TICK_4HOUR,
-    '1000BONKUSDT': DataUtils.CANDLE_TICK_4HOUR,
-    'ADAUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    # 'ETHUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    # 'SOLUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    # 'AVAXUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    # '1000PEPEUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    # '1000BONKUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    # 'ADAUSDT': DataUtils.CANDLE_TICK_4HOUR,
     # 'FETUSDT': DataUtils.CANDLE_TICK_4HOUR,
 }
 
 exchange = DataUtil.BYBIT
-leverage = 4
+leverage = 10
 
 common = Common(config_file_path)
 download = Download(config_file_path, download_dir_path)
@@ -502,32 +502,49 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
 
         equity = DataUtils.convert_to_decimal(self.broker.getvalue())
         for i in range(0, len(self.pairs)):
+            cash = DataUtils.convert_to_decimal(self.broker.get_cash())
             name = self.names[i]
 
             tick_size = self.p.tick_size[name]
             step_size = self.p.step_size[name]
-
+            
+            '''
+            롱 고가/저가 채널 생성
+            '''
             long_high_band = DataUtils.convert_to_decimal(self.long_high_bands[i][0])
             long_low_band = DataUtils.convert_to_decimal(self.long_low_bands[i][0])
-
-            short_high_band = DataUtils.convert_to_decimal(self.short_high_bands[i][0])
-            short_low_band = DataUtils.convert_to_decimal(self.short_low_bands[i][0])
-
-            atr = int(DataUtils.convert_to_decimal(self.atr1[i][0]) / tick_size) * tick_size
-            avg_atr = int(DataUtils.convert_to_decimal(self.atr2[i][0]) / tick_size) * tick_size
-            vol_factor = int((atr / avg_atr) / tick_size) * tick_size
-
+            '''
+            롱 조정 고가 채널 생성
+            '''
             adj_long_high_band = long_high_band - (long_high_band - long_low_band) * (DataUtils.convert_to_decimal(self.p.high_band_constant[name]['long']) / Decimal('100'))
             adj_long_high_band = int(adj_long_high_band / tick_size) * tick_size
-
+            '''
+            롱 조정 저가 채널 생성
+            '''
             adj_long_low_band = long_low_band + (long_high_band - long_low_band) * (DataUtils.convert_to_decimal(self.p.low_band_constant[name]['long']) / Decimal('100'))
             adj_long_low_band = int(adj_long_low_band / tick_size) * tick_size
 
+            '''
+            숏 고가/저가 채널 생성
+            '''
+            short_high_band = DataUtils.convert_to_decimal(self.short_high_bands[i][0])
+            short_low_band = DataUtils.convert_to_decimal(self.short_low_bands[i][0])
+
+            '''
+            숏 조정 고가/저가 채널 생성
+            '''
             adj_short_high_band = short_high_band - (short_high_band - short_low_band) * (DataUtils.convert_to_decimal(self.p.high_band_constant[name]['short']) / Decimal('100'))
             adj_short_high_band = int(adj_short_high_band / tick_size) * tick_size
 
             adj_short_low_band = short_low_band + (short_high_band - short_low_band) * (DataUtils.convert_to_decimal(self.p.low_band_constant[name]['short']) / Decimal('100'))
             adj_short_low_band = int(adj_short_low_band / tick_size) * tick_size
+
+            '''
+            변동성 계수 생성 
+            '''
+            atr = int(DataUtils.convert_to_decimal(self.atr1[i][0]) / tick_size) * tick_size
+            avg_atr = int(DataUtils.convert_to_decimal(self.atr2[i][0]) / tick_size) * tick_size
+            vol_factor = int((atr / avg_atr) / tick_size) * tick_size
 
             long_band_width = abs(adj_long_high_band-adj_long_low_band)
             long_stop_distance = long_band_width * vol_factor
@@ -551,13 +568,29 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                 short_qty = equity * (self.p.risk[name]['short'] / Decimal('100')) / short_stop_distance
                 short_qty = int(short_qty / step_size) * step_size
 
+                # self.log(f'[{name}] {self.dates[i].datetime(0)} -> adj long high band : {adj_long_high_band}, adj long low band : {adj_long_low_band}')
                 if entry_mode in [0, 2]:  # long position 진입
                     if self.long_rsi[i][0] >= self.p.rsi_limit[name]['long'] and self.closes[i][0] >= self.long_ma[i][0]:
-                        self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(adj_long_high_band), size=float(long_qty))
+                        margin = long_qty * adj_long_high_band / Decimal(leverage)
+                        # self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(adj_long_high_band), size=float(long_qty))
+                        if cash >= margin:
+                           self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(adj_long_high_band), size=float(long_qty))
+                        else:
+                            long_qty = cash * Decimal(leverage) / adj_long_high_band
+                            long_qty = int(long_qty/step_size) * step_size
+                            self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(adj_long_high_band), size=float(long_qty))
 
                 if entry_mode in [1, 2]:  # short position 진입
                     if self.short_ma1[i][0] <= self.short_ma2[i][0]:
-                        self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i],price=float(adj_short_low_band), size=float(short_qty))
+                        margin = short_qty * adj_short_low_band / Decimal(leverage)
+                        # self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], price=float(adj_short_low_band), size=float(short_qty))
+                        if cash >= margin:
+                            self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i],price=float(adj_short_low_band), size=float(short_qty))
+                        else:
+                            short_qty = cash * Decimal(leverage) * adj_short_low_band
+                            short_qty = int(short_qty/step_size) * step_size
+                            self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], price=float(adj_short_low_band), size=float(short_qty))
+
 
             elif current_position_size > 0:
                 self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], size=float(current_position_size), price=float(long_stop_price))
@@ -620,7 +653,8 @@ if __name__ == '__main__':
     df.to_csv(f'{file_name}.csv')
     qs.reports.html(df['value'], output=f"{file_name}.html", download_filename=f"{file_name}.html", title=file_name)
 
-    returns = returns[returns.index >= '2023-04-30']
+    returns = returns[returns.index >= '2025-06-01']
+    returns = returns[returns.index < '2025-07-01']
     returns.index.name = 'date'
     returns.name = 'value'
     # returns['date'] = returns['date'].dt.date
