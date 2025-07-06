@@ -79,6 +79,9 @@ class TimeUtil:
             closest_candle_hour = 1 + (current_time.hour - 1) // 4 * 4
             latest_time = current_time.replace(hour=closest_candle_hour, minute=0, second=0, microsecond=0)
 
+        elif timeframe == TimeUtil.CANDLE_TIMEFRAME_1DAY:
+            latest_time = current_time.replace(hour=0, minute=0, second=0, microsecond=0)
+
         else:
             raise ValueError("Invalid timeframe")
 
