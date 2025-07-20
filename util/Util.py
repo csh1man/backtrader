@@ -61,6 +61,7 @@ class DataUtils:
     COMPANY_BINANCE = "BINANCE"
     COMPANY_UPBIT = "UPBIT"
     COMPANY_BITHUMB = "BITHUMB"
+    COMPANY_NASDAQ = "nasdaq"
 
     """
     캔들 데이터가 저장된 디렉토리 경로 저장
