@@ -15,6 +15,7 @@ import hmac
 import jwt
 from hashlib import sha512
 
+
 class ApiBase:
     def __init__(self, file_path, exchange_name, base_url):
         # 공통된 config 로드
@@ -131,7 +132,7 @@ class ByBit(ApiBase):
             "symbol": symbol,
             "interval": TimeUtil.get_timeframe(DataUtil.BYBIT, timeframe),
             "start": TimeUtil.str_to_timestamp(start, True),
-            "end": TimeUtil.str_to_timestamp(to, True), # endTime 캔들은 미포함
+            "end": TimeUtil.str_to_timestamp(to, True),  # endTime 캔들은 미포함
             "limit": count
         }
 
@@ -170,7 +171,7 @@ class ByBit(ApiBase):
             "symbol": symbol,
             "interval": TimeUtil.get_timeframe(DataUtil.BYBIT, timeframe),
             "start": TimeUtil.str_to_timestamp(start, True),
-            "end": TimeUtil.str_to_timestamp(to, True), # endTime 캔들은 미포함
+            "end": TimeUtil.str_to_timestamp(to, True),  # endTime 캔들은 미포함
             "limit": count
         }
 
@@ -227,6 +228,7 @@ class ByBit(ApiBase):
             TimeUtil.delay(0.8)
 
         return total_candles
+
 
 class Binance(ApiBase):
     def __init__(self, file_path: str):
@@ -301,7 +303,7 @@ class Binance(ApiBase):
             "symbol": symbol,
             "interval": TimeUtil.get_timeframe(DataUtil.BINANCE, timeframe),
             "startTime": TimeUtil.str_to_timestamp(start, True),
-            "endTime": TimeUtil.str_to_timestamp(to, True), # endTime 캔들은 미포함
+            "endTime": TimeUtil.str_to_timestamp(to, True),  # endTime 캔들은 미포함
             "limit": count
         }
 
@@ -396,6 +398,7 @@ class Binance(ApiBase):
 
         return total_candles
 
+
 class UpBit(ApiBase):
     def __init__(self, file_path):
         super().__init__(file_path, 'upbit', "https://api.upbit.com/v1")
@@ -426,7 +429,6 @@ class UpBit(ApiBase):
             else:
                 raise RuntimeError(response.text)
         return response
-
 
     def get_nonce(self):
         nonce = int(time.time() * 1000) + 1000
@@ -594,6 +596,7 @@ class UpBit(ApiBase):
 
         return total_candles
 
+
 class Common:
     def __init__(self, config_file_path):
         self.bybit = ByBit(config_file_path)
@@ -654,6 +657,7 @@ class Common:
         elif exchange == DataUtil.UPBIT:
             return self.upbit.fetch_all_candles(symbol, timeframe)
 
+
 class Download:
     def __init__(self, config_file_path, download_dir_path):
         self.common = Common(config_file_path)
@@ -673,7 +677,8 @@ class Download:
         # 다운받고자하는 timeframe이 key로 존재하는 지 여부 확인
         if timeframe in json_data:
             # 해당 캔들이 존재할 경우, 가장 최신의 캔들 시간을 획득
-            latest_candle_time = max(json_data[timeframe].keys(), key=lambda x: datetime.strptime(x, "%Y-%m-%d %H:%M:%S"))
+            latest_candle_time = max(json_data[timeframe].keys(),
+                                     key=lambda x: datetime.strptime(x, "%Y-%m-%d %H:%M:%S"))
             latest_candle_time = TimeUtil.add_times(latest_candle_time, timeframe, 1)
             added_candles = self.common.fetch_all_candles_from_start(exchange, symbol, timeframe, latest_candle_time)
             for candle in reversed(list(added_candles)):
@@ -721,8 +726,3 @@ class Download:
 
         download_file_path = f'{self.download_dir_path}/{exchange.lower()}/{symbol.lower()}.json'
         FileUtil.write_json_file(download_file_path, total_json)
-
-
-
-
-

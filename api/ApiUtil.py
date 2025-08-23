@@ -1,10 +1,12 @@
 from datetime import datetime, timedelta
 import pytz, time, json
 
+
 class DataUtil:
     BINANCE = "binance"
     BYBIT = "bybit"
     UPBIT = "upbit"
+
 
 class FileUtil:
     @staticmethod
@@ -30,6 +32,7 @@ class FileUtil:
             print(f"Error decoding JSON from the file {file_path}.")
         except Exception as e:
             print(f"An error occurred: {e}")
+
 
 class TimeUtil:
     CANDLE_TIMEFRAME_1MINUTES = "1m"

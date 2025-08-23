@@ -6,15 +6,15 @@ from api.ApiUtil import DataUtil
 from api.Api import Common, Download
 from decimal import Decimal
 
-config_file_path = "C:\\Users\\KOSCOM\\Desktop\\각종자료\\개인자료\\krInvestment\\config.json"
-# config_file_path = "C:/Users/user/Desktop/개인자료/콤트/config/config.json"
+# config_file_path = "C:\\Users\\KOSCOM\\Desktop\\각종자료\\개인자료\\krInvestment\\config.json"
+config_file_path = "C:/Users/user/Desktop/개인자료/콤트/config/config.json"
 
-download_dir_path ="C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
-# download_dir_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+# download_dir_path ="C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+download_dir_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
 # download_dir_path = "/Users/tjgus/Desktop/project/krtrade/backData"
 
-result_file_path = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
-# result_file_path = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+# result_file_path = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+result_file_path = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
 
 result_file_prefix = "TrendFollowWithATRScalingV1"
 
@@ -402,11 +402,6 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
         self.winning_trading_count = 0
         self.winning_rate = 0
 
-        # --- 승률 계산을 위한 변수 추가 ---
-        self.total_trades = 0
-        self.winning_trades = 0
-        self.losing_trades = 0
-
         for i in range(0, len(self.datas)):
             self.names.append(self.datas[i]._name)
             self.pairs.append(self.datas[i])
@@ -476,30 +471,8 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                          f'수량:{order.size} \t'
                          f'가격:{order.created.price:.4f}\n')
 
-    # --- notify_trade 메서드 추가 ---
-    def notify_trade(self, trade):
-        if trade.isclosed:
-            self.total_trades += 1
-            if trade.pnlcomm > 0:  # 수수료를 포함한 순수익이 0보다 크면 승리
-                self.winning_trades += 1
-            else:
-                self.losing_trades += 1
-
-            self.log(
-                f'TRADE CLOSED: PNL {trade.pnlcomm:.2f}, TOTAL TRADES {self.total_trades}, WINNING TRADES {self.winning_trades}')
-
     def stop(self):
-        # --- stop 메서드 수정 ---
-        if self.total_trades > 0:
-            win_rate = (self.winning_trades / self.total_trades) * 100
-            self.log(f'--- STRATEGY ANALYSIS ---')
-            self.log(f'Total Trades: {self.total_trades}')
-            self.log(f'Winning Trades: {self.winning_trades}')
-            self.log(f'Losing Trades: {self.losing_trades}')
-            self.log(f'Win Rate: {win_rate:.2f}%')
-            self.log(f'-------------------------')
-        else:
-            self.log('No trades were executed.')
+        self.log(f'전체 트레이딩 횟수 : {self.total_trading_count}')
 
     def record_asset(self):
         account_value = self.broker.get_cash()  # 현재 현금(보유 포지션 제외) 자산의 가격을 획득
@@ -681,7 +654,7 @@ if __name__ == '__main__':
     qs.reports.html(df['value'], output=f"{file_name}.html", download_filename=f"{file_name}.html", title=file_name)
 
     returns = returns[returns.index >= '2023-05-01']
-    # returns = returns[returns.index < '2025-07-01']
+    returns = returns[returns.index < '2025-09-01']
     returns.index.name = 'date'
     returns.name = 'value'
     # returns['date'] = returns['date'].dt.date

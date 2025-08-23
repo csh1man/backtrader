@@ -19,9 +19,9 @@ result_file_path = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과
 result_file_prefix = "ByBitTrendFollowV1"
 
 pairs = {
-    # 'ETHUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    'ETHUSDT': DataUtils.CANDLE_TICK_4HOUR,
     'BTCUSDT': DataUtils.CANDLE_TICK_4HOUR,
-    # 'SOLUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    'SOLUSDT': DataUtils.CANDLE_TICK_4HOUR,
 }
 
 

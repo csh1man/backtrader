@@ -222,8 +222,6 @@ class UpbitBBPartialExitV1(bt.Strategy):
 
     def stop(self):
         self.log(f'총 트레이딩 수 : {self.total_trading_count}')
-        self.return_rate = Indicator.get_percent(self.initial_asset, self.broker.getcash())
-        self.log(f"수익률 : {self.return_rate}%")
 
 
 if __name__ == '__main__':
