@@ -9,39 +9,58 @@ pairs = {
     'TSLA': DataUtils.CANDLE_TICK_1DAY,
     'AAPL': DataUtils.CANDLE_TICK_1DAY,
     'NVDA': DataUtils.CANDLE_TICK_1DAY,
+    'MSFT': DataUtils.CANDLE_TICK_1DAY,
+    'NFLX': DataUtils.CANDLE_TICK_1DAY,
 }
 
-result_file_path = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
-# result_file_path = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+# result_file_path = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+result_file_path = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
 
-result_file_prefix = "NasdaqBBV1"
+result_file_prefix = "NasdaqDonchianWithTrailingStopV1"
 
-class NasdaqBBV1(bt.Strategy):
+class NasdaqDonchianWithTrailingStopV1(bt.Strategy):
     params = dict(
         risk={
             'TSLA': Decimal(2.0),
             'AAPL': Decimal(2.0),
             'NVDA': Decimal(2.0),
+            'MSFT': Decimal(2.0),
+            'NFLX': Decimal(2.0),
         },
-        bb_span={
-            'TSLA' : 50,
-            'AAPL' : 50,
-            'NVDA' : 50,
+        high_band_span={
+            'TSLA' : 20,
+            'AAPL' : 20,
+            'NVDA' : 20,
+            'MSFT' : 20,
+            'NFLX' : 20,
         },
-        bb_mult={
-            'TSLA': 2.0,
-            'AAPL': 2.0,
-            'NVDA': 2.0,
+        low_band_span={
+            'TSLA': 20,
+            'AAPL': 20,
+            'NVDA': 20,
+            'MSFT': 20,
+            'NFLX': 20,
         },
         atr_length={
             'TSLA': 14,
             'AAPL': 14,
             'NVDA': 14,
+            'MSFT': 14,
+            'NFLX': 14,
         },
         atr_mult={
-            'TSLA': 1.5,
-            'AAPL': 1.5,
-            'NVDA': 1.5,
+            'TSLA': Decimal(1.5),
+            'AAPL': Decimal(1.5),
+            'NVDA': Decimal(1.5),
+            'MSFT': Decimal(1.5),
+            'NFLX': Decimal(1.5),
+        },
+        atr_mult2={
+            'TSLA': Decimal(3.0),
+            'AAPL': Decimal(3.0),
+            'NVDA': Decimal(3.0),
+            'MSFT': Decimal(3.0),
+            'NFLX': Decimal(3.0),
         }
     )
     def log(self, txt):
@@ -50,15 +69,20 @@ class NasdaqBBV1(bt.Strategy):
     def __init__(self):
         self.pairs = []
         self.names = []
+        self.stop_price = []
+
         self.opens = []
         self.highs = []
         self.lows = []
         self.closes = []
         self.dates = []
-        self.top = []
-        self.mid = []
-        self.bot = []
+
+        self.high_band = []
+        self.low_band = []
         self.atr = []
+        self.entry_atr = []
+        self.partial_exit = []
+        self.partial_exit_price = []
 
         # 자산 기록용 변수 셋팅
         self.order = None
@@ -81,13 +105,18 @@ class NasdaqBBV1(bt.Strategy):
             self.lows.append(self.datas[i].low)
             self.closes.append(self.datas[i].close)
             self.dates.append(self.datas[i].datetime)
+            self.stop_price.append(Decimal('-1'))
+            self.entry_atr.append(Decimal(0))
+            self.partial_exit.append(False)
+            self.partial_exit_price.append(Decimal('0'))
 
         for i in range(0, len(self.pairs)):
             name = self.names[i]
-            bb = bt.indicators.BollingerBands(self.closes[i], period=self.p.bb_span[name], devfactor=self.p.bb_mult[name])
-            self.top.append(bb.lines.top)
-            self.mid.append(bb.lines.mid)
-            self.bot.append(bb.lines.bot)
+            high_band = bt.indicators.Highest(self.highs[i], period=self.p.high_band_span[name])
+            self.high_band.append(high_band)
+
+            low_band = bt.indicators.Lowest(self.lows[i], period=self.p.low_band_span[name])
+            self.low_band.append(low_band)
 
             atr = bt.indicators.AverageTrueRange(self.pairs[i], period=self.p.atr_length[name])
             self.atr.append(atr)
@@ -129,37 +158,62 @@ class NasdaqBBV1(bt.Strategy):
 
         self.my_assets.append(position_value)
 
+    def cancel_all(self):
+        open_orders = self.broker.get_orders_open()
+        for order in open_orders:
+            if order.status in [bt.Order.Submitted, bt.Order.Accepted]:
+                self.broker.cancel(order)
+
     def next(self):
         self.record_asset()
+        self.cancel_all()
 
         for i in range(0, len(self.pairs)):
+            # 이름 획득
             name = self.names[i]
+
+            # 현재 포지션 사이즈 획득
             current_position_size = self.getposition(self.pairs[i]).size
+
+            # 포지션이 하나도 없을 경우
             if current_position_size == 0:
-                if self.closes[i][0] >= self.top[i][0]:
+                # 종가가 돈치안 상단 채널을 상향 돌파할 경우 매수
+                if self.closes[i][-1] < self.high_band[i][-2] and self.closes[i][0] >= self.high_band[i][-1]:
+                    risk = self.p.risk[name]
                     equity = DataUtils.convert_to_decimal(self.broker.getvalue())
-                    price = DataUtils.convert_to_decimal(self.closes[i][0])
-                    qty = equity / price
+                    entry_price = DataUtils.convert_to_decimal(self.closes[i][0])
+
+                    stop_price = entry_price - DataUtils.convert_to_decimal(self.atr[i][0]) * self.p.atr_mult[name]
+                    self.stop_price[i] = stop_price
+
+                    qty = equity * (risk / Decimal('100')) / abs(entry_price - stop_price)
                     qty = qty.quantize(Decimal('1'), rounding=ROUND_FLOOR)
+
                     if qty > 0:
                         self.order = self.buy(exectype=bt.Order.Market, data=self.pairs[i], size=float(qty))
+                        self.partial_exit_price[i] = DataUtils.convert_to_decimal(self.closes[i][0]) + DataUtils.convert_to_decimal(self.atr[i][0]) * self.p.atr_mult2[name]
 
             elif current_position_size > 0:
-                if self.closes[i][0] < self.top[i][0] - self.atr[i][0] * self.p.atr_mult[name]:
+                if DataUtils.convert_to_decimal(self.closes[i][0]) >= self.partial_exit_price[i] and not self.partial_exit[i]:
+                    self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i],size=float(current_position_size/2))
+                    self.partial_exit[i] = True
+                if self.closes[i][-1] >= self.low_band[i][-2] and self.closes[i][0] < self.low_band[i][-1]:
                     self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i], size=float(current_position_size))
+                elif DataUtils.convert_to_decimal(self.closes[i][0]) < self.stop_price[i]:
+                    self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i],size=float(current_position_size))
 
 
 
 
 if __name__ == '__main__':
-    # data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
-    data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+    data_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+    # data_path = "C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
 
     cerebro = bt.Cerebro()
-    cerebro.addstrategy(NasdaqBBV1)
+    cerebro.addstrategy(NasdaqDonchianWithTrailingStopV1)
 
-    cerebro.broker.setcash(80000)
-    cerebro.broker.setcommission(commission=0.0002, leverage=1)
+    cerebro.broker.setcash(10000)
+    cerebro.broker.setcommission(commission=0.002, leverage=1)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
