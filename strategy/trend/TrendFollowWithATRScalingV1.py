@@ -29,7 +29,7 @@ pairs = {
     # 'FETUSDT': DataUtils.CANDLE_TICK_4HOUR,
 }
 
-exchange = DataUtil.BYBIT
+exchange = DataUtil.BINANCE
 leverage = 4
 
 common = Common(config_file_path)
@@ -43,8 +43,8 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             'ETHUSDT': 2,
             'SOLUSDT': 2,
             'AVAXUSDT': 2,
-            '1000PEPEUSDT': 2,
-            '1000BONKUSDT': 2,
+            '1000PEPEUSDT': 0,
+            '1000BONKUSDT': 0,
             'ADAUSDT': 0,
             'FETUSDT': 0,
         },
@@ -575,10 +575,12 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                         # self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(adj_long_high_band), size=float(long_qty))
                         if cash >= margin:
                            self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(adj_long_high_band), size=float(long_qty))
+                           self.log(f'[{self.dates[i].datetime(0)}] {name} -> price : [{adj_long_high_band}]')
                         else:
                             long_qty = cash * Decimal(leverage) / adj_long_high_band
                             long_qty = int(long_qty/step_size) * step_size
                             self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(adj_long_high_band), size=float(long_qty))
+                            self.log(f'No.2 [{self.dates[i].datetime(0)}] {name} -> price : [{adj_long_high_band}]')
 
                 if entry_mode in [1, 2]:  # short position 진입
                     if self.short_ma1[i][0] <= self.short_ma2[i][0]:
@@ -653,8 +655,8 @@ if __name__ == '__main__':
     df.to_csv(f'{file_name}.csv')
     qs.reports.html(df['value'], output=f"{file_name}.html", download_filename=f"{file_name}.html", title=file_name)
 
-    returns = returns[returns.index >= '2023-05-01']
-    returns = returns[returns.index < '2025-09-01']
+    returns = returns[returns.index >= '2020-05-01']
+    # returns = returns[returns.index < '2025-09-01']
     returns.index.name = 'date'
     returns.name = 'value'
     # returns['date'] = returns['date'].dt.date
