@@ -6,15 +6,15 @@ from api.ApiUtil import DataUtil
 from api.Api import Common, Download
 from decimal import Decimal
 
-# config_file_path = "C:\\Users\\KOSCOM\\Desktop\\각종자료\\개인자료\\krInvestment\\config.json"
-config_file_path = "C:/Users/user/Desktop/개인자료/콤트/config/config.json"
+config_file_path = "C:\\Users\\KOSCOM\\Desktop\\각종자료\\개인자료\\krInvestment\\config.json"
+# config_file_path = "C:/Users/user/Desktop/개인자료/콤트/config/config.json"
 
-# download_dir_path ="C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
-download_dir_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+download_dir_path ="C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+# download_dir_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
 # download_dir_path = "/Users/tjgus/Desktop/project/krtrade/backData"
 
-# result_file_path = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
-result_file_path = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+result_file_path = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+# result_file_path = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
 
 result_file_prefix = "TrendFollowWithATRScalingV1"
 
@@ -25,12 +25,13 @@ pairs = {
     'AVAXUSDT': DataUtils.CANDLE_TICK_4HOUR,
     '1000PEPEUSDT': DataUtils.CANDLE_TICK_4HOUR,
     '1000BONKUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    'MNTUSDT': DataUtils.CANDLE_TICK_4HOUR,
     'ADAUSDT': DataUtils.CANDLE_TICK_4HOUR,
-    # 'FETUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    # 'FETUSDT': DataUtils.CANDLE_TICK_10HOUR,
 }
 
-exchange = DataUtil.BINANCE
-leverage = 4
+exchange = DataUtil.BYBIT
+leverage = 10
 
 common = Common(config_file_path)
 download = Download(config_file_path, download_dir_path)
@@ -45,6 +46,7 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             'AVAXUSDT': 2,
             '1000PEPEUSDT': 0,
             '1000BONKUSDT': 0,
+            'MNTUSDT': 2,
             'ADAUSDT': 0,
             'FETUSDT': 0,
         },
@@ -74,6 +76,10 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                 'short': Decimal('1.5')
             },
             'ADAUSDT': {
+                'long': Decimal('1.5'),
+                'short': Decimal('1.5')
+            },
+            'MNTUSDT': {
                 'long': Decimal('1.5'),
                 'short': Decimal('1.5')
             },
@@ -111,8 +117,8 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                 'long': 40,
                 'short': 15,
             },
-            'FETUSDT': {
-                'long': 45,
+            'MNTUSDT': {
+                'long': 40,
                 'short': 15,
             },
         },
@@ -145,9 +151,9 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                 'long': 15,
                 'short': 50,
             },
-            'FETUSDT': {
-                'long': 30,
-                'short': 50,
+            'MNTUSDT': {
+                'long': 25,
+                'short': 30,
             },
         },
         high_band_constant={
@@ -179,9 +185,9 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                 'long': 0,
                 'short': 15,
             },
-            'FETUSDT': {
+            'MNTUSDT': {
                 'long': 5,
-                'short': 15,
+                'short': 0,
             },
         },
         low_band_constant={
@@ -213,8 +219,8 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                 'long': 65,
                 'short': 0,
             },
-            'FETUSDT': {
-                'long': 55,
+            'MNTUSDT': {
+                'long': 50,
                 'short': 0,
             },
         },
@@ -247,7 +253,7 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                 'long': 2,
                 'short': 3,
             },
-            'FETUSDT': {
+            'MNTUSDT': {
                 'long': 2,
                 'short': 3,
             },
@@ -281,8 +287,8 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                 'long': 0,
                 'short': 30,
             },
-            'FETUSDT': {
-                'long': 0,
+            'MNTUSDT': {
+                'long': 50,
                 'short': 30,
             },
         },
@@ -315,9 +321,9 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                 'long': 120,
                 'short': [160, 200],
             },
-            'FETUSDT': {
-                'long': 100,
-                'short': [160, 200],
+            'MNTUSDT': {
+                'long': 120,
+                'short': [150, 200],
             },
         },
         atr_length={
@@ -328,7 +334,7 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             '1000PEPEUSDT': [20, 50],
             '1000BONKUSDT': [5, 50],
             'ADAUSDT': [5, 70],
-            'FETUSDT': [14, 50],
+            'MNTUSDT': [20, 50],
         },
         tick_size={
             'BTCUSDT': common.fetch_tick_size(exchange, 'BTCUSDT'),
@@ -338,7 +344,7 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             '1000PEPEUSDT': common.fetch_tick_size(exchange, '1000PEPEUSDT'),
             '1000BONKUSDT': common.fetch_tick_size(exchange, '1000BONKUSDT'),
             'ADAUSDT': common.fetch_tick_size(exchange, 'ADAUSDT'),
-            'FETUSDT': common.fetch_tick_size(exchange, 'FETUSDT'),
+            'MNTUSDT': common.fetch_tick_size(DataUtil.BYBIT, 'MNTUSDT'),
         },
         step_size={
             'BTCUSDT': common.fetch_step_size(exchange, "BTCUSDT"),
@@ -348,7 +354,7 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             '1000PEPEUSDT': common.fetch_step_size(exchange, "1000PEPEUSDT"),
             '1000BONKUSDT': common.fetch_step_size(exchange, "1000BONKUSDT"),
             'ADAUSDT': common.fetch_step_size(exchange, "ADAUSDT"),
-            'FETUSDT': common.fetch_step_size(exchange, "FETUSDT"),
+            'MNTUSDT': common.fetch_step_size(DataUtil.BYBIT, "MNTUSDT"),
         }
     )
 
@@ -571,28 +577,10 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                 # self.log(f'[{name}] {self.dates[i].datetime(0)} -> adj long high band : {adj_long_high_band}, adj long low band : {adj_long_low_band}')
                 if entry_mode in [0, 2]:  # long position 진입
                     if self.long_rsi[i][0] >= self.p.rsi_limit[name]['long'] and self.closes[i][0] >= self.long_ma[i][0]:
-                        margin = long_qty * adj_long_high_band / Decimal(leverage)
-                        # self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(adj_long_high_band), size=float(long_qty))
-                        if cash >= margin:
-                           self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(adj_long_high_band), size=float(long_qty))
-                           self.log(f'[{self.dates[i].datetime(0)}] {name} -> price : [{adj_long_high_band}]')
-                        else:
-                            long_qty = cash * Decimal(leverage) / adj_long_high_band
-                            long_qty = int(long_qty/step_size) * step_size
-                            self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(adj_long_high_band), size=float(long_qty))
-                            self.log(f'No.2 [{self.dates[i].datetime(0)}] {name} -> price : [{adj_long_high_band}]')
-
+                        self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(adj_long_high_band), size=float(long_qty))
                 if entry_mode in [1, 2]:  # short position 진입
                     if self.short_ma1[i][0] <= self.short_ma2[i][0]:
-                        margin = short_qty * adj_short_low_band / Decimal(leverage)
-                        # self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], price=float(adj_short_low_band), size=float(short_qty))
-                        if cash >= margin:
-                            self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i],price=float(adj_short_low_band), size=float(short_qty))
-                        else:
-                            short_qty = cash * Decimal(leverage) * adj_short_low_band
-                            short_qty = int(short_qty/step_size) * step_size
-                            self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], price=float(adj_short_low_band), size=float(short_qty))
-
+                        self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], price=float(adj_short_low_band), size=float(short_qty))
 
             elif current_position_size > 0:
                 self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], size=float(current_position_size), price=float(long_stop_price))

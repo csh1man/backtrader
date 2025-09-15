@@ -6,26 +6,39 @@ from api.ApiUtil import DataUtil
 from api.Api import Common, Download
 from decimal import Decimal
 
-config_file_path = "C:/Users/user/Desktop/개인자료/콤트/config/config.json"
+config_file_path = "C:\\Users\\KOSCOM\\Desktop\\각종자료\\개인자료\\krInvestment\\config.json"
+# config_file_path = "C:/Users/user/Desktop/개인자료/콤트/config/config.json"
 
-download_dir_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+download_dir_path ="C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+# download_dir_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+# download_dir_path = "/Users/tjgus/Desktop/project/krtrade/backData"
 
-result_file_path = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+result_file_path = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+# result_file_path = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
 
 result_file_prefix = "TrendFollowV1"
 
 pairs = {
-        "MNTUSDT": DataUtils.CANDLE_TICK_4HOUR
+        "BTCUSDT": DataUtils.CANDLE_TICK_4HOUR,
+        "ETHUSDT": DataUtils.CANDLE_TICK_4HOUR,
+        "SOLUSDT": DataUtils.CANDLE_TICK_4HOUR,
+        "MNTUSDT": DataUtils.CANDLE_TICK_4HOUR,
+        "1000PEPEUSDT": DataUtils.CANDLE_TICK_4HOUR,
+        "1000BONKUSDT": DataUtils.CANDLE_TICK_4HOUR
     }
 
 exchange = DataUtil.BYBIT
 
 if exchange == DataUtil.BINANCE:
     pairs = {
-        "BNBUSDT": DataUtils.CANDLE_TICK_4HOUR
+        "BTCUSDT": DataUtils.CANDLE_TICK_4HOUR,
+        "ETHUSDT": DataUtils.CANDLE_TICK_4HOUR,
+        "SOLUSDT": DataUtils.CANDLE_TICK_4HOUR,
+        "1000PEPEUSDT": DataUtils.CANDLE_TICK_4HOUR,
+        "1000BONKUSDT": DataUtils.CANDLE_TICK_4HOUR,
     }
 
-leverage = 20
+leverage = 10
 
 common = Common(config_file_path)
 download = Download(config_file_path, download_dir_path)
@@ -33,51 +46,176 @@ download = Download(config_file_path, download_dir_path)
 class TrendFollowV1(bt.Strategy):
     params = dict(
         use_long={
-            "MNTUSDT": True
+            "BTCUSDT": True,
+            "ETHUSDT": True,
+            "SOLUSDT": True,
+            "MNTUSDT": True,
+            "1000PEPEUSDT": True,
+            "1000BONKUSDT": True,
         },
         use_short={
-            "MNTUSDT": False
+            "BTCUSDT": False,
+            "ETHUSDT": False,
+            "SOLUSDT": False,
+            "MNTUSDT": True,
+            "1000PEPEUSDT": False,
+            "1000BONKUSDT": True,
         },
         risk={
+          "BTCUSDT":{
+              "long": Decimal("1.5"),
+              "short": Decimal("1.5"),
+          },
+          "ETHUSDT":{
+              "long": Decimal("1.5"),
+              "short": Decimal("1.5"),
+          },
+          "SOLUSDT":{
+              "long": Decimal("1.5"),
+              "short": Decimal("1.5"),
+          },
           "MNTUSDT":{
+              "long": Decimal("1.5"),
+              "short": Decimal("1.5"),
+          },
+          "1000PEPEUSDT":{
+              "long": Decimal("1.5"),
+              "short": Decimal("1.5"),
+          },
+          "1000BONKUSDT":{
               "long": Decimal("1.5"),
               "short": Decimal("1.5"),
           }
         },
         high_band_span={
+            "BTCUSDT":{
+                "long": 40,
+                "short": 15,
+            },
+            "ETHUSDT":{
+                "long": 45,
+                "short": 15,
+            },
+            "SOLUSDT":{
+                "long": 40,
+                "short": 15,
+            },
             "MNTUSDT":{
                 "long": 30,
                 "short": 10,
+            },
+            "1000PEPEUSDT":{
+                "long": 45,
+                "short": 10,
+            },
+            "1000BONKUSDT":{
+                "long": 45,
+                "short": 25,
             }
         },
         low_band_span={
+            "BTCUSDT":{
+                "long": 25,
+                "short": 50,
+            },
+            "ETHUSDT":{
+                "long": 25,
+                "short": 50,
+            },
+            "SOLUSDT":{
+                "long": 25,
+                "short": 50,
+            },
             "MNTUSDT":{
                 "long": 15,
                 "short": 40,
+            },
+            "1000PEPEUSDT":{
+                "long": 25,
+                "short": 40,
+            },
+            "1000BONKUSDT":{
+                "long": 25,
+                "short": 25,
             }
         },
         high_band_constant={
+            "BTCUSDT":{
+                "long": Decimal(5),
+                "short": Decimal(50)
+            },
+            "ETHUSDT":{
+                "long": Decimal(5),
+                "short": Decimal(50)
+            },
+            "SOLUSDT":{
+                "long": Decimal(5),
+                "short": Decimal(50)
+            },
             "MNTUSDT":{
                 "long": Decimal(5),
                 "short": Decimal(50)
+            },
+            "1000PEPEUSDT":{
+                "long": Decimal(5),
+                "short": Decimal(50)
+            },
+            "1000BONKUSDT":{
+                "long": Decimal(5),
+                "short": Decimal(0)
             }
         },
         low_band_constant={
+            "BTCUSDT":{
+                "long": Decimal(50),
+                "short": Decimal(5)
+            },
+            "ETHUSDT":{
+                "long": Decimal(50),
+                "short": Decimal(5)
+            },
+            "SOLUSDT":{
+                "long": Decimal(20),
+                "short": Decimal(5)
+            },
             "MNTUSDT":{
                 "long": Decimal(20),
                 "short": Decimal(5)
+            },
+            "1000PEPEUSDT":{
+                "long": Decimal(30),
+                "short": Decimal(5)
+            },
+            "1000BONKUSDT":{
+                "long": Decimal(20),
+                "short": Decimal(0)
             }
         },
         atr_span=14,
         atr_constant=Decimal("1.5"),
         ma_span={
+            "BTCUSDT": 200,
+            "ETHUSDT": 200,
+            "SOLUSDT": 100,
             "MNTUSDT": 200,
+            "1000PEPEUSDT": 100,
+            "1000BONKUSDT": 100,
         },
         tick_size={
-            "MNTUSDT": common.fetch_tick_size(DataUtil.BYBIT, "MNTUSDT")
+            "BTCUSDT": common.fetch_tick_size(exchange, "BTCUSDT"),
+            "ETHUSDT": common.fetch_tick_size(exchange, "ETHUSDT"),
+            "SOLUSDT": common.fetch_tick_size(exchange, "SOLUSDT"),
+            "MNTUSDT": common.fetch_tick_size(DataUtil.BYBIT, "MNTUSDT"),
+            "1000PEPEUSDT": common.fetch_tick_size(DataUtil.BYBIT, "1000PEPEUSDT"),
+            "1000BONKUSDT": common.fetch_tick_size(DataUtil.BYBIT, "1000BONKUSDT")
         },
         step_size={
-            "MNTUSDT": common.fetch_step_size(DataUtil.BYBIT, "MNTUSDT")
+            "BTCUSDT": common.fetch_step_size(exchange, "BTCUSDT"),
+            "ETHUSDT": common.fetch_step_size(exchange, "ETHUSDT"),
+            "SOLUSDT": common.fetch_step_size(exchange, "SOLUSDT"),
+            "MNTUSDT": common.fetch_step_size(DataUtil.BYBIT, "MNTUSDT"),
+            "1000PEPEUSDT": common.fetch_step_size(DataUtil.BYBIT, "1000PEPEUSDT"),
+            "1000BONKUSDT": common.fetch_step_size(DataUtil.BYBIT, "1000BONKUSDT"),
         }
     )
 
@@ -252,7 +390,8 @@ class TrendFollowV1(bt.Strategy):
                 else:
                     if self.p.use_short[name]:
                         entry_price = adj_short_low_band
-                        stop_price = int((adj_short_low_band + atr * atr_constant) / tick_size) * tick_size
+                        stop_price = entry_price + atr * atr_constant
+                        stop_price = int(stop_price / tick_size) * tick_size
                         self.short_stop_price[i] = stop_price
 
                         qty = equity * (self.p.risk[name]['short'] / Decimal('100')) / abs(entry_price - stop_price)
@@ -263,13 +402,12 @@ class TrendFollowV1(bt.Strategy):
                 if DataUtils.convert_to_decimal(self.closes[i][0]) < self.long_stop_price[i]:
                     self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i], size=current_position_size)
                 else:
-                    self.log(f'{self.dates[i].datetime(0)} => adj long low band : {adj_long_low_band}')
                     self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], price=float(adj_long_low_band), size=current_position_size)
             elif current_position_size < 0:
                 if DataUtils.convert_to_decimal(self.closes[i][0]) >= self.short_stop_price[i]:
                     self.order = self.buy(exectype=bt.Order.Market, data=self.pairs[i], size=abs(current_position_size))
                 else:
-                    self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], size=abs(current_position_size), stop=float(adj_short_high_band))
+                    self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(adj_short_high_band), size=abs(current_position_size))
 
 if __name__ == '__main__':
     cerebro = bt.Cerebro()
