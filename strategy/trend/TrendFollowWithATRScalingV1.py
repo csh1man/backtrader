@@ -25,7 +25,7 @@ pairs = {
     'AVAXUSDT': DataUtils.CANDLE_TICK_4HOUR,
     '1000PEPEUSDT': DataUtils.CANDLE_TICK_4HOUR,
     '1000BONKUSDT': DataUtils.CANDLE_TICK_4HOUR,
-    'MNTUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    # 'MNTUSDT': DataUtils.CANDLE_TICK_4HOUR,
     'ADAUSDT': DataUtils.CANDLE_TICK_4HOUR,
     # 'FETUSDT': DataUtils.CANDLE_TICK_10HOUR,
 }
@@ -643,8 +643,8 @@ if __name__ == '__main__':
     df.to_csv(f'{file_name}.csv')
     qs.reports.html(df['value'], output=f"{file_name}.html", download_filename=f"{file_name}.html", title=file_name)
 
-    returns = returns[returns.index >= '2020-05-01']
-    # returns = returns[returns.index < '2025-09-01']
+    returns = returns[returns.index >= '2025-08-01']
+    returns = returns[returns.index < '2025-10-01']
     returns.index.name = 'date'
     returns.name = 'value'
     # returns['date'] = returns['date'].dt.date
