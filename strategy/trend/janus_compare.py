@@ -27,6 +27,13 @@ pairs = {
 }
 
 class JanusCompareStrategy(bt.Strategy):
+    params= dict(
+        percents=[Decimal('3.0'), Decimal('5.0')],
+        tick_size={
+            'BTCUSDT': common.fetch_tick_size(exchange, 'BTCUSDT'),
+        }
+    )
+
     def log(self, txt):
         print(f'{txt}')
 
@@ -83,20 +90,30 @@ class JanusCompareStrategy(bt.Strategy):
     def next(self):
         for i in range(0, len(self.pairs)):
             name = self.names[i]
+            tick_size = self.p.tick_size[name]
+            prices = []
+            for j in range(0, len(self.p.percents)):
+                percent = self.p.percents[j]
+                price = DataUtils.convert_to_decimal(self.closes[i][0]) * (Decimal('1') - percent / Decimal('100'))
+                price = int(price / tick_size) * tick_size
+                prices.append(price)
+            self.log(f'{self.dates[i].datetime(0)} => price1 : {prices[0]}, price2 : {prices[1]}')
+
             current_position_size = self.getposition(self.pairs[i]).size
             if current_position_size == 0:
-                if self.closes[i][0] > self.closes[i][-1]:
-                    self.buy(exectype=bt.Order.Market, data=self.pairs[i], size=1)
+                for j in range(0, len(prices)):
+                    price = prices[j]
+                    self.buy(exectype=bt.Order.Market, data=self.pairs[i], size=1, price=float(price))
+
             elif current_position_size > 0:
-                if self.closes[i][0] < self.closes[i][-1]:
-                    self.sell(exectype=bt.Order.Market, data=self.pairs[i], size=current_position_size)
+                self.sell(exectype=bt.Order.Market, data=self.pairs[i], size=current_position_size)
 
 if __name__ == '__main__':
     cerebro = bt.Cerebro()
     cerebro.addstrategy(JanusCompareStrategy)
 
     cerebro.broker.setcash(1000000)
-    cerebro.broker.setcommission(commission=0.0002, leverage=1)
+    cerebro.broker.setcommission(commission=0, leverage=1)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
