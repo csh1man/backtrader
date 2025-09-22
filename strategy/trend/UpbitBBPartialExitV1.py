@@ -3,7 +3,6 @@ from util.Util import DataUtils
 from api.ApiUtil import DataUtil
 from api.Api import Common, Download
 from decimal import Decimal, ROUND_HALF_UP
-from indicator.Indicators import Indicator
 import pandas as pd
 import quantstats as qs
 
