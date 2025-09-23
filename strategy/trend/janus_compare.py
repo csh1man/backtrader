@@ -159,7 +159,7 @@ class JanusCompareStrategy(bt.Strategy):
             entry_position_size = self.getposition(self.pairs[i]).size
             equity = DataUtils.convert_to_decimal(self.broker.getvalue())
             if entry_position_size == 0:
-                if self.top[i][-1] > self.closes[i][-1] and self.top[i][0] <= self.closes[i][0]:
+                if self.closes[i][-1] < self.top[i][-1] and self.closes[i][0] >= self.top[i][0]:
                     stop_price = DataUtils.convert_to_decimal(self.closes[i][0]) - DataUtils.convert_to_decimal(self.atr[i][0]) * self.p.atr_mult[name]
                     stop_price = int(stop_price / self.p.tick_size[name]) * self.p.tick_size[name]
                     self.stop_price[i] = stop_price
@@ -168,21 +168,23 @@ class JanusCompareStrategy(bt.Strategy):
                     qty = int(qty / self.p.step_size[name]) * self.p.step_size[name]
 
                     if qty > 0:
-                        self.order = self.buy(exectype=bt.Order.Market, data=self.pairs[i], qty=float(qty))
+                        self.log(f'{self.dates[i].datetime(0)} => qty : {qty}')
+                        self.order = self.buy(exectype=bt.Order.Market, data=self.pairs[i], size=float(qty))
+
             elif entry_position_size > 0:
-                if DataUtils.convert_to_decimal(self.closes[i][-1]) > self.stop_price[i] and DataUtils.convert_to_decimal(self.closes[i][0]) < self.stop_price[i]:
-                    self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i], qty=entry_position_size)
-                elif self.closes[i][-1] >= self.mid[i][-1] and  self.closes[i][0] < self.mid[i][0]:
-                    self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i], qty=entry_position_size)
+                if self.stop_price[i] >= DataUtils.convert_to_decimal(self.closes[i][0]):
+                    self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i], size=entry_position_size)
+                elif self.mid[i][0] >= self.closes[i][0]:
+                    self.order = self.sell(exectype=bt.Order.Market, data=self.pairs[i], size=entry_position_size)
 
 if __name__ == '__main__':
     cerebro = bt.Cerebro()
     cerebro.addstrategy(JanusCompareStrategy)
 
+    cerebro.broker.set_coc(True)
     cerebro.broker.setcash(1000000)
-    cerebro.broker.setcommission(commission=0, leverage=1)
+    cerebro.broker.setcommission(commission=0.002, leverage=1)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
-
     for pair, tick_kind in pairs.items():
         download.download_candles(exchange, pair, tick_kind)
         df = DataUtils.load_candle_data_as_df(download_dir_path, exchange, pair, tick_kind)
@@ -230,11 +232,8 @@ if __name__ == '__main__':
     df.to_csv(f'{file_name}.csv')
     qs.reports.html(df['value'], output=f"{file_name}.html", download_filename=f"{file_name}.html", title=file_name)
 
-    # returns = returns[returns.index >= '2025-08-01']
-    # returns = returns[returns.index < '2025-10-01']
     returns.index.name = 'date'
     returns.name = 'value'
-    # returns['date'] = returns['date'].dt.date
 
     returns.to_csv(f'{file_name}_close.csv')
     qs.reports.html(returns, output=f'{file_name}_종가 중심.html', title='result')

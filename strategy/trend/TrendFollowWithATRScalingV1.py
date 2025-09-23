@@ -19,14 +19,14 @@ result_file_path = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestme
 result_file_prefix = "TrendFollowWithATRScalingV1"
 
 pairs = {
-    'BTCUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    # 'BTCUSDT': DataUtils.CANDLE_TICK_4HOUR,
     'ETHUSDT': DataUtils.CANDLE_TICK_4HOUR,
-    'SOLUSDT': DataUtils.CANDLE_TICK_4HOUR,
-    'AVAXUSDT': DataUtils.CANDLE_TICK_4HOUR,
-    '1000PEPEUSDT': DataUtils.CANDLE_TICK_4HOUR,
-    '1000BONKUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    # 'SOLUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    # 'AVAXUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    # '1000PEPEUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    # '1000BONKUSDT': DataUtils.CANDLE_TICK_4HOUR,
     # 'MNTUSDT': DataUtils.CANDLE_TICK_4HOUR,
-    'ADAUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    # 'ADAUSDT': DataUtils.CANDLE_TICK_4HOUR,
     # 'FETUSDT': DataUtils.CANDLE_TICK_10HOUR,
 }
 
@@ -41,7 +41,7 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
     params = dict(
         entry_mode={  # 0 : only long, 1 : only short, 2 : long and short
             'BTCUSDT': 0,
-            'ETHUSDT': 2,
+            'ETHUSDT': 1,
             'SOLUSDT': 2,
             'AVAXUSDT': 2,
             '1000PEPEUSDT': 2,
@@ -472,32 +472,62 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                          f'가격:{order.created.price:.4f}')
                 self.total_trading_count += 1
             elif order.issell():
+            
                 self.log(f'{order.ref:<3} {cur_date} =>'
                          f' [매도{order.Status[order.status]:^10}] 종목 : {order.data._name} \t'
                          f'수량:{order.size} \t'
                          f'가격:{order.created.price:.4f}\n')
+                self.log(f'매도 후 현금 : {self.broker.get_cash()}')
 
     def stop(self):
         self.log(f'전체 트레이딩 횟수 : {self.total_trading_count}')
 
     def record_asset(self):
-        account_value = self.broker.get_cash()  # 현재 현금(보유 포지션 제외) 자산의 가격을 획득
-        broker_leverage = self.broker.comminfo[None].p.leverage  # cerebro에 설정한 레버리지 값 -> setcommission
-        position_value = 0.0
-        bought_value = 0.0
+        # This is the correct, standard way to calculate total equity.
+        # Start with the current available cash.
+        account_value = self.broker.get_cash()
+
+        # Add the current market value of each open position, valued conservatively.
         for pair in self.pairs:
-            position_value += self.getposition(pair).size * pair.low[0]
-            bought_value += self.getposition(pair).size * self.getposition(
-                pair).price  # 진입한 수량 x 평단가 즉, 현재 포지션 전체 가치를 의미(현금 제외)
+            pos = self.getposition(pair)
 
-        account_value += position_value - bought_value * (broker_leverage - 1) / broker_leverage
+            if pos.size == 0:
+                continue
+
+            if pos.size > 0:
+                # For a LONG position, the conservative value is at the LOW price.
+                account_value += pos.size * pair.low[0]
+            elif pos.size < 0:
+                # For a SHORT position, the conservative value is at the HIGH price.
+                # pos.size is already negative, so the result is correctly subtracted.
+                account_value += pos.size * pair.high[0]
+
+        # Append the correctly calculated total equity to the list.
         self.order_balance_list.append([self.dates[0].datetime(0), account_value])
-        self.date_value.append(self.dates[0].datetime(0))
-        position_value = self.broker.getvalue()
-        for i in range(1, len(self.datas)):
-            position_value += self.getposition(self.datas[i]).size * self.lows[i][0]
 
-        self.my_assets.append(position_value)
+        # The 'self.date_value' and 'self.my_assets' lists seem to be for a different calculation.
+        # To avoid confusion, you might want to simplify or remove them if they are not essential.
+        # For now, we focus on fixing the order_balance_list which is used for the quantstats report.
+        self.date_value.append(self.dates[0].datetime(0))
+
+    # def record_asset(self):
+    #     account_value = self.broker.get_cash()  # 현재 현금(보유 포지션 제외) 자산의 가격을 획득
+    #     broker_leverage = self.broker.comminfo[None].p.leverage  # cerebro에 설정한 레버리지 값 -> setcommission
+    #     position_value = 0.0
+    #     bought_value = 0.0
+    #     for pair in self.pairs:
+    #         position_value += self.getposition(pair).size * pair.low[0]
+    #         bought_value += self.getposition(pair).size * self.getposition(
+    #             pair).price  # 진입한 수량 x 평단가 즉, 현재 포지션 전체 가치를 의미(현금 제외)
+    #
+    #     account_value += position_value - bought_value * (broker_leverage - 1) / broker_leverage
+    #     self.order_balance_list.append([self.dates[0].datetime(0), account_value])
+    #     self.date_value.append(self.dates[0].datetime(0))
+    #     position_value = self.broker.getvalue()
+    #     for i in range(1, len(self.datas)):
+    #         position_value += self.getposition(self.datas[i]).size * self.lows[i][0]
+    #
+    #     self.my_assets.append(position_value)
 
     def next(self):
         self.record_asset()
@@ -580,6 +610,7 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                         self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(adj_long_high_band), size=float(long_qty))
                 if entry_mode in [1, 2]:  # short position 진입
                     if self.short_ma1[i][0] <= self.short_ma2[i][0]:
+                        self.log(f'매도 전 현금 : [{self.dates[i].datetime(0)}] => {self.broker.get_cash()}')
                         self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], price=float(adj_short_low_band), size=float(short_qty))
 
             elif current_position_size > 0:
@@ -618,7 +649,7 @@ if __name__ == '__main__':
     returns.index = returns.index.tz_convert(None)
 
     print(f'strat.my_assets type :{type(strat.my_assets)}')
-    asset_list = pd.DataFrame({'asset': strat.my_assets}, index=pd.to_datetime(strat.date_value))
+    # asset_list = pd.DataFrame({'asset': strat.my_assets}, index=pd.to_datetime(strat.date_value))
     order_balance_list = strat.order_balance_list
     mdd = qs.stats.max_drawdown(returns)
     print(f" quanstats's my returns MDD : {mdd * 100:.2f} %")
