@@ -6,15 +6,17 @@ from api.ApiUtil import DataUtil
 from api.Api import Common, Download
 from decimal import Decimal
 
-config_file_path = "C:\\Users\\KOSCOM\\Desktop\\각종자료\\개인자료\\krInvestment\\config.json"
+# config_file_path = "C:\\Users\\KOSCOM\\Desktop\\각종자료\\개인자료\\krInvestment\\config.json"
 # config_file_path = "C:/Users/user/Desktop/개인자료/콤트/config/config.json"
+config_file_path = "/Users/choeseohyeon/Desktop/data/config/config.json"
 
-download_dir_path ="C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+# download_dir_path ="C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
 # download_dir_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
-# download_dir_path = "/Users/tjgus/Desktop/project/krtrade/backData"
+download_dir_path = "/Users/choeseohyeon/Desktop/data/candle"
 
-result_file_path = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+# result_file_path = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
 # result_file_path = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+result_file_path = "/Users/choeseohyeon/Desktop/data/result/"
 
 result_file_prefix = "TrendFollowWithATRScalingV1"
 
@@ -41,11 +43,11 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
     params = dict(
         entry_mode={  # 0 : only long, 1 : only short, 2 : long and short
             'BTCUSDT': 0,
-            'ETHUSDT': 1,
+            'ETHUSDT': 2,
             'SOLUSDT': 2,
             'AVAXUSDT': 2,
-            '1000PEPEUSDT': 2,
-            '1000BONKUSDT': 2,
+            '1000PEPEUSDT': 0,
+            '1000BONKUSDT': 0,
             'MNTUSDT': 2,
             'ADAUSDT': 0,
             'FETUSDT': 0,
@@ -477,7 +479,6 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                          f' [매도{order.Status[order.status]:^10}] 종목 : {order.data._name} \t'
                          f'수량:{order.size} \t'
                          f'가격:{order.created.price:.4f}\n')
-                self.log(f'매도 후 현금 : {self.broker.get_cash()}')
 
     def stop(self):
         self.log(f'전체 트레이딩 횟수 : {self.total_trading_count}')
@@ -582,6 +583,7 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             avg_atr = int(DataUtils.convert_to_decimal(self.atr2[i][0]) / tick_size) * tick_size
             vol_factor = int((atr / avg_atr) / tick_size) * tick_size
 
+            self.log(f'{self.dates[i].datetime(0)} => {vol_factor}')
             long_band_width = abs(adj_long_high_band-adj_long_low_band)
             long_stop_distance = long_band_width * vol_factor
             long_stop_price = adj_long_high_band - long_stop_distance
@@ -592,38 +594,37 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             short_stop_price = adj_short_low_band + short_stop_distance
             short_stop_price = int(short_stop_price / tick_size) * tick_size
 
-            current_position_size = self.getposition(self.pairs[i]).size
-            if current_position_size == 0:
-                entry_mode = self.p.entry_mode[name]
-
-                # 롱 포지션 사이즈 계산
-                long_qty = equity * (self.p.risk[name]['long'] / Decimal('100')) / long_stop_distance
-                long_qty = int(long_qty / step_size) * step_size
-
-                # 숏 포지션 사이즈 계산
-                short_qty = equity * (self.p.risk[name]['short'] / Decimal('100')) / short_stop_distance
-                short_qty = int(short_qty / step_size) * step_size
-
-                # self.log(f'[{name}] {self.dates[i].datetime(0)} -> adj long high band : {adj_long_high_band}, adj long low band : {adj_long_low_band}')
-                if entry_mode in [0, 2]:  # long position 진입
-                    if self.long_rsi[i][0] >= self.p.rsi_limit[name]['long'] and self.closes[i][0] >= self.long_ma[i][0]:
-                        self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(adj_long_high_band), size=float(long_qty))
-                if entry_mode in [1, 2]:  # short position 진입
-                    if self.short_ma1[i][0] <= self.short_ma2[i][0]:
-                        self.log(f'매도 전 현금 : [{self.dates[i].datetime(0)}] => {self.broker.get_cash()}')
-                        self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], price=float(adj_short_low_band), size=float(short_qty))
-
-            elif current_position_size > 0:
-                self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], size=float(current_position_size), price=float(long_stop_price))
-            elif current_position_size < 0:
-                self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i],size=float(abs(current_position_size)), price=float(short_stop_price))
+            # current_position_size = self.getposition(self.pairs[i]).size
+            # if current_position_size == 0:
+            #     entry_mode = self.p.entry_mode[name]
+            #
+            #     # 롱 포지션 사이즈 계산
+            #     long_qty = equity * (self.p.risk[name]['long'] / Decimal('100')) / long_stop_distance
+            #     long_qty = int(long_qty / step_size) * step_size
+            #
+            #     # 숏 포지션 사이즈 계산
+            #     short_qty = equity * (self.p.risk[name]['short'] / Decimal('100')) / short_stop_distance
+            #     short_qty = int(short_qty / step_size) * step_size
+            #
+            #     # self.log(f'[{name}] {self.dates[i].datetime(0)} -> adj long high band : {adj_long_high_band}, adj long low band : {adj_long_low_band}')
+            #     if entry_mode in [0, 2]:  # long position 진입
+            #         if self.long_rsi[i][0] >= self.p.rsi_limit[name]['long'] and self.closes[i][0] >= self.long_ma[i][0]:
+            #             self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i], price=float(adj_long_high_band), size=float(long_qty))
+            #     if entry_mode in [1, 2]:  # short position 진입
+            #         if self.short_ma1[i][0] <= self.short_ma2[i][0]:
+            #             self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], price=float(adj_short_low_band), size=float(short_qty))
+            #
+            # elif current_position_size > 0:
+            #     self.order = self.sell(exectype=bt.Order.Stop, data=self.pairs[i], size=float(current_position_size), price=float(long_stop_price))
+            # elif current_position_size < 0:
+            #     self.order = self.buy(exectype=bt.Order.Stop, data=self.pairs[i],size=float(abs(current_position_size)), price=float(short_stop_price))
 
 
 if __name__ == '__main__':
     cerebro = bt.Cerebro()
     cerebro.addstrategy(TrendFollowWithATRScalingV1)
 
-    cerebro.broker.setcash(80000)
+    cerebro.broker.setcash(1000000)
     cerebro.broker.setcommission(commission=0.0002, leverage=leverage)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
