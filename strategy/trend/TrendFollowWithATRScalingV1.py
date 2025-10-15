@@ -25,10 +25,10 @@ pairs = {
     'ETHUSDT': DataUtils.CANDLE_TICK_4HOUR,
     'SOLUSDT': DataUtils.CANDLE_TICK_4HOUR,
     'AVAXUSDT': DataUtils.CANDLE_TICK_4HOUR,
-    # '1000PEPEUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    '1000PEPEUSDT': DataUtils.CANDLE_TICK_4HOUR,
     '1000BONKUSDT': DataUtils.CANDLE_TICK_4HOUR,
-    # 'MNTUSDT': DataUtils.CANDLE_TICK_4HOUR,
-    # 'ADAUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    'MNTUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    'ADAUSDT': DataUtils.CANDLE_TICK_4HOUR,
     # 'FETUSDT': DataUtils.CANDLE_TICK_10HOUR,
 }
 
@@ -618,7 +618,7 @@ if __name__ == '__main__':
     cerebro.addstrategy(TrendFollowWithATRScalingV1)
 
     cerebro.broker.setcash(1000000)
-    cerebro.broker.setcommission(commission=0.002, leverage=leverage)
+    cerebro.broker.setcommission(commission=0.0002, leverage=leverage)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():

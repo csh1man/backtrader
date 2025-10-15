@@ -26,11 +26,12 @@ pairs = {
     'SOLUSDT': DataUtils.CANDLE_TICK_4HOUR,
     'AVAXUSDT': DataUtils.CANDLE_TICK_4HOUR,
     '1000BONKUSDT': DataUtils.CANDLE_TICK_4HOUR,
-    # 'MNTUSDT': DataUtils.CANDLE_TICK_4HOUR,
-    'ADAUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    '1000PEPEUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    'MNTUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    # 'ADAUSDT': DataUtils.CANDLE_TICK_4HOUR,
 }
 
-exchange = DataUtil.BINANCE
+exchange = DataUtil.BYBIT
 leverage = 4
 
 common = Common(config_file_path)
@@ -45,6 +46,7 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             'SOLUSDT': 0,
             'AVAXUSDT': 2,
             '1000BONKUSDT': 0,
+            '1000PEPEUSDT': 2,
             'MNTUSDT': 2,
             'ADAUSDT': 2,
         },
@@ -66,6 +68,10 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                 'short': Decimal('2.0')
             },
             '1000BONKUSDT': {
+                'long': Decimal('2.0'),
+                'short': Decimal('2.0')
+            },
+            '1000PEPEUSDT': {
                 'long': Decimal('2.0'),
                 'short': Decimal('2.0')
             },
@@ -99,6 +105,10 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                 'long': 30,
                 'short': 40,
             },
+            '1000PEPEUSDT': {
+                'long': 40,
+                'short': 40,
+            },
             'MNTUSDT': {
                 'long': 40,
                 'short': 5,
@@ -127,6 +137,10 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             },
             '1000BONKUSDT': {
                 'long': 30,
+                'short': 60,
+            },
+            '1000PEPEUSDT': {
+                'long': 25,
                 'short': 60,
             },
             'MNTUSDT': {
@@ -159,6 +173,10 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                 'long': Decimal(5),
                 'short': Decimal(30),
             },
+            '1000PEPEUSDT': {
+                'long': Decimal(10),
+                'short': Decimal(40),
+            },
             'MNTUSDT': {
                 'long': Decimal(5),
                 'short': Decimal(50),
@@ -189,6 +207,10 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                 'long': Decimal(30),
                 'short': Decimal(20),
             },
+            '1000PEPEUSDT': {
+                'long': Decimal(50),
+                'short': Decimal(20),
+            },
             'MNTUSDT': {
                 'long': Decimal(50),
                 'short': Decimal(5),
@@ -204,6 +226,7 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             'SOLUSDT': 20,
             'AVAXUSDT': 120,
             '1000BONKUSDT': 120,
+            '1000PEPEUSDT': 220,
             'MNTUSDT': 20,
             'ADAUSDT': 20
         },
@@ -213,6 +236,7 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             'SOLUSDT': common.fetch_tick_size(exchange, 'SOLUSDT'),
             'AVAXUSDT': common.fetch_tick_size(exchange, 'AVAXUSDT'),
             '1000BONKUSDT': common.fetch_tick_size(exchange, '1000BONKUSDT'),
+            '1000PEPEUSDT': common.fetch_tick_size(exchange, '1000PEPEUSDT'),
             'MNTUSDT': common.fetch_tick_size(exchange, 'MNTUSDT'),
             'ADAUSDT': common.fetch_tick_size(exchange, 'ADAUSDT'),
         },
@@ -222,6 +246,7 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             'SOLUSDT': common.fetch_step_size(exchange, "SOLUSDT"),
             'AVAXUSDT': common.fetch_step_size(exchange, "AVAXUSDT"),
             '1000BONKUSDT': common.fetch_step_size(exchange, "1000BONKUSDT"),
+            '1000PEPEUSDT': common.fetch_step_size(exchange, "1000PEPEUSDT"),
             'MNTUSDT': common.fetch_step_size(exchange, "MNTUSDT"),
             'ADAUSDT': common.fetch_step_size(exchange, "ADAUSDT"),
         }
