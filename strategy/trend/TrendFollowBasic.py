@@ -1,20 +1,24 @@
 import backtrader as bt
 import pandas as pd
 import quantstats as qs
+
 from util.Util import DataUtils
 from api.ApiUtil import DataUtil
 from api.Api import Common, Download
 from decimal import Decimal
 
-config_file_path = "C:\\Users\\KOSCOM\\Desktop\\각종자료\\개인자료\\krInvestment\\config.json"
+config_file_path = "/Users/koscom/Desktop/개인자료/data/config/config.json"
+# config_file_path = "C:\\Users\\KOSCOM\\Desktop\\각종자료\\개인자료\\krInvestment\\config.json"
 # config_file_path = "C:/Users/user/Desktop/개인자료/콤트/config/config.json"
 # config_file_path = "/Users/choeseohyeon/Desktop/data/config/config.json"
 
-download_dir_path ="C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
+download_dir_path = "/Users/koscom/Desktop/개인자료/data/candle/"
+# download_dir_path ="C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
 # download_dir_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
 # download_dir_path = "/Users/choeseohyeon/Desktop/data/candle"
 
-result_file_path = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
+result_file_path = "/Users/koscom/Desktop/개인자료/data/result/"
+# result_file_path = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
 # result_file_path = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
 # result_file_path = "/Users/choeseohyeon/Desktop/data/result/"
 
