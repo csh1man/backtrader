@@ -25,10 +25,10 @@ pairs = {
     'ETHUSDT': DataUtils.CANDLE_TICK_4HOUR,
     'SOLUSDT': DataUtils.CANDLE_TICK_4HOUR,
     'AVAXUSDT': DataUtils.CANDLE_TICK_4HOUR,
-    '1000PEPEUSDT': DataUtils.CANDLE_TICK_4HOUR,
     '1000BONKUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    # '1000PEPEUSDT': DataUtils.CANDLE_TICK_4HOUR,
     'MNTUSDT': DataUtils.CANDLE_TICK_4HOUR,
-    'ADAUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    # 'ADAUSDT': DataUtils.CANDLE_TICK_4HOUR,
     # 'FETUSDT': DataUtils.CANDLE_TICK_10HOUR,
 }
 
@@ -54,40 +54,40 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
         },
         risk={
             'BTCUSDT': {
-                'long': Decimal('1.5'),
-                'short': Decimal('1.5')
+                'long': Decimal('2.0'),
+                'short': Decimal('2.0')
             },
             'ETHUSDT': {
-                'long': Decimal('1.5'),
-                'short': Decimal('1.5')
+                'long': Decimal('2.0'),
+                'short': Decimal('2.0')
             },
             'SOLUSDT': {
-                'long': Decimal('1.5'),
-                'short': Decimal('1.5')
+                'long': Decimal('2.0'),
+                'short': Decimal('2.0')
             },
             'AVAXUSDT': {
-                'long': Decimal('1.5'),
-                'short': Decimal('3')
+                'long': Decimal('2.0'),
+                'short': Decimal('2.0')
             },
             '1000PEPEUSDT': {
-                'long': Decimal('1.5'),
-                'short': Decimal('1.5')
+                'long': Decimal('2.0'),
+                'short': Decimal('2.0')
             },
             '1000BONKUSDT': {
-                'long': Decimal('1.5'),
-                'short': Decimal('1.5')
+                'long': Decimal('2.0'),
+                'short': Decimal('2.0')
             },
             'ADAUSDT': {
-                'long': Decimal('1.5'),
-                'short': Decimal('1.5')
+                'long': Decimal('2.0'),
+                'short': Decimal('2.0')
             },
             'MNTUSDT': {
-                'long': Decimal('1.5'),
-                'short': Decimal('1.5')
+                'long': Decimal('2.0'),
+                'short': Decimal('2.0')
             },
             'FETUSDT': {
-                'long': Decimal('1.5'),
-                'short': Decimal('1.5')
+                'long': Decimal('2.0'),
+                'short': Decimal('2.0')
             },
         },
         high_band_length={
@@ -618,7 +618,7 @@ if __name__ == '__main__':
     cerebro.addstrategy(TrendFollowWithATRScalingV1)
 
     cerebro.broker.setcash(1000000)
-    cerebro.broker.setcommission(commission=0.0002, leverage=leverage)
+    cerebro.broker.setcommission(commission=0.001, leverage=leverage)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():

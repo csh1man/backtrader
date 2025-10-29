@@ -7,37 +7,34 @@ from api.ApiUtil import DataUtil
 from api.Api import Common, Download
 from decimal import Decimal
 
-config_file_path = "/Users/koscom/Desktop/개인자료/data/config/config.json"
+# config_file_path = "/Users/koscom/Desktop/개인자료/data/config/config.json"
 # config_file_path = "C:\\Users\\KOSCOM\\Desktop\\각종자료\\개인자료\\krInvestment\\config.json"
-# config_file_path = "C:/Users/user/Desktop/개인자료/콤트/config/config.json"
+config_file_path = "C:/Users/user/Desktop/개인자료/콤트/config/config.json"
 # config_file_path = "/Users/choeseohyeon/Desktop/data/config/config.json"
 
-download_dir_path = "/Users/koscom/Desktop/개인자료/data/candle/"
+# download_dir_path = "/Users/koscom/Desktop/개인자료/data/candle/"
 # download_dir_path ="C:/Users/KOSCOM/Desktop/각종자료/개인자료/krInvestment/백테스팅데이터"
-# download_dir_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
+download_dir_path = "C:/Users/user/Desktop/개인자료/콤트/candleData"
 # download_dir_path = "/Users/choeseohyeon/Desktop/data/candle"
 
-result_file_path = "/Users/koscom/Desktop/개인자료/data/result/"
+# result_file_path = "/Users/koscom/Desktop/개인자료/data/result/"
 # result_file_path = "C:/Users/KOSCOM\Desktop/각종자료/개인자료/krInvestment/백테스팅데이터/결과/"
-# result_file_path = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
+result_file_path = "C:/Users/user/Desktop/개인자료/콤트/백테스트결과/"
 # result_file_path = "/Users/choeseohyeon/Desktop/data/result/"
 
 result_file_prefix = "TrendFollowBasic"
 
 pairs = {
-    # 'BTCUSDT': DataUtils.CANDLE_TICK_4HOUR,
-    # 'ETHUSDT': DataUtils.CANDLE_TICK_4HOUR,
-    # 'SOLUSDT': DataUtils.CANDLE_TICK_4HOUR,
-    # 'AVAXUSDT': DataUtils.CANDLE_TICK_4HOUR,
-    # '1000BONKUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    'BTCUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    'ETHUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    'SOLUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    'AVAXUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    '1000BONKUSDT': DataUtils.CANDLE_TICK_4HOUR,
     # '1000PEPEUSDT': DataUtils.CANDLE_TICK_4HOUR,
-    # 'MNTUSDT': DataUtils.CANDLE_TICK_4HOUR,
-    # 'XAUTUSDT': DataUtils.CANDLE_TICK_1HOUR,
-    'PAXGUSDT': DataUtils.CANDLE_TICK_1HOUR,
-    # 'ADAUSDT': DataUtils.CANDLE_TICK_4HOUR,
+    'MNTUSDT': DataUtils.CANDLE_TICK_4HOUR,
 }
 
-exchange = DataUtil.BINANCE
+exchange = DataUtil.BYBIT
 leverage = 4
 
 common = Common(config_file_path)
@@ -51,7 +48,7 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             'ETHUSDT': 2,
             'SOLUSDT': 0,
             'AVAXUSDT': 2,
-            '1000BONKUSDT': 0,
+            '1000BONKUSDT': 2,
             '1000PEPEUSDT': 2,
             'MNTUSDT': 2,
             'ADAUSDT': 2,
@@ -86,18 +83,6 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             'MNTUSDT': {
                 'long': Decimal('2.0'),
                 'short': Decimal('2.0')
-            },
-            'ADAUSDT': {
-                'long': Decimal('2.0'),
-                'short': Decimal('2.0')
-            },
-            'XAUTUSDT': {
-                'long': Decimal('2.0'),
-                'short': Decimal('2.0')
-            },
-            'PAXGUSDT': {
-                'long': Decimal('2.0'),
-                'short': Decimal('2.0')
             }
         },
         high_band_length={
@@ -107,39 +92,27 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             },
             'ETHUSDT': {
                 'long': 40,
-                'short': 15,
+                'short': 5,
             },
             'SOLUSDT': {
                 'long': 40,
                 'short': 15,
             },
             'AVAXUSDT': {
-                'long': 30,
-                'short': 40,
+                'long': 80,
+                'short': 60,
             },
             '1000BONKUSDT': {
-                'long': 30,
-                'short': 40,
+                'long': 45,
+                'short': 15,
             },
             '1000PEPEUSDT': {
-                'long': 40,
-                'short': 40,
+                'long': 50,
+                'short': 25,
             },
             'MNTUSDT': {
-                'long': 40,
+                'long': 35,
                 'short': 5,
-            },
-            'ADAUSDT': {
-                'long': 30,
-                'short': 35,
-            },
-            'XAUTUSDT': {
-                'long': 70,
-                'short': 35,
-            },
-            'PAXGUSDT': {
-                'long': 70,
-                'short': 35,
             }
         },
         low_band_length={
@@ -149,7 +122,7 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             },
             'ETHUSDT': {
                 'long': 25,
-                'short': 45,
+                'short': 40,
             },
             'SOLUSDT': {
                 'long': 25,
@@ -160,28 +133,16 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                 'short': 60,
             },
             '1000BONKUSDT': {
-                'long': 30,
-                'short': 60,
+                'long': 35,
+                'short': 40,
             },
             '1000PEPEUSDT': {
-                'long': 25,
+                'long': 40,
                 'short': 60,
             },
             'MNTUSDT': {
-                'long': 25,
-                'short': 40,
-            },
-            'ADAUSDT': {
                 'long': 15,
-                'short': 90,
-            },
-            'XAUTUSDT': {
-                'long': 35,
-                'short': 90,
-            },
-            'PAXGUSDT': {
-                'long': 35,
-                'short': 90,
+                'short': 50,
             }
         },
         high_band_constant={
@@ -198,32 +159,20 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                 'short': Decimal(50),
             },
             'AVAXUSDT': {
-                'long': Decimal(5),
-                'short': Decimal(30),
+                'long': Decimal(10),
+                'short': Decimal(50),
             },
             '1000BONKUSDT': {
                 'long': Decimal(5),
-                'short': Decimal(30),
+                'short': Decimal(25),
             },
             '1000PEPEUSDT': {
-                'long': Decimal(10),
-                'short': Decimal(40),
+                'long': Decimal(5),
+                'short': Decimal(20),
             },
             'MNTUSDT': {
-                'long': Decimal(5),
+                'long': Decimal(10),
                 'short': Decimal(50),
-            },
-            'ADAUSDT': {
-                'long': Decimal(10),
-                'short': Decimal(60),
-            },
-            'XAUTUSDT': {
-                'long': Decimal(10),
-                'short': Decimal(60),
-            },
-            'PAXGUSDT': {
-                'long': Decimal(10),
-                'short': Decimal(60),
             }
         },
         low_band_constant={
@@ -240,32 +189,20 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
                 'short': Decimal(5),
             },
             'AVAXUSDT': {
-                'long': Decimal(0),
-                'short': Decimal(20),
+                'long': Decimal(30),
+                'short': Decimal(5),
             },
             '1000BONKUSDT': {
                 'long': Decimal(30),
                 'short': Decimal(20),
             },
             '1000PEPEUSDT': {
-                'long': Decimal(50),
-                'short': Decimal(20),
+                'long': Decimal(40),
+                'short': Decimal(5),
             },
             'MNTUSDT': {
-                'long': Decimal(50),
-                'short': Decimal(5),
-            },
-            'ADAUSDT': {
-                'long': Decimal(30),
-                'short': Decimal(5),
-            },
-            'XAUTUSDT': {
-                'long': Decimal(30),
-                'short': Decimal(5),
-            },
-            'PAXGUSDT': {
-                'long': Decimal(30),
-                'short': Decimal(5),
+                'long': Decimal(40),
+                'short': Decimal(10),
             }
         },
         ma_length={
@@ -273,12 +210,9 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             'ETHUSDT': 60,
             'SOLUSDT': 20,
             'AVAXUSDT': 120,
-            '1000BONKUSDT': 120,
-            '1000PEPEUSDT': 220,
+            '1000BONKUSDT': 100,
+            '1000PEPEUSDT': 60,
             'MNTUSDT': 20,
-            'ADAUSDT': 20,
-            'XAUTUSDT': 20,
-            'PAXGUSDT': 20,
         },
         tick_size={
             'BTCUSDT': common.fetch_tick_size(exchange, 'BTCUSDT'),
@@ -288,9 +222,6 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             '1000BONKUSDT': common.fetch_tick_size(exchange, '1000BONKUSDT'),
             '1000PEPEUSDT': common.fetch_tick_size(exchange, '1000PEPEUSDT'),
             'MNTUSDT': common.fetch_tick_size(exchange, 'MNTUSDT'),
-            'ADAUSDT': common.fetch_tick_size(exchange, 'ADAUSDT'),
-            'XAUTUSDT': common.fetch_tick_size(exchange, 'XAUTUSDT'),
-            'PAXGUSDT': common.fetch_tick_size(exchange, 'PAXGUSDT'),
         },
         step_size={
             'BTCUSDT': common.fetch_step_size(exchange, "BTCUSDT"),
@@ -300,9 +231,6 @@ class TrendFollowWithATRScalingV1(bt.Strategy):
             '1000BONKUSDT': common.fetch_step_size(exchange, "1000BONKUSDT"),
             '1000PEPEUSDT': common.fetch_step_size(exchange, "1000PEPEUSDT"),
             'MNTUSDT': common.fetch_step_size(exchange, "MNTUSDT"),
-            'ADAUSDT': common.fetch_step_size(exchange, "ADAUSDT"),
-            'XAUTUSDT': common.fetch_step_size(exchange, "XAUTUSDT"),
-            'PAXGUSDT': common.fetch_step_size(exchange, "PAXGUSDT"),
         }
     )
 
@@ -495,7 +423,7 @@ if __name__ == '__main__':
     cerebro.addstrategy(TrendFollowWithATRScalingV1)
 
     cerebro.broker.setcash(1000000)
-    cerebro.broker.setcommission(commission=0.0002, leverage=leverage)
+    cerebro.broker.setcommission(commission=0.001, leverage=leverage)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
 
     for pair, tick_kind in pairs.items():
